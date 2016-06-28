@@ -1,4 +1,4 @@
-package org.openlmis.template;
+package org.openlmis.auth;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;

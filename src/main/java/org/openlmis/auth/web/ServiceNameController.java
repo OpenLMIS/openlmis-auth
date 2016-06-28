@@ -1,6 +1,6 @@
-package org.openlmis.template.web;
+package org.openlmis.auth.web;
 
-import org.openlmis.template.util.ServiceSignature;
+import org.openlmis.auth.util.ServiceSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;

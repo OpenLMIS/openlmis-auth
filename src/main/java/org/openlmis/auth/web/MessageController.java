@@ -1,6 +1,6 @@
-package org.openlmis.template.web;
+package org.openlmis.auth.web;
 
-import org.openlmis.template.i18n.ExposedMessageSource;
+import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

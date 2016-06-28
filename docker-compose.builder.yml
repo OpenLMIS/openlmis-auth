@@ -14,9 +14,9 @@ services:
     env_file: .env
   image:
     build: .
-    image: openlmis/template-service
+    image: openlmis/auth
   template-service:
-    image: openlmis/template-service
+    image: openlmis/auth
     links:
       - db
       - log
@@ -34,4 +34,4 @@ services:
   log:
     image: openlmis/rsyslog
     volumes:
-      - '../logs/template-service:/var/log'
+      - '../logs/auth:/var/log'
