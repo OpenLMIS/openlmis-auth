@@ -15,7 +15,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "users")
+@Table(name = "auth_users")
 public class User extends BaseEntity implements UserDetails {
 
   @Getter
