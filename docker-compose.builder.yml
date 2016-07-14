@@ -21,7 +21,7 @@ services:
       - db
       - log
     ports:
-      - "8080:8080"
+      - "8080"
     environment:
       JAVA_OPTS: '-Dlogging.config=/logback.xml'
     volumes:

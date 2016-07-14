@@ -1,6 +1,5 @@
 package org.openlmis.auth;
 
-import org.openlmis.auth.repository.UserRepository;
 import org.postgresql.ds.PGPoolingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,9 +13,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 
 @Configuration
 @EnableWebSecurity
+@EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
@@ -52,5 +55,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .jdbcAuthentication()
         .dataSource(dataSource)
         .authoritiesByUsernameQuery("SELECT username,role from users where username = ?");
+  }
+
+  @Bean
+  public AccessTokenConverter accessTokenConverter() {
+    return new DefaultAccessTokenConverter();
   }
 }
