@@ -1,4 +1,4 @@
-package org.openlmis.auth;
+package org.openlmis.auth.security;
 
 import org.openlmis.auth.domain.User;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;

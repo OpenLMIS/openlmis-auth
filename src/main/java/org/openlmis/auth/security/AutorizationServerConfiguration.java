@@ -1,4 +1,4 @@
-package org.openlmis.auth;
+package org.openlmis.auth.security;
 
 
 import org.postgresql.ds.PGPoolingDataSource;

@@ -10,7 +10,7 @@ import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 @Configuration
-public class DatabasePopulatorConfig {
+public class DatabasePopulatorConfiguration {
 
   @Autowired
   private PGPoolingDataSource dataSource;

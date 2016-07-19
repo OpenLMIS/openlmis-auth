@@ -20,7 +20,7 @@ public class User extends BaseEntity implements UserDetails {
 
   @Getter
   @Setter
-  @Column(unique = true)
+  @Column(nullable = false, unique = true)
   private UUID referenceDataUserId;
 
   @Getter
