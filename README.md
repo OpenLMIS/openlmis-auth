@@ -1,4 +1,4 @@
-# OpenLMIS Service Template
+# OpenLMIS Authentication Service
 This template is meant to be a starting point for developing a new 
 OpenLMIS 3.x Independent Service.
 
