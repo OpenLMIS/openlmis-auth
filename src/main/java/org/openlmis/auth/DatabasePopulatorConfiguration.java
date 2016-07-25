@@ -15,6 +15,10 @@ public class DatabasePopulatorConfiguration {
   @Autowired
   private PGPoolingDataSource dataSource;
 
+  /**
+   * Initializes database using SQL script.
+   * @return database populator
+   */
   @Bean
   public ResourceDatabasePopulator databasePopulator() {
     ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
