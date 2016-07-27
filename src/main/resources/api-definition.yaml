@@ -1,0 +1,143 @@
+#%RAML 0.8
+---
+title: OpenLMIS Requisition API
+version: "1.0.0"
+baseUri: "http://localhost:8080/api"
+
+documentation:
+    - title: Getting Started
+      content: Welcome to the OpenLMIS auth-service documentation. This minimal API is intended for illustrative purposes.
+
+schemas:
+  - user: |
+      {
+          "type": "object",
+          "$schema": "http://json-schema.org/draft-03/schema",
+          "title": "User",
+          "properties": {
+              "id": { "type": "string", "required": true, "title": "id" },
+              "referenceDataUserId": { "type": "string", "required": true, "title": "referenceDataUserId" },
+              "username": { "type": "string", "required": true, "title": "username" },
+              "password": { "type": "string", "required": true, "title": "password" },
+              "role": { "type": "string", "required": true, "title": "role" },
+              "enabled": { "type": "boolean", "required": false, "title": "enabled" }
+          }
+      }
+
+  - client: |
+      {   "type": "object",
+          "$schema": "http://json-schema.org/draft-03/schema",
+          "title": "Client",
+          "properties": {
+              "clientId": { "type": "string", "required": true, "title": "clientId" },
+              "cientSecret": { "type": "string", "required": false, "title": "clientSecret" },
+              "scope": { "type": "string", "required": false, "title": "scope" },
+              "resourceIds": { "type": "string", "required": false, "title": "resourceIds" },
+              "authorizedGrantTypes": { "type": "string", "required": false, "title": "authorizedGrantTypes" },
+              "registeredRedirectUris": { "type": "string", "required": false, "title": "registeredRedirectUris" },
+              "autoApproveScopes": { "type": "string", "required": false, "title": "autoApproveScopes" },
+              "authorities": { "type": "string", "required": false, "title": "authorities" },
+              "accessTokenValiditySeconds": { "type": "number", "required": false, "title": "accessTokenValiditySeconds" },
+              "refreshTokenValiditySeconds": { "type": "number", "required": false, "title": "refreshTokenValiditySeconds" },
+              "additionalInformation": { "type": "string", "required": false, "title": "additionalInformation" },
+              "webServerRedirectUri": { "type": "string", "required": false, "title": "webServerRedirectUri" }
+          }
+      }
+
+resourceTypes:
+    - collection:
+        get:
+            responses:
+                200:
+                  description: Collection retrieved successfully
+                  headers:
+                    X-Content-Type-Options:
+                    X-XSS-Protection:
+                  body:
+                      application/json:
+                          schema: <<schema>>
+                404:
+                  description: Collection is empty.
+                  headers:
+                    X-Content-Type-Options:
+                    X-XSS-Protection:
+        post:
+            body:
+                application/json:
+                    schema: <<schema>>
+            responses:
+                201:
+                  description: Item created successfully
+                  headers:
+                    X-Content-Type-Options:
+                    X-XSS-Protection:
+                  body:
+                      application/json:
+                          schema: <<schema>>
+    - member:
+        get:
+            responses:
+                200:
+                    body:
+                        application/json:
+                            schema: <<schema>>
+        post:
+            body:
+                application/json:
+                    schema: <<schema>>
+            responses:
+                200:
+                    body:
+                        application/json:
+                            schema: <<schema>>
+        delete:
+            responses:
+                200:
+
+/users:
+    displayName: User
+    /search/findOneByUsername:
+        get:
+            description: Find User by username.
+            queryParameters:
+                username:
+                    displayName: username
+                    description: User's name
+                    type: string
+                    required: true
+                    repeat: false
+            responses:
+                "200":
+                    headers:
+                      X-Content-Type-Options:
+                      X-XSS-Protection:
+                    body:
+                      application/json:
+                "500":
+                    headers:
+                      X-Content-Type-Options:
+                      X-XSS-Protection:
+
+/clients:
+    displayName: Client
+    /search/findOneByClientId:
+        get:
+            description: Find Client by ID.
+            queryParameters:
+                username:
+                    displayName: clientId
+                    description: Client's ID
+                    type: string
+                    required: true
+                    repeat: false
+            responses:
+                "200":
+                    headers:
+                      X-Content-Type-Options:
+                      X-XSS-Protection:
+                    body:
+                      application/json:
+                "500":
+                    headers:
+                      X-Content-Type-Options:
+                      X-XSS-Protection:

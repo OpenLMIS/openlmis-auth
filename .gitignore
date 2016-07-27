@@ -7,3 +7,6 @@ out/
 .idea/
 .env
 gradle*
+node_modules/
+api-definition.json
+api-definition.html
