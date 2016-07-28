@@ -8,3 +8,4 @@ out/
 .env
 gradle*
 node_modules/
+api-definition-raml.yaml
