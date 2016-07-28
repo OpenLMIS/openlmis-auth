@@ -43,29 +43,10 @@ schemas:
               "webServerRedirectUri": { "type": "string", "required": false, "title": "webServerRedirectUri" }
           }
       }
-  - passwordResetRequest: |
-      {   "type": "object",
-          "$schema": "http://json-schema.org/draft-03/schema",
-          "title": "PasswordResetRequest",
-          "properties": {
-              "username": { "type": "string", "required": true, "title": "username" },
-              "newPassword": { "type": "string", "required": true, "title": "new password" }
-          }
-      }
 
-traits:
-    - secured:
-          queryParameters:
-              access_token:
-                  displayName: access_token
-                  description: OAuth2 access token
-                  type: string
-                  required: true
-                  repeat: false
 resourceTypes:
     - collection:
         get:
-            is: [ secured ]
             responses:
                 200:
                   description: Collection retrieved successfully
@@ -81,7 +62,6 @@ resourceTypes:
                     X-Content-Type-Options:
                     X-XSS-Protection:
         post:
-            is: [ secured ]
             body:
                 application/json:
                     schema: <<schema>>
@@ -96,14 +76,12 @@ resourceTypes:
                           schema: <<schema>>
     - member:
         get:
-            is: [ secured ]
             responses:
                 200:
                     body:
                         application/json:
                             schema: <<schema>>
         post:
-            is: [ secured ]
             body:
                 application/json:
                     schema: <<schema>>
@@ -113,38 +91,13 @@ resourceTypes:
                         application/json:
                             schema: <<schema>>
         delete:
-            is: [ secured ]
             responses:
                 200:
 
 /users:
     displayName: User
-    /passwordReset:
-        post:
-            is: [ secured ]
-            description: Reset user's password.
-            body:
-              application/json:
-                schema: passwordResetRequest
-            responses:
-               200:
-                   description: Password changed successfully
-                   headers:
-                     X-Content-Type-Options:
-                     X-XSS-Protection:
-                   body:
-                       application/json:
-               400:
-                   description: There were errors validating the request
-                   body:
-                       application/json:
-                           example: |
-                             {
-                               "newPassword" : "may not be null"
-                             }
     /search/findOneByUsername:
         get:
-            is: [ secured ]
             description: Find User by username.
             queryParameters:
                 username:
@@ -169,7 +122,6 @@ resourceTypes:
     displayName: Client
     /search/findOneByClientId:
         get:
-            is: [ secured ]
             description: Find Client by ID.
             queryParameters:
                 username:

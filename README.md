@@ -1,4 +1,4 @@
-# OpenLMIS Service Template
+# OpenLMIS Authentication Service
 This template is meant to be a starting point for developing a new 
 OpenLMIS 3.x Independent Service.
 
@@ -37,12 +37,12 @@ environment, start the Service with: `gradle bootRun`
 and version. Note that you can determine yourDockerIPAddress by running `docker-machine ip`.
 10. Go to `http://<yourDockerIPAddress>:8080/api/` to see the APIs.
 
-## API Definition and Testing
-Our API is defined using RAML. This repository offers a preferred approach for integration-testing the API, generating user-friendly documentation for it, and ensuring that it’s congruous with the specification defined within the project’s RAML.
-
-Specifically, `api-definition.yaml` contains the project’s RAML.
-
-After running `gradle ramlToSwagger bootRun`, developers can browse to `http://<yourDockerIPAddress>:8080` to see a user-friendly and interactive version of the API spec.
++## API Definition and Testing
+ +Our API is defined using RAML. This repository offers a preferred approach for integration-testing the API, generating user-friendly documentation for it, and ensuring that it’s congruous with the specification defined within the project’s RAML.
+ +
+ +Specifically, `api-definition.yaml` contains the project’s RAML.
+ +
+ +After running `gradle ramlToSwagger bootRun`, developers can browse to `http://<yourDockerIPAddress>:8080/index.html` to see a user-friendly and interactive version of the API spec.
 
 ## Building & Testing
 
