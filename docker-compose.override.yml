@@ -8,7 +8,6 @@ services:
     volumes:
       - '.:/app'
       - 'gradlecache:/gradle'
-    env_file: .env
 volumes:
   gradlecache:
     external: false

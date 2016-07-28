@@ -1,0 +1,14 @@
+{
+  "name": "openlmis-auth",
+  "version": "0.0.1",
+
+  "devDependencies":
+  {
+    "raml2html": "~2.4.0"
+  },
+
+  "scripts":
+  {
+    "runApiHtmlConverter": "raml2html --input /app/src/main/resources/api-definition-raml.yaml --output /app/src/main/resources/api-definition.html"
+  }
+}
