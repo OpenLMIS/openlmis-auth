@@ -1,5 +1,6 @@
 package org.openlmis.auth.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +17,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "auth_users")
+@JsonIgnoreProperties(value = { "authorities" }, ignoreUnknown = true)
 public class User extends BaseEntity implements UserDetails {
 
   @Getter

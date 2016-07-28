@@ -8,5 +8,3 @@ out/
 .env
 gradle*
 node_modules/
-api-definition.json
-api-definition.html
