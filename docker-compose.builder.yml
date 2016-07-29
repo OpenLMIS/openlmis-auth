@@ -2,6 +2,9 @@ version: "2"
 services:
   builder:
     image: openlmis/dev
+    links:
+      - db
+      - log
     volumes:
       - '.:/app'
     entrypoint:
@@ -15,17 +18,6 @@ services:
   image:
     build: .
     image: openlmis/auth
-  template-service:
-    image: openlmis/auth
-    links:
-      - db
-      - log
-    ports:
-      - "8080"
-    environment:
-      JAVA_OPTS: '-Dlogging.config=/logback.xml'
-    volumes:
-      - '../logback.xml:/logback.xml'
   db:
     image: openlmis/postgres
     ports:
