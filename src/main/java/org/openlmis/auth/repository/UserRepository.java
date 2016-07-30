@@ -2,6 +2,7 @@ package org.openlmis.auth.repository;
 
 import org.openlmis.auth.domain.User;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Optional;
@@ -11,5 +12,5 @@ import java.util.UUID;
 public interface UserRepository extends CrudRepository<User, UUID> {
 
   @PreAuthorize("permitAll()")
-  Optional<User> findOneByUsername(String username);
+  Optional<User> findOneByUsername(@Param("username") String username);
 }

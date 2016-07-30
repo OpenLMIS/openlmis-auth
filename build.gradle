@@ -173,3 +173,4 @@ test.dependsOn copyRaml
 test.dependsOn copyRamlToBuild
 build.dependsOn ramlToHtml
 build.dependsOn copyRamlHtmlToBuild
+build.dependsOn ramlToSwagger

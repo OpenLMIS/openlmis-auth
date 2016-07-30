@@ -36,3 +36,10 @@ task copyRamlHtmlToBuild(type:Copy) {
     into 'build/resources/main'
 }
 copyRamlHtmlToBuild.dependsOn ramlToHtml
+
+// Generate live documentation
+task ramlToSwagger(type: Exec) {
+    description = 'Convert RAML to Swagger'
+    commandLine 'npm', 'run', 'runApiSpecConverter'
+}
+ramlToSwagger.dependsOn(npm_install, copyRaml)

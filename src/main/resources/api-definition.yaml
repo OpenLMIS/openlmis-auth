@@ -2,7 +2,7 @@
 ---
 title: OpenLMIS Requisition API
 version: "1.0.0"
-baseUri: "http://localhost:8080/api"
+baseUri: "${baseUrl}/api"
 
 documentation:
     - title: Getting Started
@@ -172,7 +172,7 @@ resourceTypes:
             is: [ secured ]
             description: Find Client by ID.
             queryParameters:
-                username:
+                clientId:
                     displayName: clientId
                     description: Client's ID
                     type: string

@@ -9,3 +9,5 @@ out/
 gradle*
 node_modules/
 api-definition-raml.yaml
+api-definition.json
+api-definition.html
