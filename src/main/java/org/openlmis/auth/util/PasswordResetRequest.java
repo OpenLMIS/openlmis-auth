@@ -1,5 +1,6 @@
 package org.openlmis.auth.util;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import javax.validation.constraints.Size;
 import javax.validation.constraints.Pattern;
 
 @NoArgsConstructor
+@AllArgsConstructor
 public class PasswordResetRequest {
 
   @Getter
@@ -25,10 +27,5 @@ public class PasswordResetRequest {
         @Pattern(regexp = "(?=\\S+$).+", message = "must not contain spaces")
       })
   private String newPassword;
-
-  public PasswordResetRequest(String username, String newPassword) {
-    this.username = username;
-    this.newPassword = newPassword;
-  }
 
 }
