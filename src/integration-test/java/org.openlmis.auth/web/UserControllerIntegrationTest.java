@@ -34,8 +34,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     restAssured = ramlDefinition.createRestAssured();
   }
 
-  @Test
-  public void testPasswordReset() {
+  private String getPassword() {
     User user = restAssured.given()
         .queryParam("access_token", getToken())
         .when()
@@ -43,35 +42,45 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .then()
         .statusCode(200)
         .extract().as(User.class);
-    String password = user.getPassword();
-    Assert.assertNotNull(password);
+    return user.getPassword();
+  }
 
-    PasswordResetRequest passwordResetRequest = new PasswordResetRequest(USERNAME, "test");
-    String response = restAssured.given()
+  private String changePassword(String password) {
+    PasswordResetRequest passwordResetRequest = new PasswordResetRequest(USERNAME, password);
+    return restAssured.given()
         .contentType("application/json")
         .content(passwordResetRequest)
         .when()
         .post("/api/users/passwordReset")
         .then()
-        .statusCode(200)
         .extract().asString();
+  }
+
+  private void testChangePassword(String password, String expectedMessage) {
+    String response = changePassword(password);
+    Assert.assertTrue(response.contains(expectedMessage));
+  }
+
+  @Test
+  public void testPasswordReset() {
+    String password = getPassword();
+    Assert.assertNotNull(password);
 
     String[] msgArgs = {USERNAME};
-    Assert.assertTrue(response.contains(messageSource.getMessage(
-        "users.passwordReset.confirmation", msgArgs, LocaleContextHolder.getLocale())));
+    String expectedMessage = messageSource.getMessage("users.passwordReset.confirmation",
+        msgArgs, LocaleContextHolder.getLocale());
+
+    testChangePassword("test1234", expectedMessage);
     Assert.assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(),
         RamlMatchers.hasNoViolations());
 
-    user = restAssured.given()
-        .queryParam("access_token", getToken(USERNAME, "test"))
-        .when()
-        .get("/api/users/" + USER_ID)
-        .then()
-        .statusCode(200)
-        .extract().as(User.class);
-    String newPassword = user.getPassword();
+    String newPassword = getPassword();
     Assert.assertNotNull(newPassword);
-
     Assert.assertNotEquals(password, newPassword);
+
+    testChangePassword("1234567", "size must be between 8 and 16");
+    testChangePassword("sdokfsodpfjsaidjasj2akdsjk", "size must be between 8 and 16");
+    testChangePassword("vvvvvvvvvvv", "must contain at least 1 number");
+    testChangePassword("1sample text", "must not contain spaces");
   }
 }
