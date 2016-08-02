@@ -52,6 +52,15 @@ schemas:
               "newPassword": { "type": "string", "required": true, "title": "new password" }
           }
       }
+  - passwordChangeRequest: |
+      {   "type": "object",
+          "$schema": "http://json-schema.org/draft-03/schema",
+          "title": "PasswordChangeRequest",
+          "properties": {
+              "token": { "type": "string", "required": true, "title": "password change token" },
+              "newPassword": { "type": "string", "required": true, "title": "new password" }
+          }
+      }
 
 traits:
     - secured:
@@ -142,6 +151,42 @@ resourceTypes:
                              {
                                "newPassword" : "may not be null"
                              }
+    /forgotPassword:
+        post:
+            description: Send an email to the user with a reset password link.
+            queryParameters:
+                email:
+                    displayName: Email
+                    description: Email
+                    type: string
+                    required: true
+                    repeat: false
+            responses:
+               200:
+                   description: Email send successfully
+                   headers:
+                     X-Content-Type-Options:
+                     X-XSS-Protection:
+                   body:
+                       application/json:
+               400:
+                   description: Email not found
+    /changePassword:
+        post:
+            description: Change user's password.
+            body:
+              application/json:
+                schema: passwordChangeRequest
+            responses:
+               200:
+                   description: Password changed successfully
+                   headers:
+                     X-Content-Type-Options:
+                     X-XSS-Protection:
+                   body:
+                       application/json:
+               400:
+                   description: There were errors validating the request
     /search/findOneByUsername:
         get:
             is: [ secured ]

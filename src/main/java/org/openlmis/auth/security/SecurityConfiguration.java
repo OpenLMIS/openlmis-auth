@@ -47,7 +47,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             "/css/*",
             "/swagger-ui.js",
             "/swagger-ui.min.js",
-            "/fonts/*"
+            "/fonts/*",
+            "/index.html",
+            "/api-definition.json",
+            "/api/users/forgotPassword",
+            "/api/users/changePassword"
         );
   }
 
