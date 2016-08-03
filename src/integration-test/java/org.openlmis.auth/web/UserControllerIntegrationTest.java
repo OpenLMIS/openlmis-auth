@@ -5,20 +5,28 @@ import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.i18n.ExposedMessageSource;
+import org.openlmis.auth.repository.PasswordResetTokenRepository;
+import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.auth.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
+
+import java.util.UUID;
 
 public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String RAML_ASSERT_MESSAGE = "HTTP request/response should match RAML "
       + "definition.";
   private static final String USER_ID = "51f6bdc1-4932-4bc3-9589-368646ef7ad3";
   private static final String USERNAME = "admin";
+  private static final String EMAIL = "test@openlmis.org";
 
   private RamlDefinition ramlDefinition;
   private RestAssuredClient restAssured;
@@ -26,12 +34,23 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @Autowired
   private ExposedMessageSource messageSource;
 
+  @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
+  private PasswordResetTokenRepository passwordResetTokenRepository;
+
   /** Prepare the test environment. */
   @Before
   public void setUp() {
     RestAssured.baseURI = BASE_URL;
     ramlDefinition = RamlLoaders.fromClasspath().load("api-definition-raml.yaml");
     restAssured = ramlDefinition.createRestAssured();
+  }
+
+  @After
+  public void cleanUp() {
+    passwordResetTokenRepository.deleteAll();
   }
 
   private String getPassword() {
@@ -102,5 +121,34 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     Assert.assertTrue(response.contains("You have successfully logged out!"));
 
     logoutUser(401, accessToken);
+  }
+
+  @Test
+  public void testForgotPassword() {
+    restAssured.given()
+        .queryParam("email", EMAIL)
+        .when()
+        .post("/api/users/forgotPassword")
+        .then()
+        .statusCode(200);
+
+    User user = userRepository.findOne(UUID.fromString(USER_ID));
+    Assert.assertNotNull(user);
+
+    PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
+    Assert.assertNotNull(token);
+
+    PasswordChangeRequest request = new PasswordChangeRequest(token.getId(), "test");
+    restAssured.given()
+        .contentType("application/json")
+        .content(request)
+        .when()
+        .post("/api/users/changePassword")
+        .then()
+        .statusCode(200);
+
+    User changedUser = userRepository.findOne(UUID.fromString(USER_ID));
+    Assert.assertNotNull(changedUser);
+    Assert.assertNotEquals(changedUser.getPassword(), user.getPassword());
   }
 }
