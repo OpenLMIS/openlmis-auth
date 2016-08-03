@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 
 @Configuration
 @EnableAuthorizationServer
@@ -31,6 +32,9 @@ public class AutorizationServerConfiguration extends AuthorizationServerConfigur
   private PGPoolingDataSource dataSource;
 
   @Autowired
+  private TokenStore tokenStore;
+
+  @Autowired
   private JdbcClientDetailsService clientDetailsService;
 
   @Value("${token.validitySeconds}")
@@ -38,8 +42,9 @@ public class AutorizationServerConfiguration extends AuthorizationServerConfigur
 
   @Override
   public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+    endpoints.tokenStore(tokenStore);
     DefaultTokenServices tokenServices = new DefaultTokenServices();
-    tokenServices.setTokenStore(endpoints.getTokenStore());
+    tokenServices.setTokenStore(tokenStore);
     tokenServices.setSupportRefreshToken(true);
     tokenServices.setClientDetailsService(clientDetailsService);
     tokenServices.setTokenEnhancer(tokenEnhancer());
@@ -68,5 +73,4 @@ public class AutorizationServerConfiguration extends AuthorizationServerConfigur
   public TokenEnhancer tokenEnhancer() {
     return new AccessTokenEnhancer();
   }
-
 }

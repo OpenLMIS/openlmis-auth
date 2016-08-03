@@ -164,6 +164,19 @@ resourceTypes:
                     headers:
                       X-Content-Type-Options:
                       X-XSS-Protection:
+    /logout:
+        post:
+            is: [ secured ]
+            description: Logout user.
+            responses:
+               "200":
+                   headers:
+                     X-Content-Type-Options:
+                     X-XSS-Protection:
+               "500":
+                   headers:
+                     X-Content-Type-Options:
+                     X-XSS-Protection:
 
 /clients:
     displayName: Client
@@ -188,4 +201,4 @@ resourceTypes:
                 "500":
                     headers:
                       X-Content-Type-Options:
-                      X-XSS-Protection:
+                      X-XSS-Protection: 

@@ -83,4 +83,24 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     testChangePassword("vvvvvvvvvvv", "must contain at least 1 number");
     testChangePassword("1sample text", "must not contain spaces");
   }
+
+  private String logoutUser(Integer statusCode, String token) {
+    return restAssured.given()
+        .queryParam("access_token", token)
+        .when()
+        .post("/api/users/logout")
+        .then()
+        .statusCode(statusCode)
+        .extract().asString();
+  }
+
+  @Test
+  public void revokeTokenTest() {
+    String accessToken = getToken();
+    String response = logoutUser(200, accessToken);
+
+    Assert.assertTrue(response.contains("You have successfully logged out!"));
+
+    logoutUser(401, accessToken);
+  }
 }

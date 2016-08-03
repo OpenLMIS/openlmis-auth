@@ -14,6 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
@@ -46,6 +50,24 @@ public class UserController {
 
   @Autowired
   private ExposedMessageSource messageSource;
+
+  @Autowired
+  private TokenStore tokenStore;
+
+  /**
+   * Endpoint for logout.
+   */
+  @PreAuthorize("isAuthenticated()")
+  @RequestMapping(value = "/users/logout", method = RequestMethod.POST)
+  public ResponseEntity<?> revokeToken(OAuth2Authentication auth) {
+    OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) auth.getDetails();
+    String token = details.getTokenValue();
+    tokenStore.removeAccessToken(new DefaultOAuth2AccessToken(token));
+
+    String[] msgArgs = {};
+    return new ResponseEntity<String>(messageSource.getMessage(
+        "users.logout.confirmation", msgArgs, LocaleContextHolder.getLocale()), HttpStatus.OK);
+  }
 
   /**
    * Custom endpoint for creating new users. Encrypts password with BCryptPasswordEncoder.
