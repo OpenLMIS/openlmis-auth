@@ -1,6 +1,6 @@
 #%RAML 0.8
 ---
-title: OpenLMIS Requisition API
+title: OpenLMIS Auth API
 version: "1.0.0"
 baseUri: "${baseUrl}/api"
 
