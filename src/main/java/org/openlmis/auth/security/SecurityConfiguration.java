@@ -14,16 +14,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
 @Configuration
 @EnableWebSecurity
-@EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
@@ -55,17 +52,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             "/css/*",
             "/swagger-ui.js",
             "/swagger-ui.min.js",
-            "/fonts/*",
-            "/index.html",
-            "/api-definition.json",
-            "/api/users/forgotPassword",
-            "/api/users/changePassword"
+            "/fonts/*"
         );
   }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http
+        .antMatcher("/oauth/**")
         .authorizeRequests()
         .antMatchers(HttpMethod.OPTIONS).permitAll()
         .anyRequest().authenticated()
