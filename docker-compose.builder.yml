@@ -10,8 +10,7 @@ services:
     entrypoint:
       - 'gradle'
     command:
-      - 'clean'
-      - 'build'
+      - './build.sh'
     environment:
       GRADLE_OPTS: '-Dorg.gradle.daemon=false'
     env_file: .env
