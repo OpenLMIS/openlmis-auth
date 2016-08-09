@@ -46,7 +46,6 @@ public class Version {
 
     InputStream inputStream = getClass().getResourceAsStream(VERSION);
     if (inputStream != null) {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
       try(BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         this.service = getValueFromLine(reader.readLine());
         this.build = getValueFromLine(reader.readLine());
