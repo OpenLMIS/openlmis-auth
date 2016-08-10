@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class VersionController {
 
-  public static final Logger LOGGER = LoggerFactory.getLogger(VersionController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(VersionController.class);
 
   /**
    * Displays version information.
