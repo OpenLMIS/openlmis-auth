@@ -1,5 +1,5 @@
-Service: requisition
-Build: ${build}
-Branch: ${branch}
-Timestamp: ${time}
-Version: 0.0.1
+Service=auth
+Build=${build}
+Branch=${branch}
+Timestamp=${time}
+Version=0.0.1
