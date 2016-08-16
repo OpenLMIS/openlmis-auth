@@ -16,7 +16,7 @@ project settings and credentials. For a starter environment file, you can use [t
 one](https://github.com/OpenLMIS/openlmis-config/blob/master/.env). e.g.
 
  ```shell
- cd openlmis-requisition
+ cd openlmis-auth
  curl -LO https://raw.githubusercontent.com/OpenLMIS/openlmis-config/master/.env
  ```
 3. Develop w/ Docker by running `docker-compose run --service-ports auth`.
@@ -25,7 +25,9 @@ See [Developing w/ Docker](#devdocker).
 environment, start the Service with: `gradle bootRun`
 5. Go to `http://<yourDockerIPAddress>:8080/` to see the service name 
 and version. Note that you can determine yourDockerIPAddress by running `docker-machine ip`.
-6. Go to `http://<yourDockerIPAddress>:8080/api/` to see the APIs.
+6. Go to `http://<yourDockerIPAddress>:8080/api?access_token=<access_token_id>` to see the APIs.
+For additional info about security see the Security section in the Example Service README at
+https://github.com/OpenLMIS/openlmis-example/blob/master/README.md#security.
 
 ## API Definition and Testing
 See the API Definition and Testing section in the Example Service README at
