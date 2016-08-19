@@ -7,10 +7,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -34,7 +33,7 @@ public class User extends BaseEntity implements UserDetails {
 
   @Getter
   @Setter
-  @Column(nullable = false)
+  @Column
   private String password;
 
   @Getter

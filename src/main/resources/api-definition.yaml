@@ -18,7 +18,7 @@ schemas:
               "id": { "type": "string", "required": true, "title": "id" },
               "referenceDataUserId": { "type": "string", "required": true, "title": "referenceDataUserId" },
               "username": { "type": "string", "required": true, "title": "username" },
-              "password": { "type": "string", "required": true, "title": "password" },
+              "password": { "type": "string", "required": false, "title": "password" },
               "role": { "type": "string", "required": true, "title": "role" },
               "enabled": { "type": "boolean", "required": false, "title": "enabled" }
           }

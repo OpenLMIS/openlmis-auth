@@ -30,19 +30,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.support.SessionStatus;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.validation.Valid;
 
 @RepositoryRestController
 public class UserController {
   private static final long RESET_PASSWORD_TOKEN_VALIDITY_HOURS = 12;
 
-  private Logger logger = LoggerFactory.getLogger(UserController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
   @Autowired
   private UserRepository userRepository;
@@ -80,21 +80,37 @@ public class UserController {
   }
 
   /**
-   * Custom endpoint for creating new users. Encrypts password with BCryptPasswordEncoder.
-   * @return newly created user.
+   * Custom endpoint for creating and updating users. Encrypts password with BCryptPasswordEncoder.
+   * @return saved user.
    */
   @RequestMapping(value = "/users", method = RequestMethod.POST)
-  public ResponseEntity<?> createUser(@RequestBody User user,
-                                      BindingResult bindingResult, SessionStatus status) {
-    logger.debug("Creating new user");
+  public ResponseEntity<?> saveUser(@RequestBody User user, BindingResult bindingResult) {
+    LOGGER.debug("Creating or updating user");
     if (bindingResult.getErrorCount() == 0) {
-      BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-      user.setPassword(encoder.encode(user.getPassword()));
-      User newUser = userRepository.save(user);
+      User dbUser = userRepository.findOneByReferenceDataUserId(user.getReferenceDataUserId());
 
-      return new ResponseEntity<User>(newUser, HttpStatus.CREATED);
+      if (dbUser != null) {
+        dbUser.setUsername(user.getUsername());
+        dbUser.setEmail(user.getEmail());
+        dbUser.setPassword(user.getPassword());
+        dbUser.setEnabled(user.getEnabled());
+        dbUser.setRole(user.getRole());
+      } else {
+        dbUser = user;
+      }
+
+      if (dbUser.getPassword() != null && !dbUser.getPassword().isEmpty()) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        dbUser.setPassword(encoder.encode(dbUser.getPassword()));
+      } else {
+        dbUser.setPassword(null);
+      }
+
+      User newUser = userRepository.save(dbUser);
+
+      return new ResponseEntity<>(newUser, HttpStatus.OK);
     } else {
-      return new ResponseEntity(getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(getErrors(bindingResult), HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -129,7 +145,7 @@ public class UserController {
     } else {
       errors.putAll(getErrors(bindingResult));
     }
-    return new ResponseEntity(errors, HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
   }
 
   /**
