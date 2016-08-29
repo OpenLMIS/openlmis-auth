@@ -222,6 +222,28 @@ resourceTypes:
                    headers:
                      X-Content-Type-Options:
                      X-XSS-Protection:
+    /passwordResetToken:
+        post:
+            description: Create token which can be used to change user's password.
+            queryParameters:
+                userId:
+                    displayName: ReferenceDataUserId
+                    description: Reference Data User Id
+                    type: string
+                    required: true
+                    repeat: false
+            responses:
+               200:
+                   description: Token was created successfully
+                   headers:
+                     X-Content-Type-Options:
+                     X-XSS-Protection:
+                   body:
+                       application/json:
+               500:
+                    headers:
+                      X-Content-Type-Options:
+                      X-XSS-Protection:
 
 /clients:
     displayName: Client
