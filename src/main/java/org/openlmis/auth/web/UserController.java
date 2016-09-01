@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.validation.Valid;
 
@@ -161,15 +162,7 @@ public class UserController {
           null, LocaleContextHolder.getLocale()), HttpStatus.BAD_REQUEST);
     }
 
-    PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
-    if (token != null) {
-      passwordResetTokenRepository.delete(token);
-    }
-
-    token = new PasswordResetToken();
-    token.setUser(user);
-    token.setExpiryDate(LocalDateTime.now().plusHours(RESET_PASSWORD_TOKEN_VALIDITY_HOURS));
-    passwordResetTokenRepository.save(token);
+    PasswordResetToken token = createPasswordResetToken(user);
 
     //sendMail(user.getEmail(), token);
     System.out.println("Password reset token: " + token.getId().toString());
@@ -205,6 +198,19 @@ public class UserController {
     return new ResponseEntity(HttpStatus.OK);
   }
 
+  /**
+   * Creates token which can be used to change user's password.
+   */
+  @RequestMapping(value = "/users/passwordResetToken", method = RequestMethod.POST)
+  public ResponseEntity<?> generatePasswordResetToken(
+      @RequestParam(value = "userId") UUID referenceDataUserId) {
+    User user = userRepository.findOneByReferenceDataUserId(referenceDataUserId);
+
+    PasswordResetToken token = createPasswordResetToken(user);
+
+    return new ResponseEntity<>(token.getId(), HttpStatus.OK);
+  }
+
   private Map<String, String> getErrors(final BindingResult bindingResult) {
     return new HashMap<String, String>() {
       {
@@ -213,5 +219,17 @@ public class UserController {
         }
       }
     };
+  }
+
+  private PasswordResetToken createPasswordResetToken(User user) {
+    PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
+    if (token != null) {
+      passwordResetTokenRepository.delete(token);
+    }
+
+    token = new PasswordResetToken();
+    token.setUser(user);
+    token.setExpiryDate(LocalDateTime.now().plusHours(RESET_PASSWORD_TOKEN_VALIDITY_HOURS));
+    return passwordResetTokenRepository.save(token);
   }
 }

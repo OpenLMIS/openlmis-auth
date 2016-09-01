@@ -18,6 +18,7 @@ import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.auth.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.UUID;
 
@@ -27,6 +28,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String USER_ID = "51f6bdc1-4932-4bc3-9589-368646ef7ad3";
   private static final String USERNAME = "admin";
   private static final String EMAIL = "test@openlmis.org";
+  private static final String REFERENCE_DATA_USER_ID = "35316636-6264-6331-2d34-3933322d3462";
+  private static final String PASSWORD = "password";
 
   private RamlDefinition ramlDefinition;
   private RestAssuredClient restAssured;
@@ -51,6 +54,10 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @After
   public void cleanUp() {
     passwordResetTokenRepository.deleteAll();
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    User user = userRepository.findOne(UUID.fromString(USER_ID));
+    user.setPassword(encoder.encode(PASSWORD));
+    userRepository.save(user);
   }
 
   private String getPassword() {
@@ -150,5 +157,20 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     User changedUser = userRepository.findOne(UUID.fromString(USER_ID));
     Assert.assertNotNull(changedUser);
     Assert.assertNotEquals(changedUser.getPassword(), user.getPassword());
+  }
+
+  @Test
+  public void testCreatePasswordResetToken() {
+    UUID tokenId = restAssured.given()
+        .queryParam("access_token", getToken())
+        .queryParam("userId", REFERENCE_DATA_USER_ID)
+        .when()
+        .post("/api/users/passwordResetToken")
+        .then()
+        .statusCode(200)
+        .extract().as(UUID.class);
+
+    PasswordResetToken token = passwordResetTokenRepository.findOne(tokenId);
+    Assert.assertNotNull(token);
   }
 }

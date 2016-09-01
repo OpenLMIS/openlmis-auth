@@ -3,6 +3,7 @@ package org.openlmis.auth.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,7 @@ public class User extends BaseEntity implements UserDetails {
 
   @Getter
   @Setter
+  @Type(type = "pg-uuid")
   @Column(nullable = false, unique = true)
   private UUID referenceDataUserId;
 
