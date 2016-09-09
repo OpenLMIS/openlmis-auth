@@ -1,7 +1,12 @@
 
 package org.openlmis.auth.web;
 
+import org.openlmis.auth.domain.Facility;
 import org.openlmis.auth.domain.PasswordResetToken;
+import org.openlmis.auth.domain.Program;
+import org.openlmis.auth.domain.Right;
+import org.openlmis.auth.domain.RightQuery;
+import org.openlmis.auth.domain.SupervisoryNode;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
@@ -26,15 +31,18 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -44,6 +52,7 @@ public class UserController {
   private static final long RESET_PASSWORD_TOKEN_VALIDITY_HOURS = 12;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+  private static final String USER_ID = "userId";
 
   @Autowired
   private UserRepository userRepository;
@@ -64,6 +73,9 @@ public class UserController {
 
   @Autowired
   private TokenStore tokenStore;
+  
+  @Autowired
+  private RestTemplate restTemplate;
 
   /**
    * Endpoint for logout.
@@ -231,5 +243,125 @@ public class UserController {
     token.setUser(user);
     token.setExpiryDate(LocalDateTime.now().plusHours(RESET_PASSWORD_TOKEN_VALIDITY_HOURS));
     return passwordResetTokenRepository.save(token);
+  }
+
+
+  /**
+   * Check if user has a right with certain criteria.
+   *
+   * @param userId            id of user to check for right
+   * @param rightName         right to check
+   * @param programCode       program to check
+   * @param supervisoryNodeId supervisory node to check
+   * @param warehouseCode     warehouse to check
+   * @return if successful, true or false depending on if user has the right
+   */
+  @RequestMapping(value = "/users/{userId}/hasRight", method = RequestMethod.GET)
+  public ResponseEntity<?> checkIfUserHasRight(@PathVariable(USER_ID) UUID userId,
+                                               @RequestParam(value = "rightName") String rightName,
+                                               @RequestParam(value = "programCode",
+                                                   required = false) String programCode,
+                                               @RequestParam(value = "supervisoryNodeId",
+                                                   required = false) UUID supervisoryNodeId,
+                                               @RequestParam(value = "warehouseCode",
+                                                   required = false) String warehouseCode) {
+
+    User user = restTemplate.getForObject("http://referencedata:8080/api/users/{userId}", User.class, userId);
+    if (user == null) {
+      LOGGER.error("User not found");
+      return ResponseEntity
+          .notFound()
+          .build();
+    }
+
+    RightQuery rightQuery;
+    Right right = restTemplate.getForObject("http://referencedata:8080/api/rights/{rightName}", Right.class, 
+        rightName);
+    if (programCode != null) {
+
+      Program program = restTemplate.getForObject("http://referencedata:8080/api/programs/{programCode}",
+          Program.class, programCode);
+      if (supervisoryNodeId != null) {
+
+        SupervisoryNode supervisoryNode = restTemplate.getForObject(
+            "http://referencedata:8080/api/supervisoryNodes/{supervisoryNodeId}", SupervisoryNode.class, 
+                supervisoryNodeId);
+        rightQuery = new RightQuery(right, program, supervisoryNode);
+
+      } else {
+        rightQuery = new RightQuery(right, program);
+      }
+    } else if (warehouseCode != null) {
+
+      Facility warehouse = restTemplate.getForObject("http://referencedata:8080/api/facilities/{facilityCode}",
+          Facility.class, warehouseCode);
+      rightQuery = new RightQuery(right, warehouse);
+
+    } else {
+      rightQuery = new RightQuery(right);
+    }
+
+    boolean hasRight = user.hasRight(rightQuery);
+
+    return ResponseEntity
+        .ok()
+        .body(hasRight);
+  }
+
+  /**
+   * Get the programs at a user's home facility or programs that the user supervises.
+   *
+   * @param userId          id of user to get programs
+   * @param forHomeFacility true to get home facility programs, false to get supervised programs;
+   *                        default value is true
+   * @return set of programs
+   */
+  @RequestMapping(value = "/users/{userId}/programs", method = RequestMethod.GET)
+  public ResponseEntity<?> getUserPrograms(@PathVariable(USER_ID) UUID userId,
+                                           @RequestParam(value = "access_token") String accessToken,
+                                           @RequestParam(value = "forHomeFacility",
+                                               required = false, defaultValue = "true")
+                                               boolean forHomeFacility) {
+
+    User user = restTemplate.getForObject(
+        "http://referencedata:8080/api/users/{userId}?access_token={accessToken}", 
+        User.class, userId, accessToken);
+    if (user == null) {
+      LOGGER.error("User not found");
+      return ResponseEntity
+          .notFound()
+          .build();
+    }
+
+    Set<Program> programs = forHomeFacility
+        ? user.getHomeFacilityPrograms() : user.getSupervisedPrograms();
+
+    return ResponseEntity
+        .ok()
+        .body(programs);
+  }
+
+  /**
+   * Get all the facilities that the user supervises.
+   *
+   * @param userId id of user to get supervised facilities
+   * @return set of supervised facilities
+   */
+  @RequestMapping(value = "/users/{userId}/supervisedFacilities", method = RequestMethod.GET)
+  public ResponseEntity<?> getUserSupervisedFacilities(@PathVariable(USER_ID) UUID userId) {
+
+    User user = restTemplate.getForObject("http://referencedata:8080/api/users/{userId}", User.class, userId);
+    if (user == null) {
+      LOGGER.error("User not found");
+      return ResponseEntity
+          .notFound()
+          .build();
+    }
+
+    Set<Facility> supervisedFacilities = user.getSupervisedFacilities();
+
+    return ResponseEntity
+        .ok()
+        .body(supervisedFacilities);
   }
 }
