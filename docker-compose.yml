@@ -2,18 +2,32 @@ version: "2"
 services:
   auth:
     image: openlmis/auth
-    links:
-      - db
-      - log
+    networks:
+      - my-net
     ports:
-      - "8080"
+      - "8080:8080"
     env_file: .env
   db:
     image: openlmis/postgres
+    networks:
+      - my-net
     ports:
       - "5432"
     env_file: .env
   log:
     image: openlmis/rsyslog
+    networks:
+      - my-net
     volumes:
       - '../logs/auth:/var/log'
+  referencedata:
+    image: openlmis/referencedata
+    networks:
+      - my-net
+    ports:
+    - "8081:8080"
+    env_file: .env
+
+networks:
+  my-net:
+    driver: bridge
