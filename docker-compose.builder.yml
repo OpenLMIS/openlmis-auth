@@ -16,6 +16,17 @@ services:
     environment:
       GRADLE_OPTS: '-Dorg.gradle.daemon=false'
     env_file: .env
+  sonar:
+    image: openlmis/dev
+    volumes:
+      - '.:/app'
+    entrypoint:
+      - 'gradle'
+    command:
+      - 'sonarqube'
+    environment:
+      GRADLE_OPTS: '-Dorg.gradle.daemon=false $SONAR_LOGIN $SONAR_PASSWORD'
+    env_file: .env
   image:
     build: .
     image: openlmis/auth
