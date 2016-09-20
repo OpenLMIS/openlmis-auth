@@ -8,17 +8,16 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+import java.util.Collection;
+import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "auth_users")
 @JsonIgnoreProperties(value = { "authorities" }, ignoreUnknown = true)
 public class User extends BaseEntity implements UserDetails {
 
