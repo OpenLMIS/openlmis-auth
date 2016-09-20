@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "oauth_client_details")
+@Table(name = "clients")
 public class Client {
 
   @Id
