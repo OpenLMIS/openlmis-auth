@@ -1,5 +1,5 @@
 
-INSERT INTO clients (client_id, client_secret, authorities, authorized_grant_types,  resource_ids, scope)
+INSERT INTO oauth_client_details (client_id, client_secret, authorities, authorized_grant_types,  resource_ids, scope)
 VALUES ('trusted-client', 'secret', 'TRUSTED_CLIENT', 'client_credentials,password', 'auth,example,requisition,notification,referencedata', 'read,write');
 
 INSERT INTO auth_users (id, enabled, password, role, username, email, reference_data_user_id)
