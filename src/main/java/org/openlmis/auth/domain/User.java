@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 @Entity
-@Table(name = "auth_users")
+@Table(name = "users")
 @JsonIgnoreProperties(value = { "authorities" }, ignoreUnknown = true)
 public class User extends BaseEntity implements UserDetails {
 
