@@ -1,18 +1,19 @@
 version: "2"
 services:
+
   auth:
     image: openlmis/auth
     links:
       - db
       - log
     env_file: .env
-    ports:
-      - "8080"
+
   db:
     image: openlmis/postgres
-    env_file: .env
     ports:
       - "8766:5432"
+    env_file: .env
+
   log:
     image: openlmis/rsyslog
     volumes:

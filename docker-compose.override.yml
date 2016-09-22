@@ -1,13 +1,14 @@
 version: "2"
 services:
+
   auth:
     image: openlmis/dev
     ports:
-      - "5005:5005"
       - "8080:8080"
     volumes:
       - '.:/app'
       - 'gradlecache:/gradle'
+
 volumes:
   gradlecache:
     external: false
