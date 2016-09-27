@@ -3,8 +3,6 @@ services:
 
   auth:
     image: openlmis/auth
-    ports:
-      - "8080"
     links:
       - db
       - log
