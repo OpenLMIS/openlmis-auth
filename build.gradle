@@ -194,6 +194,11 @@ task generateBuildInfo(type:Copy) {
     }
 }
 
+task demoDataSeed(type:Exec) {
+    executable "./demo-data/demo_seed.sh"
+    args "./demo-data", "node ./demo-data/seed_generator.js"
+}
+
 apply from: "documentation.gradle"
 test.dependsOn copyRaml
 test.dependsOn copyRamlToBuild

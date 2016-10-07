@@ -1,0 +1,11 @@
+[
+  {
+    "id": "00000000-4932-4bc3-9589-368646ef7ad3",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "role": "ADMIN",
+    "username": "administrator",
+    "email": "admin@openlmis.org",
+    "reference_data_user_id": "00000000-0000-0000-0000-000000000001"
+  }
+]
