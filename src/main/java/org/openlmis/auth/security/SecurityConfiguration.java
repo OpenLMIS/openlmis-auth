@@ -1,11 +1,12 @@
 package org.openlmis.auth.security;
 
-import org.postgresql.ds.PGPoolingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,9 +27,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Autowired
   private UserDetailsService userDetailsService;
-
-  @Autowired
-  private PGPoolingDataSource dataSource;
 
   @Bean
   public TokenStore tokenStore() {
@@ -59,6 +57,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http
+        .userDetailsService(userDetailsService)
         .antMatcher("/oauth/**")
         .authorizeRequests()
         .antMatchers(HttpMethod.OPTIONS).permitAll()
@@ -69,16 +68,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    auth
-        .userDetailsService(userDetailsService)
-        .passwordEncoder(encoder);
-    auth
-        .jdbcAuthentication()
-        .dataSource(dataSource)
-        .authoritiesByUsernameQuery("SELECT username,role from auth.auth_users where username = ?")
-        .usersByUsernameQuery(
-            "SELECT username,password,enabled FROM auth.auth_users WHERE username = ?");
+    auth.authenticationProvider(authenticator());
+  }
+
+  @Bean
+  public AuthenticationProvider authenticator() {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    provider.setUserDetailsService(userDetailsService);
+    provider.setPasswordEncoder(new BCryptPasswordEncoder());
+    return provider;
   }
 
   @Bean

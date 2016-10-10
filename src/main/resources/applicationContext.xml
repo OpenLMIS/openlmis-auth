@@ -22,12 +22,6 @@
     <property name="password" value="${spring.datasource.password}"/>
   </bean>
 
-  <bean id="clientDetailsService" class="org.springframework.security.oauth2.provider.client.JdbcClientDetailsService">
-    <constructor-arg index="0">
-      <ref bean="openlmisDataSource" />
-    </constructor-arg>
-  </bean>
-
   <bean id="validator"
         class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
 </beans>

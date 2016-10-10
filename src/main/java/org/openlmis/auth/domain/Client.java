@@ -25,41 +25,51 @@ public class Client {
 
   @Column(name = "scope")
   @Getter
+  @Setter
   private String scope;
 
   @Column(name = "resource_ids")
   @Getter
+  @Setter
   private String resourceIds;
 
   @Column(name = "authorized_grant_types")
   @Getter
+  @Setter
   private String authorizedGrantTypes;
 
   @Column(name = "redirect_uri")
   @Getter
+  @Setter
   private String registeredRedirectUris;
 
   @Column(name = "autoapprove")
   @Getter
+  @Setter
   private String autoApproveScopes;
 
   @Column(name = "authorities")
   @Getter
+  @Setter
   private String authorities;
 
   @Column(name = "access_token_validity")
   @Getter
+  @Setter
   private Integer accessTokenValiditySeconds;
 
   @Column(name = "refresh_token_validity")
   @Getter
+  @Setter
   private Integer refreshTokenValiditySeconds;
 
   @Column(name = "additional_information")
   @Getter
+  @Setter
   private String additionalInformation;
 
   @Column(name = "web_server_redirect_uri")
   @Getter
+  @Setter
   private String webServerRedirectUri;
 }
