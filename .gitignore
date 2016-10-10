@@ -8,6 +8,7 @@ out/
 .env
 gradle*
 node_modules/
+demo-data/*.sql
 api-definition-raml.yaml
 api-definition.json
 api-definition.html
