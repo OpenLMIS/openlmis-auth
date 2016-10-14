@@ -53,7 +53,17 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
         .authorizeRequests()
         .antMatchers(
             "/api/users/forgotPassword",
-            "/api/users/changePassword"
+            "/api/users/changePassword",
+            "/lib/*",
+            "/images/*",
+            "/css/*",
+            "/swagger-ui.js",
+            "/swagger-ui.min.js",
+            "/fonts/*",
+            "/lang/*",
+            "/index.html",
+            "/o2c.html",
+            "/generated/api-definition.json"
         ).permitAll()
         .antMatchers(
             "/api/users",
