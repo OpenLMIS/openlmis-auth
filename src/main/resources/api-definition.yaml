@@ -1,8 +1,8 @@
 #%RAML 0.8
 ---
 title: OpenLMIS Auth API
-version: "1.0.0"
-baseUri: "${baseUrl}/api"
+version: "@version@"
+baseUri: "@baseUrl@/api"
 
 documentation:
     - title: Getting Started

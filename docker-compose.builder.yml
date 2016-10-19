@@ -12,7 +12,6 @@ services:
       - 'gradle'
     command:
       - 'clean'
-      - 'generateBuildInfo'
       - 'build'
     environment:
       GRADLE_OPTS: '-Dorg.gradle.daemon=false'

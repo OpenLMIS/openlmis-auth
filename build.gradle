@@ -1,5 +1,3 @@
-import java.text.SimpleDateFormat
-
 buildscript {
     repositories {
         mavenCentral()
@@ -22,18 +20,17 @@ apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
 apply plugin: 'pmd'
 
-jar {
-    baseName = 'openlmis-auth'
-    version  = '0.0.1'
-}
+group = serviceGroup
+version = serviceVersion
+archivesBaseName = rootProject.name
+project.ext.buildTime = java.time.Instant.now().toString() // for versioning
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
     jcenter()
 }
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-web"
@@ -114,6 +111,13 @@ task generateMigration << {
     migrationFile.createNewFile()
 }
 
+processResources {
+    // update version information in build
+    filesMatching('**/version.properties') {
+        expand(project.properties)
+    }
+}
+
 test {
     testLogging {
         events 'started', 'passed'
@@ -143,6 +147,7 @@ sonarqube {
         property "sonar.projectName", "OpenLMIS Auth Service"
         property "sonar.projectKey", "org.sonarqube:openlmis-auth"
         property "sonar.host.url", "http://sonar.openlmis.org"
+        property "sonar.projectVersion", version
         property "sonar.java.coveragePlugin", "jacoco"
         //Tells SonarQube where the unit tests execution reports are
         property "sonar.junit.reportsPath", "build/test-results/test"
@@ -152,10 +157,6 @@ sonarqube {
         property "sonar.jacoco.itReportPath", "build/jacoco/integrationTest.exec"
     }
 }
-
-build.dependsOn jacocoTestReport
-// Makes sure checkstyle is run before build completes
-build.dependsOn check
 
 pmd {
     toolVersion = '5.4.0'
@@ -172,36 +173,22 @@ tasks.withType(Pmd){
     }
 }
 
-def time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-time.setTimeZone(TimeZone.getTimeZone("GMT"))
-
-def versionToCopy = copySpec {
-    from 'src/main/resources'
-    include 'version_template'
-}
-
-task generateBuildInfo(type:Copy) {
-    with versionToCopy
-    into 'build/resources/main'
-    rename { 'version.properties' }
-    expand([
-            build: "$System.env.BUILD_NUMBER", // ${build}
-            branch: "$System.env.GIT_BRANCH", // ${branch}
-            time: time.format(new Date()) + " GMT" // ${time}
-    ])
-    doLast{
-        delete 'src/main/resources/version_template'
-    }
-}
-
 task demoDataSeed(type:Exec) {
     executable "./demo-data/demo_seed.sh"
     args "./demo-data", "node ./demo-data/seed_generator.js"
 }
 
 apply from: "documentation.gradle"
-test.dependsOn copyRaml
-test.dependsOn copyRamlToBuild
-build.dependsOn ramlToHtml
-build.dependsOn copyRamlHtmlToBuild
-build.dependsOn ramlToSwagger
+
+test {
+    dependsOn copyRaml
+    dependsOn copyRamlToBuild
+}
+
+build {
+    dependsOn check
+    dependsOn jacocoTestReport
+    dependsOn ramlToHtml
+    dependsOn copyRamlHtmlToBuild
+    dependsOn ramlToSwagger
+}
