@@ -7,5 +7,14 @@
     "username": "administrator",
     "email": "admin@openlmis.org",
     "reference_data_user_id": "a337ec45-31a0-4f2b-9b2e-a105c4b669bb"
+  },
+  {
+    "id": "29606a63-5a53-4db5-9c46-95737da16347",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "role": "ADMIN",
+    "username": "devadmin",
+    "email": "devadmin@openlmis.org",
+    "reference_data_user_id": "56a50e9a-9668-437d-a09c-7e709ce22222"
   }
 ]
