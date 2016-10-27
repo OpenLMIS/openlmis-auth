@@ -65,6 +65,10 @@ public class ClientDetails implements org.springframework.security.oauth2.provid
   @Setter
   private Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
 
+  /** Initializes ClientDetails with properties from given client.
+   *
+   * @param client instance of custom Client
+   */
   public ClientDetails(Client client) {
     this.clientId = client.getClientId();
 
@@ -82,8 +86,8 @@ public class ClientDetails implements org.springframework.security.oauth2.provid
     if (null != json) {
       try {
         this.additionalInformation = new ObjectMapper().readValue(json, Map.class);
-      } catch (Exception e) {
-        LOGGER.warn("Could not decode JSON for additional information: " + this, e);
+      } catch (Exception ex) {
+        LOGGER.warn("Could not decode JSON for additional information: " + this, ex);
       }
     }
 

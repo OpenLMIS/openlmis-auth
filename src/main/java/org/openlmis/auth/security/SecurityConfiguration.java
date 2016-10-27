@@ -44,14 +44,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     webSecurity
         .ignoring()
         .antMatchers(
-            "/",
-            "/lib/*",
-            "/images/*",
-            "/css/*",
-            "/swagger-ui.js",
-            "/swagger-ui.min.js",
-            "/fonts/*"
-        );
+          "/",
+          "/lib/*",
+          "/images/*",
+          "/css/*",
+          "/swagger-ui.js",
+          "/swagger-ui.min.js",
+          "/fonts/*"
+      );
   }
 
   @Override
@@ -71,6 +71,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     auth.authenticationProvider(authenticator());
   }
 
+  /** Initializes AuthenticationProvider bean with userDetailsService and BCryptPasswordEncoder.
+   *
+   * @return initialized AuthenticationProvider
+   */
   @Bean
   public AuthenticationProvider authenticator() {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
