@@ -71,7 +71,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     auth.authenticationProvider(authenticator());
   }
 
-  /** Initializes AuthenticationProvider bean with userDetailsService and BCryptPasswordEncoder.
+  /**
+   * Initializes AuthenticationProvider bean with userDetailsService and BCryptPasswordEncoder.
    *
    * @return initialized AuthenticationProvider
    */
