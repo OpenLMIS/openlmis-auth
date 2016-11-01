@@ -191,4 +191,5 @@ build {
     dependsOn ramlToHtml
     dependsOn copyRamlHtmlToBuild
     dependsOn ramlToSwagger
+    dependsOn demoDataSeed
 }
