@@ -32,6 +32,10 @@ repositories {
     jcenter()
 }
 
+configurations {
+    webjars
+}
+
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-security"
@@ -45,6 +49,8 @@ dependencies {
     compile "org.springframework:spring-test"
     compile "org.springframework.boot:spring-boot-starter-security"
     compile "org.springframework.security.oauth:spring-security-oauth2"
+
+    webjars 'org.webjars:swagger-ui:2.2.6'
 
     testCompile 'io.rest-assured:rest-assured:3.0.0'
     testCompile 'io.rest-assured:json-schema-validator:3.0.0'
@@ -125,6 +131,32 @@ test {
     }
 }
 
+task webjarExtraction(type: Copy) {
+    configurations.webjars.each {jar ->
+
+        def config = configurations.webjars.resolvedConfiguration
+        def artifact = config.resolvedArtifacts.find {
+            it.file.toString() == jar.absolutePath
+        }
+
+        def upStreamVersion = "${artifact.moduleVersion.id.version}"
+        upStreamVersion = upStreamVersion.replaceAll(/(-[\d.-]+)/, '')
+
+        copy {
+            from zipTree(jar)
+            into file("${buildDir}/webjars-content/${artifact.name}")
+        }
+        copy {
+            from "${buildDir}/webjars-content/${artifact.name}/META-INF/resources/webjars/${artifact.name}/${upStreamVersion}",
+                    "${buildDir}/webjars-content/${artifact.name}/META-INF/resources/webjars/${artifact.name}/${artifact.moduleVersion.id.version}"
+
+            into file("${buildDir}/resources/main/static/")
+            exclude '**/*.gz'
+            exclude '**/index.html'
+        }
+    }
+}
+
 jacocoTestReport {
     group = "reporting"
     description = "Generate Jacoco coverage reports after running tests."
@@ -187,6 +219,7 @@ test {
 
 build {
     dependsOn check
+    dependsOn webjarExtraction
     dependsOn jacocoTestReport
     dependsOn ramlToHtml
     dependsOn copyRamlHtmlToBuild
