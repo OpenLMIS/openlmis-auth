@@ -45,7 +45,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .ignoring()
         .antMatchers(
           "/",
-          "/generated/api-definition.json",
           "/webjars/**",
           "/docs/**"
       );

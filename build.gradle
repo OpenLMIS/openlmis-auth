@@ -194,3 +194,8 @@ build {
     dependsOn ramlToSwagger
     dependsOn demoDataSeed
 }
+
+jar {
+    // we want the generated swagger spec file included in the output jar
+    dependsOn ramlToSwagger
+}
