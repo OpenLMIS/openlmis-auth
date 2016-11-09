@@ -112,13 +112,6 @@ task generateMigration << {
     migrationFile.createNewFile()
 }
 
-processResources {
-    // update version information in build
-    filesMatching('**/version.properties') {
-        expand(project.properties)
-    }
-}
-
 test {
     testLogging {
         events 'started', 'passed'
@@ -181,6 +174,15 @@ task demoDataSeed(type:Exec) {
 
 apply from: "documentation.gradle"
 
+processResources {
+    // we want the generated swagger spec file included in the output jar
+    finalizedBy ramlToSwagger
+    // update version information in build
+    filesMatching('**/version.properties') {
+        expand(project.properties)
+    }
+}
+
 test {
     dependsOn copyRaml
     dependsOn copyRamlToBuild
@@ -193,9 +195,4 @@ build {
     dependsOn copyRamlHtmlToBuild
     dependsOn ramlToSwagger
     dependsOn demoDataSeed
-}
-
-jar {
-    // we want the generated swagger spec file included in the output jar
-    dependsOn ramlToSwagger
 }
