@@ -37,7 +37,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
   @Override
   public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-    DefaultTokenServices tokenServices = new DefaultTokenServices();
+    DefaultTokenServices tokenServices = new CustomTokenServices();
     tokenServices.setTokenStore(tokenStore);
     tokenServices.setSupportRefreshToken(true);
     tokenServices.setClientDetailsService(clientDetailsService);
