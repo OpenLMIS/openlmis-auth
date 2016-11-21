@@ -5,7 +5,7 @@ in production environments.
 
 Each .json file contains demo data that corresponds to one database table.
 
-## Users (auth_users)
+## Users (auth.auth_users.json)
 There are 2 user accounts:
 
 1. administrator (password=password)
@@ -13,3 +13,6 @@ There are 2 user accounts:
 
 The [Reference Data service demo data](https://github.com/OpenLMIS/openlmis-referencedata/tree/master/demo-data)
 connects these users to specific rights at facilities and programs.
+
+These credentials are public knowledge. They are not secure. Do not use any of these accounts or
+passwords in any production OpenLMIS environment.
