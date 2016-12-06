@@ -211,16 +211,6 @@ public class UserController {
     return new ResponseEntity<>(token.getId(), HttpStatus.OK);
   }
 
-  private Map<String, String> getErrors(final BindingResult bindingResult) {
-    return new HashMap<String, String>() {
-      {
-        for (FieldError error : bindingResult.getFieldErrors()) {
-          put(error.getField(), error.getDefaultMessage());
-        }
-      }
-    };
-  }
-
   private PasswordResetToken createPasswordResetToken(User user) {
     PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
     if (token != null) {
@@ -231,5 +221,15 @@ public class UserController {
     token.setUser(user);
     token.setExpiryDate(LocalDateTime.now().plusHours(RESET_PASSWORD_TOKEN_VALIDITY_HOURS));
     return passwordResetTokenRepository.save(token);
+  }
+
+  private Map<String, String> getErrors(final BindingResult bindingResult) {
+    return new HashMap<String, String>() {
+      {
+        for (FieldError error : bindingResult.getFieldErrors()) {
+          put(error.getField(), error.getDefaultMessage());
+        }
+      }
+    };
   }
 }

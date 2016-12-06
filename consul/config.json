@@ -1,0 +1,13 @@
+{
+  "name": "auth",
+  "raml": "src/main/resources/api-definition.yaml",
+  "path": [
+    "auth",
+    "auth/docs",
+    "auth/docs/<all>",
+    "auth/webjars",
+    "auth/webjars/<all>",
+    "api/oauth",
+    "api/oauth/<all>"
+  ]
+}

@@ -48,7 +48,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     endpoints
         .tokenStore(tokenStore)
         .authenticationManager(authenticationManager)
-        .tokenServices(tokenServices);
+        .tokenServices(tokenServices)
+        .pathMapping("/oauth/token", "/api/oauth/token")
+        .pathMapping("/oauth/check_token", "/api/oauth/check_token");
   }
 
   @Override

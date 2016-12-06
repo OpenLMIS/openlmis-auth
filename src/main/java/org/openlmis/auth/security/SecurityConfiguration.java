@@ -44,9 +44,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     webSecurity
         .ignoring()
         .antMatchers(
-          "/",
-          "/webjars/**",
-          "/docs/**"
+            "/auth",
+            "/webjars/**",
+            "/auth/webjars/**",
+            "/auth/docs/**"
       );
   }
 
@@ -54,7 +55,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     http
         .userDetailsService(userDetailsService)
-        .antMatcher("/oauth/**")
+        .antMatcher("/api/oauth/**")
         .authorizeRequests()
         .antMatchers(HttpMethod.OPTIONS).permitAll()
         .anyRequest().authenticated()

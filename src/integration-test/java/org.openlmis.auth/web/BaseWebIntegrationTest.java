@@ -35,7 +35,7 @@ public abstract class BaseWebIntegrationTest {
 
     HttpEntity<String> request = new HttpEntity<>(headers);
     ResponseEntity<?> response = restTemplate.exchange(
-        BASE_URL + "/oauth/token?grant_type=password&username="
+        BASE_URL + "api/oauth/token?grant_type=password&username="
             + username + "&password=" + password,
         HttpMethod.POST, request, Object.class);
 

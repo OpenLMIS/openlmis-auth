@@ -188,6 +188,8 @@ test {
     dependsOn copyRamlToBuild
 }
 
+apply from: "registration.gradle"
+
 build {
     dependsOn check
     dependsOn jacocoTestReport
@@ -195,4 +197,7 @@ build {
     dependsOn copyRamlHtmlToBuild
     dependsOn ramlToSwagger
     dependsOn demoDataSeed
+    dependsOn copyConsulRegistrationToBuild
 }
+
+bootRun.dependsOn consulRegistration
