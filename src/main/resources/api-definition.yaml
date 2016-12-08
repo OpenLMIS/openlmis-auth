@@ -130,6 +130,26 @@ resourceTypes:
 /api:
   /users:
       displayName: User
+      /auth:
+          post:
+              is: [ secured ]
+              description: Save user.
+              body:
+                application/json:
+                  schema: user
+              responses:
+                 "200":
+                     description: User saved successfully
+                     headers:
+                       X-Content-Type-Options:
+                       X-XSS-Protection:
+                     body:
+                         application/json:
+                            schema: user
+                 "400":
+                     headers:
+                       X-Content-Type-Options:
+                       X-XSS-Protection:
       /passwordReset:
           post:
               is: [ secured ]

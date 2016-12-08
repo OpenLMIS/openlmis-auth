@@ -84,7 +84,7 @@ public class UserController {
    * Custom endpoint for creating and updating users. Encrypts password with BCryptPasswordEncoder.
    * @return saved user.
    */
-  @RequestMapping(value = "/users", method = RequestMethod.POST)
+  @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
   public ResponseEntity<?> saveUser(@RequestBody User user, BindingResult bindingResult) {
     LOGGER.debug("Creating or updating user");
     if (bindingResult.getErrorCount() == 0) {

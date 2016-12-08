@@ -59,7 +59,7 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
             "/generated/api-definition.json"
         ).permitAll()
         .antMatchers(
-            "/api/users",
+            "/api/users/auth",
             "/api/passwordResetTokens"
         ).hasAuthority("ADMIN")
         .antMatchers("/**").fullyAuthenticated();
