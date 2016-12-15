@@ -1,5 +1,9 @@
 {
-  "name": "auth",
+  "service": {
+    "Name": "auth",
+    "Port": 8080,
+    "Tags": ["openlmis-service"]
+  },
   "raml": "src/main/resources/api-definition.yaml",
   "path": [
     "auth",
