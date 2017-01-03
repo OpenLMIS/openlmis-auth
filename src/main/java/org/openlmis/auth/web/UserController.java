@@ -1,11 +1,14 @@
 
 package org.openlmis.auth.web;
 
+import static org.openlmis.auth.service.notification.NotificationRequest.plainTextNotification;
+
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.auth.util.PasswordResetRequest;
 import org.slf4j.Logger;
@@ -43,6 +46,10 @@ import javax.validation.Valid;
 public class UserController {
   private static final long RESET_PASSWORD_TOKEN_VALIDITY_HOURS = 12;
 
+  private static final String MAIL_USERNAME = System.getenv("MAIL_USERNAME");
+  private static final String RESET_PASSWORD_URL =
+          System.getenv("BASE_URL") + "/webapp/#!/resetPassword/";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
   @Autowired
@@ -64,6 +71,9 @@ public class UserController {
 
   @Autowired
   private TokenStore tokenStore;
+
+  @Autowired
+  private NotificationService notificationService;
 
   /**
    * Endpoint for logout.
@@ -164,8 +174,17 @@ public class UserController {
 
     PasswordResetToken token = createPasswordResetToken(user);
 
-    //sendMail(user.getEmail(), token);
-    System.out.println("Password reset token: " + token.getId().toString());
+    String[] emailBodyMsgArgs = {user.getUsername(), RESET_PASSWORD_URL + token.getId().toString()};
+    String[] emailSubjectMsgArgs = {};
+    if (!notificationService.send(plainTextNotification(
+            MAIL_USERNAME,
+            email,
+            messageSource.getMessage("auth.email.reset-password.subject", emailSubjectMsgArgs,
+                    LocaleContextHolder.getLocale()),
+            messageSource.getMessage("auth.email.reset-password.body", emailBodyMsgArgs,
+                    LocaleContextHolder.getLocale())))) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
