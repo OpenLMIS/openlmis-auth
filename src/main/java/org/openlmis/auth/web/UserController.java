@@ -48,7 +48,7 @@ public class UserController {
 
   private static final String MAIL_USERNAME = System.getenv("MAIL_USERNAME");
   private static final String RESET_PASSWORD_URL =
-          System.getenv("BASE_URL") + "/webapp/#!/resetPassword/";
+          System.getenv("BASE_URL") + "/#!/resetPassword/";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
