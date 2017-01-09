@@ -58,7 +58,7 @@ public abstract class BaseWebIntegrationTest {
   private String fetchToken(String username, String password) {
     RestTemplate restTemplate = new RestTemplate();
 
-    String plainCreds = "trusted-client:secret";
+    String plainCreds = "user-client:changeme";
     byte[] plainCredsBytes = plainCreds.getBytes();
     byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
     String base64Creds = new String(base64CredsBytes);
