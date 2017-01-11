@@ -10,7 +10,7 @@ import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.util.PasswordChangeRequest;
-import org.openlmis.auth.util.PasswordResetRequest;
+import org.openlmis.util.PasswordResetRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
