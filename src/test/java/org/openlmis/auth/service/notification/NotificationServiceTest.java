@@ -1,5 +1,14 @@
 package org.openlmis.auth.service.notification;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -12,15 +21,6 @@ import org.springframework.web.client.HttpServerErrorException;
 
 import java.net.URI;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 public class NotificationServiceTest extends BaseCommunicationServiceTest {
 
   @Captor
@@ -32,9 +32,7 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
             .plainTextNotification("from", "to", "subject", "plainContent");
 
     NotificationService service = prepareService();
-    boolean success = service.send(request);
-
-    assertThat(success, is(true));
+    service.send(request);
 
     verify(restTemplate)
             .postForEntity(uriCaptor.capture(), captor.capture(), eq(NotificationRequest.class));
@@ -57,7 +55,7 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
     assertThat(sent.getHtmlContent(), is(equalTo(request.getHtmlContent())));
   }
 
-  @Test
+  @Test(expected = HttpServerErrorException.class)
   public void shouldReturnFalseIfCannotSendNotification() {
     NotificationRequest request = NotificationRequest
             .plainTextNotification("from", "to", "subject", "plainContent");
@@ -67,9 +65,7 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
             .thenThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY));
 
     NotificationService service = prepareService();
-    boolean success = service.send(request);
-
-    assertThat(success, is(false));
+    service.send(request);
   }
 
   @Override

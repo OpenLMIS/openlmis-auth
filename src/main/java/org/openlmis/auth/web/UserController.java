@@ -176,15 +176,13 @@ public class UserController {
 
     String[] emailBodyMsgArgs = {user.getUsername(), RESET_PASSWORD_URL + token.getId().toString()};
     String[] emailSubjectMsgArgs = {};
-    if (!notificationService.send(plainTextNotification(
-            MAIL_USERNAME,
-            email,
-            messageSource.getMessage("auth.email.reset-password.subject", emailSubjectMsgArgs,
-                    LocaleContextHolder.getLocale()),
-            messageSource.getMessage("auth.email.reset-password.body", emailBodyMsgArgs,
-                    LocaleContextHolder.getLocale())))) {
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    notificationService.send(plainTextNotification(
+        MAIL_USERNAME,
+        email,
+        messageSource.getMessage("auth.email.reset-password.subject", emailSubjectMsgArgs,
+            LocaleContextHolder.getLocale()),
+        messageSource.getMessage("auth.email.reset-password.body", emailBodyMsgArgs,
+            LocaleContextHolder.getLocale())));
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
