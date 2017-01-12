@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ public class UserController {
 
   private static final String MAIL_USERNAME = System.getenv("MAIL_USERNAME");
   private static final String RESET_PASSWORD_URL =
-          System.getenv("BASE_URL") + "/#!/resetPassword/";
+      System.getenv("BASE_URL") + "/#!/resetPassword/";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
@@ -92,6 +93,7 @@ public class UserController {
 
   /**
    * Custom endpoint for creating and updating users. Encrypts password with BCryptPasswordEncoder.
+   *
    * @return saved user.
    */
   @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
@@ -127,6 +129,7 @@ public class UserController {
 
   /**
    * Resets a user's password.
+   *
    * @return confirmation message or map with field errors.
    */
   @PreAuthorize("hasAuthority('ADMIN')")
@@ -176,13 +179,25 @@ public class UserController {
 
     String[] emailBodyMsgArgs = {user.getUsername(), RESET_PASSWORD_URL + token.getId().toString()};
     String[] emailSubjectMsgArgs = {};
-    notificationService.send(plainTextNotification(
-        MAIL_USERNAME,
-        email,
-        messageSource.getMessage("auth.email.reset-password.subject", emailSubjectMsgArgs,
-            LocaleContextHolder.getLocale()),
-        messageSource.getMessage("auth.email.reset-password.body", emailBodyMsgArgs,
-            LocaleContextHolder.getLocale())));
+
+    try {
+      notificationService.send(plainTextNotification(
+          MAIL_USERNAME,
+          email,
+          messageSource.getMessage("auth.email.reset-password.subject", emailSubjectMsgArgs,
+              LocaleContextHolder.getLocale()),
+          messageSource.getMessage("auth.email.reset-password.body", emailBodyMsgArgs,
+              LocaleContextHolder.getLocale())));
+    } catch (HttpStatusCodeException exp) {
+      LOGGER.warn("Can't send notification", exp);
+      return new ResponseEntity<>(
+          messageSource.getMessage(
+              "users.forgotPassword.sendNotificationException",
+              new Object[]{exp.getStatusCode(), exp.getResponseBodyAsString()},
+              LocaleContextHolder.getLocale()),
+          HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
