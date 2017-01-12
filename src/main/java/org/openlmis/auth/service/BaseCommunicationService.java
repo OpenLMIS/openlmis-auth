@@ -10,12 +10,11 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BaseCommunicationService {
+public abstract class BaseCommunicationService {
   protected static final String ACCESS_TOKEN = "access_token";
 
   protected RestOperations restTemplate = new RestTemplate();
@@ -30,13 +29,6 @@ public class BaseCommunicationService {
   private String authorizationUrl;
 
   protected String obtainAccessToken() {
-    HttpServletRequest httpServletRequest = HttpContextHelper.getCurrentHttpRequest();
-    if (httpServletRequest != null) {
-      String token = httpServletRequest.getParameter(ACCESS_TOKEN);
-      if (token != null ) {
-        return token;
-      }
-    }
     String plainCreds = clientId + ":" + clientSecret;
     byte[] plainCredsBytes = plainCreds.getBytes();
     byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
@@ -51,8 +43,7 @@ public class BaseCommunicationService {
     params.put("grant_type", "client_credentials");
 
     ResponseEntity<?> response = restTemplate.exchange(
-            buildUri(authorizationUrl, params), HttpMethod.POST, request, Object.class);
-
+        buildUri(authorizationUrl, params), HttpMethod.POST, request, Object.class);
 
     return ((Map<String, String>) response.getBody()).get(ACCESS_TOKEN);
   }
@@ -65,7 +56,8 @@ public class BaseCommunicationService {
     return builder.build(true).toUri();
   }
 
-  public void setRestTemplate(RestOperations template) {
+  void setRestTemplate(RestOperations template) {
     this.restTemplate = template;
   }
+
 }
