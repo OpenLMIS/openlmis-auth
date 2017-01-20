@@ -22,17 +22,17 @@ When a user logs in and uses OpenLMIS, here is the typical sequence:
 6. UI app receives this Token and uses it on each subsequent API request to any of the OpenLMIS micro-service APIs.
 7. UI app loads the home screen of OpenLMIS and, in order to show the correct navigation options, it must query the Reference Data service for the user's rights.
 8. UI app makes a request to the Reference Data service to retrieve the user account information and rights.
-  a. This request includes the user's Token. The Token is a UUID string that is added to requests as a parameter, eg `/api/endpoint?access_token=57ec15d3-6a33-4165-96ad-94f2552fb5ba`.
+  1. This request includes the user's Token. The Token is a UUID string that is added to requests as a parameter, eg `/api/endpoint?access_token=57ec15d3-6a33-4165-96ad-94f2552fb5ba`.
 9. Reference Data service responds to the UI app with the user account info including their **Roles and Rights**.
-  a. Before responding, the Reference Data service first checks that the Token is valid, as follows:
-  b. Reference Data makes a request to the Auth Service `/api/check_token` endpoint to test whether it is valid.
-  c. If the Token is valid, Auth Service responds with user information, including the Reference Data UUID of the user account.
-  d. Reference Data looks up its user account using the UUID.
-  e. Reference Data looks up the Role and Rights of the user.
-  f. Reference Data responds to the UI app with full object about the user account, including their Role and Rights.
+  1. Before responding, the Reference Data service first checks that the Token is valid, as follows:
+  2. Reference Data makes a request to the Auth Service `/api/check_token` endpoint to test whether it is valid.
+  3. If the Token is valid, Auth Service responds with user information, including the Reference Data UUID of the user account.
+  4. Reference Data looks up its user account using the UUID.
+  5. Reference Data looks up the Role and Rights of the user.
+  6. Reference Data responds to the UI app with full object about the user account, including their Role and Rights.
 10. UI app receives the user rights and uses that to provide their allowed navigation links.
 11. User may navigate to any authorized areas of the OpenLMIS UI app.
-  a. Different parts of the UI app are powered by different OpenLMIS micro-services such as Requisition or Fulfillment. Each time the UI app hits these different service APIs, every request includes the Token. Each service should check the token with a request to the Auth Service similar to two steps above. Furthermore, each service should check what Rights the user has in order to decide whether any particular request is allowed or not. For example, the Requisition Service uses Rights to determine whether the User has permissions to View or Approve any given Requisition.
+  1. Different parts of the UI app are powered by different OpenLMIS micro-services such as Requisition or Fulfillment. Each time the UI app hits these different service APIs, every request includes the Token. Each service should check the token with a request to the Auth Service similar to two steps above. Furthermore, each service should check what Rights the user has in order to decide whether any particular request is allowed or not. For example, the Requisition Service uses Rights to determine whether the User has permissions to View or Approve any given Requisition.
 12. Eventually, the User may log out of the Token may expire. Requests using that token would be
  rejected, and the UI app would invite the User to log in again.
 
