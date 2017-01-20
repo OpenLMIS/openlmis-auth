@@ -2,7 +2,7 @@
 
 The Auth Service in OpenLMIS v3 is a stand-alone micro-service that implements OAuth 2. This is used by other OpenLMIS micro-services as well as by the Reference UI AngularJS application. It is also available for use by other mobile apps or web apps that may integrate with OpenLMIS.
 
-The Auth Service maintains the list of user logins and passwords and it has endpoints for creating and verifying Tokens. It works with the *Reference Data service*, another micro-service that is required for an OpenLMIS implementation. The Reference Data service maintains its own list of users with additional properties as well as a list of *Rights* and *Roles* that may be associated with each user.
+The Auth Service maintains the list of user logins and passwords and it has endpoints for creating and verifying Tokens. It works with the **Reference Data service**, another micro-service that is required for an OpenLMIS implementation. The Reference Data service maintains its own list of users with additional properties as well as a list of **Rights** and **Roles** that may be associated with each user.
 
 The Auth Service provides API [endpoints](http://openlmis.readthedocs.io/en/latest/api/index.html#auth-service) to generate or check a token as well as to handle user password resets (a forgot password workflow). The Reference Data service provides [endpoints](http://openlmis.readthedocs.io/en/latest/api/index.html#reference-data-service) for other services to check rights and manage user accounts, rights and role assignments. Both Auth and Reference Data work together in an OpenLMIS implementation to handle authentication and authorization in a way that can be leveraged and extended by other new services or third-party integrations.
 
@@ -17,22 +17,22 @@ When a user logs in and uses OpenLMIS, here is the typical sequence:
 1. User opens a browser to OpenLMIS.
 2. Browser loads the UI AngularJS application. The UI app starts running and presents a login screen.
 3. User enters their username and password to log in.
-4. UI app sends this username and password to the Auth Service API. (In OAuth2 terminology, the UI app is acting as a *Client* to the OAuth2 API in the Auth Service.)
-5. If username and password are valid, the Auth Service responds to the UI app with a *Token*.
+4. UI app sends this username and password to the Auth Service API. (In OAuth2 terminology, the UI app is acting as a **Client** to the OAuth2 API in the Auth Service.)
+5. If username and password are valid, the Auth Service responds to the UI app with a **Token**.
 6. UI app receives this Token and uses it on each subsequent API request to any of the OpenLMIS micro-service APIs.
 7. UI app loads the home screen of OpenLMIS and, in order to show the correct navigation options, it must query the Reference Data service for the user's rights.
 8. UI app makes a request to the Reference Data service to retrieve the user account information and rights.
-    a. This request includes the user's Token. The Token is a UUID string that is added to requests as a parameter, eg `/api/endpoint?access_token=57ec15d3-6a33-4165-96ad-94f2552fb5ba`.
-9. Reference Data service responds to the UI app with the user account info including their *Roles and Rights*.
-    a. Before responding, the Reference Data service first checks that the Token is valid, as follows:
-    b. Reference Data makes a request to the Auth Service `/api/check_token` endpoint to test whether it is valid.
-    c. If the Token is valid, Auth Service responds with user information, including the Reference Data UUID of the user account.
-    d. Reference Data looks up its user account using the UUID.
-    e. Reference Data looks up the Role and Rights of the user.
-    f. Reference Data responds to the UI app with full object about the user account, including their Role and Rights.
+  a. This request includes the user's Token. The Token is a UUID string that is added to requests as a parameter, eg `/api/endpoint?access_token=57ec15d3-6a33-4165-96ad-94f2552fb5ba`.
+9. Reference Data service responds to the UI app with the user account info including their **Roles and Rights**.
+  a. Before responding, the Reference Data service first checks that the Token is valid, as follows:
+  b. Reference Data makes a request to the Auth Service `/api/check_token` endpoint to test whether it is valid.
+  c. If the Token is valid, Auth Service responds with user information, including the Reference Data UUID of the user account.
+  d. Reference Data looks up its user account using the UUID.
+  e. Reference Data looks up the Role and Rights of the user.
+  f. Reference Data responds to the UI app with full object about the user account, including their Role and Rights.
 10. UI app receives the user rights and uses that to provide their allowed navigation links.
 11. User may navigate to any authorized areas of the OpenLMIS UI app.
-    a. Different parts of the UI app are powered by different OpenLMIS micro-services such as Requisition or Fulfillment. Each time the UI app hits these different service APIs, every request includes the Token. Each service should check the token with a request to the Auth Service similar to two steps above. Furthermore, each service should check what Rights the user has in order to decide whether any particular request is allowed or not. For example, the Requisition Service uses Rights to determine whether the User has permissions to View or Approve any given Requisition.
+  a. Different parts of the UI app are powered by different OpenLMIS micro-services such as Requisition or Fulfillment. Each time the UI app hits these different service APIs, every request includes the Token. Each service should check the token with a request to the Auth Service similar to two steps above. Furthermore, each service should check what Rights the user has in order to decide whether any particular request is allowed or not. For example, the Requisition Service uses Rights to determine whether the User has permissions to View or Approve any given Requisition.
 12. Eventually, the User may log out of the Token may expire. Requests using that token would be
  rejected, and the UI app would invite the User to log in again.
 
@@ -54,23 +54,23 @@ Two endpoints in the Auth Service implement OAuth 2:
 
 There are two types of access tokens that can be generated by the Auth Service:
 
-1. *User-based tokens* - token is associated with a User, meaning a user account in the Reference Data service. The check_token endpoint returns a result with user info (username and Reference Data user UUID) with a USER or ADMIN authority. The USER or ADMIN authority currently has no meaning in the OpenLMIS system for access control. Access control is handled in role-based access control with Rights checks in the Reference Data Service. See the previous section for more info.
-2. *Service-based tokens* - token is not associated with any User, and is strictly for Service-to-Service communication. The check_token endpoint returns a trusted client result with a TRUSTED_CLIENT authority. Only Services should use these tokens because they essentially give "root" level access in the system. All endpoints in OpenLMIS services are accessible if they are accessed with a valid Service-Based Token. For more information about Service-based tokens, see the section below.
+1. **User-based tokens** - token is associated with a User, meaning a user account in the Reference Data service. The check_token endpoint returns a result with user info (username and Reference Data user UUID) with a USER or ADMIN authority. The USER or ADMIN authority currently has no meaning in the OpenLMIS system for access control. Access control is handled in role-based access control with Rights checks in the Reference Data Service. See the previous section for more info.
+2. **Service-based tokens** - token is not associated with any User, and is strictly for Service-to-Service communication. The check_token endpoint returns a trusted client result with a TRUSTED_CLIENT authority. Only Services should use these tokens because they essentially give "root" level access in the system. All endpoints in OpenLMIS services are accessible if they are accessed with a valid Service-Based Token. For more information about Service-based tokens, see the section below.
 
 ### OAuth Client Credentials
 
-Any service or app that accesses the Auth Service OAuth 2 endpoints is a *Client* in the OAuth 2 terminology. The OpenLMIS services and UI app each use credentials to connect to the Auth Service OAuth 2 endpoints. Each type of access token, User-based and Service-based, uses separate Client ID and Client credentials.
+Any service or app that accesses the Auth Service OAuth 2 endpoints is a **Client** in the OAuth 2 terminology. The OpenLMIS services and UI app each use credentials to connect to the Auth Service OAuth 2 endpoints. Each type of access token, User-based and Service-based, uses separate Client ID and Client credentials.
 
 The Auth Service has a default client ID and secret for these two Client IDs:
 
 * User-based Client ID: user-client, secret: changeme. The UI app uses these credentials to log in and generate an access token on behalf of a user. Other browser apps, web apps or device apps that may allow users to log in to OpenLMIS would also use these User-Based Client credentials.
 * Service-based Client ID: trusted-client, secret: secret. Only Services should use these credentials; for a Spring Boot application Service, these credentials are stored in the application.properties file.
 
-*Security Note:* For security purposes, implementers *must* change the ID and secret of both clients when deploying an OpenLMIS implementation. These credentials must be changed in the Auth service, in every other OpenLMIS service, and in the UI app.
+**Security Note:** For security purposes, implementers **must** change the ID and secret of both clients when deploying an OpenLMIS implementation. These credentials must be changed in the Auth service, in every other OpenLMIS service, and in the UI app.
 
 In the Auth Service, the Client credentials are generated from the [Auth Service Bootstrap data](https://github.com/OpenLMIS/openlmis-auth/blob/master/src/main/resources/bootstrap.sql). The Auth Service also comes with [Demo Data](https://github.com/OpenLMIS/openlmis-auth/tree/master/demo-data) that includes demo user accounts. In the other OpenLMIS services, the credentials are stored in the Spring Boot application inside the application.properties file. EG, see the [Reference Data application.properties](https://github.com/OpenLMIS/openlmis-referencedata/blob/master/src/main/resources/application.properties) file. In the UI app, the Client credentials are stored in the [auth_server_client.json](https://github.com/OpenLMIS/openlmis-requisition-refUI/blob/master/src/main/resources/auth_server_client.json) file.
 
-In short, implementors *must* change these credentials in all services. Bootstrap and Demo data are public knowledge and should not be used in any production system.
+In short, implementors **must** change these credentials in all services. Bootstrap and Demo data are public knowledge and should not be used in any production system.
 
 Inside the Auth Service, client credentials are stored in the database in the `oauth_client_details` table. Additionally, since user-based access tokens are associated with a User, basic User information is stored in the `auth_users` table. It includes username, password, email, and the Reference Data UUID of each User.
 
