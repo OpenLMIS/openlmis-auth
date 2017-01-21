@@ -6,10 +6,15 @@ in production environments.
 Each .json file contains demo data that corresponds to one database table.
 
 ## Users (auth.auth_users.json)
-There are 2 user accounts:
+There are 7 user accounts:
 
 1. administrator (password=password)
 2. devadmin (password=password)
+3. srmanager (password=password)
+4. smanager (password=password)
+5. dsrmanager (password=password)
+6. psupervisor (password=password)
+7. wclerk (password=password)
 
 The [Reference Data service's demo data](https://github.com/OpenLMIS/openlmis-referencedata/tree/master/demo-data)
 connects these users to specific rights at facilities and programs.
