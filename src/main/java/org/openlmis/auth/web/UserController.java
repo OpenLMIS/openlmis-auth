@@ -2,6 +2,7 @@
 package org.openlmis.auth.web;
 
 import static org.openlmis.auth.service.notification.NotificationRequest.plainTextNotification;
+import static org.openlmis.auth.util.ValidationUtils.isNullOrWhitespace;
 
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
@@ -89,18 +90,19 @@ public class UserController {
       if (dbUser != null) {
         dbUser.setUsername(user.getUsername());
         dbUser.setEmail(user.getEmail());
-        dbUser.setPassword(user.getPassword());
         dbUser.setEnabled(user.getEnabled());
         dbUser.setRole(user.getRole());
+
+        if (!isNullOrWhitespace(user.getPassword())) {
+          dbUser.setPassword(user.getPassword());
+        }
       } else {
         dbUser = user;
       }
 
-      if (dbUser.getPassword() != null && !dbUser.getPassword().isEmpty()) {
+      if (!isNullOrWhitespace(dbUser.getPassword())) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         dbUser.setPassword(encoder.encode(dbUser.getPassword()));
-      } else {
-        dbUser.setPassword(null);
       }
 
       User newUser = userRepository.save(dbUser);
