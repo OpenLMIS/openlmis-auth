@@ -52,8 +52,8 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
     http
         .authorizeRequests()
         .antMatchers(
-            "/api/users/forgotPassword",
-            "/api/users/changePassword",
+            "/api/users/auth/forgotPassword",
+            "/api/users/auth/changePassword",
             "/webjars/**",
             "/static/auth/docs/index.html",
             "/generated/api-definition.json"

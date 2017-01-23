@@ -168,65 +168,100 @@ resourceTypes:
                      headers:
                        X-Content-Type-Options:
                        X-XSS-Protection:
-      /passwordReset:
-          post:
-              is: [ secured ]
-              description: Reset user's password.
-              body:
-                application/json:
-                  schema: passwordResetRequest
-              responses:
-                 200:
-                     description: Password changed successfully
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
-                     body:
-                         application/json:
-                 400:
-                     description: There were errors validating the request
-                     body:
-                         application/json:
-                             example: |
-                               {
-                                 "newPassword" : "may not be null"
-                               }
-      /forgotPassword:
-          post:
-              description: Send an email to the user with a reset password link.
-              queryParameters:
-                  email:
-                      displayName: Email
-                      description: Email
-                      type: string
-                      required: true
-                      repeat: false
-              responses:
-                 200:
-                     description: Email send successfully
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
-                     body:
-                         application/json:
-                 400:
-                     description: Email not found
-      /changePassword:
-          post:
-              description: Change user's password.
-              body:
-                application/json:
-                  schema: passwordChangeRequest
-              responses:
-                 200:
-                     description: Password changed successfully
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
-                     body:
-                         application/json:
-                 400:
-                     description: There were errors validating the request
+          /passwordReset:
+              post:
+                  is: [ secured ]
+                  description: Reset user's password.
+                  body:
+                    application/json:
+                      schema: passwordResetRequest
+                  responses:
+                     200:
+                         description: Password changed successfully
+                         headers:
+                           X-Content-Type-Options:
+                           X-XSS-Protection:
+                         body:
+                             application/json:
+                     400:
+                         description: There were errors validating the request
+                         body:
+                             application/json:
+                                 example: |
+                                   {
+                                     "newPassword" : "may not be null"
+                                   }
+          /forgotPassword:
+              post:
+                  description: Send an email to the user with a reset password link.
+                  queryParameters:
+                      email:
+                          displayName: Email
+                          description: Email
+                          type: string
+                          required: true
+                          repeat: false
+                  responses:
+                     200:
+                         description: Email send successfully
+                         headers:
+                           X-Content-Type-Options:
+                           X-XSS-Protection:
+                         body:
+                             application/json:
+                     400:
+                         description: Email not found
+          /changePassword:
+              post:
+                  description: Change user's password.
+                  body:
+                    application/json:
+                      schema: passwordChangeRequest
+                  responses:
+                     200:
+                         description: Password changed successfully
+                         headers:
+                           X-Content-Type-Options:
+                           X-XSS-Protection:
+                         body:
+                             application/json:
+                     400:
+                         description: There were errors validating the request
+          /passwordResetToken:
+              post:
+                  description: Create token which can be used to change user's password.
+                  queryParameters:
+                      userId:
+                          displayName: ReferenceDataUserId
+                          description: Reference Data User Id
+                          type: string
+                          required: true
+                          repeat: false
+                  responses:
+                     200:
+                         description: Token was created successfully
+                         headers:
+                           X-Content-Type-Options:
+                           X-XSS-Protection:
+                         body:
+                             application/json:
+                     500:
+                          headers:
+                            X-Content-Type-Options:
+                            X-XSS-Protection:
+          /logout:
+              post:
+                  is: [ secured ]
+                  description: Logout user.
+                  responses:
+                     "200":
+                         headers:
+                           X-Content-Type-Options:
+                           X-XSS-Protection:
+                     "500":
+                         headers:
+                           X-Content-Type-Options:
+                           X-XSS-Protection:
       /search/findOneByUsername:
           get:
               is: [ secured ]
@@ -246,41 +281,6 @@ resourceTypes:
                       body:
                         application/json:
                   "500":
-                      headers:
-                        X-Content-Type-Options:
-                        X-XSS-Protection:
-      /logout:
-          post:
-              is: [ secured ]
-              description: Logout user.
-              responses:
-                 "200":
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
-                 "500":
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
-      /passwordResetToken:
-          post:
-              description: Create token which can be used to change user's password.
-              queryParameters:
-                  userId:
-                      displayName: ReferenceDataUserId
-                      description: Reference Data User Id
-                      type: string
-                      required: true
-                      repeat: false
-              responses:
-                 200:
-                     description: Token was created successfully
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
-                     body:
-                         application/json:
-                 500:
                       headers:
                         X-Content-Type-Options:
                         X-XSS-Protection:

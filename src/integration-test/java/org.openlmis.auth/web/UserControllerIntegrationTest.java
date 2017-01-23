@@ -77,7 +77,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .contentType("application/json")
         .content(passwordResetRequest)
         .when()
-        .post("/api/users/passwordReset")
+        .post("/api/users/auth/passwordReset")
         .then()
         .extract().asString();
   }
@@ -114,7 +114,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     return restAssured.given()
         .queryParam("access_token", token)
         .when()
-        .post("/api/users/logout")
+        .post("/api/users/auth/logout")
         .then()
         .statusCode(statusCode)
         .extract().asString();
@@ -135,7 +135,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     restAssured.given()
         .queryParam("email", EMAIL)
         .when()
-        .post("/api/users/forgotPassword")
+        .post("/api/users/auth/forgotPassword")
         .then()
         .statusCode(200);
 
@@ -150,7 +150,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .contentType("application/json")
         .content(request)
         .when()
-        .post("/api/users/changePassword")
+        .post("/api/users/auth/changePassword")
         .then()
         .statusCode(200);
 
@@ -165,7 +165,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .queryParam("access_token", getToken())
         .queryParam("userId", REFERENCE_DATA_USER_ID)
         .when()
-        .post("/api/users/passwordResetToken")
+        .post("/api/users/auth/passwordResetToken")
         .then()
         .statusCode(200)
         .extract().as(UUID.class);

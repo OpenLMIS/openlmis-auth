@@ -76,21 +76,6 @@ public class UserController {
   private NotificationService notificationService;
 
   /**
-   * Endpoint for logout.
-   */
-  @PreAuthorize("isAuthenticated()")
-  @RequestMapping(value = "/users/logout", method = RequestMethod.POST)
-  public ResponseEntity<?> revokeToken(OAuth2Authentication auth) {
-    OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) auth.getDetails();
-    String token = details.getTokenValue();
-    tokenStore.removeAccessToken(new DefaultOAuth2AccessToken(token));
-
-    String[] msgArgs = {};
-    return new ResponseEntity<String>(messageSource.getMessage(
-        "users.logout.confirmation", msgArgs, LocaleContextHolder.getLocale()), HttpStatus.OK);
-  }
-
-  /**
    * Custom endpoint for creating and updating users. Encrypts password with BCryptPasswordEncoder.
    *
    * @return saved user.
@@ -127,12 +112,27 @@ public class UserController {
   }
 
   /**
+   * Endpoint for logout.
+   */
+  @PreAuthorize("isAuthenticated()")
+  @RequestMapping(value = "/users/auth/logout", method = RequestMethod.POST)
+  public ResponseEntity<?> revokeToken(OAuth2Authentication auth) {
+    OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) auth.getDetails();
+    String token = details.getTokenValue();
+    tokenStore.removeAccessToken(new DefaultOAuth2AccessToken(token));
+
+    String[] msgArgs = {};
+    return new ResponseEntity<String>(messageSource.getMessage(
+        "users.logout.confirmation", msgArgs, LocaleContextHolder.getLocale()), HttpStatus.OK);
+  }
+
+  /**
    * Resets a user's password.
    *
    * @return confirmation message or map with field errors.
    */
   @PreAuthorize("hasAuthority('ADMIN')")
-  @RequestMapping(value = "/users/passwordReset", method = RequestMethod.POST)
+  @RequestMapping(value = "/users/auth/passwordReset", method = RequestMethod.POST)
   public ResponseEntity<?> passwordReset(
       @RequestBody @Valid PasswordResetRequest passwordResetRequest, BindingResult bindingResult) {
     Map<String, String> errors = new HashMap<>();
@@ -164,7 +164,7 @@ public class UserController {
   /**
    * Generates token which can be used to change user's password.
    */
-  @RequestMapping(value = "/users/forgotPassword", method = RequestMethod.POST)
+  @RequestMapping(value = "/users/auth/forgotPassword", method = RequestMethod.POST)
   public ResponseEntity<?> forgotPassword(@RequestParam(value = "email") String email) {
 
     User user = userRepository.findOneByEmail(email);
@@ -193,7 +193,7 @@ public class UserController {
   /**
    * Changes user's password if valid reset token is provided.
    */
-  @RequestMapping(value = "/users/changePassword", method = RequestMethod.POST)
+  @RequestMapping(value = "/users/auth/changePassword", method = RequestMethod.POST)
   public ResponseEntity<?> showChangePasswordPage(
       @RequestBody PasswordChangeRequest passwordChangeRequest) {
 
@@ -221,7 +221,7 @@ public class UserController {
   /**
    * Creates token which can be used to change user's password.
    */
-  @RequestMapping(value = "/users/passwordResetToken", method = RequestMethod.POST)
+  @RequestMapping(value = "/users/auth/passwordResetToken", method = RequestMethod.POST)
   public ResponseEntity<?> generatePasswordResetToken(
       @RequestParam(value = "userId") UUID referenceDataUserId) {
     User user = userRepository.findOneByReferenceDataUserId(referenceDataUserId);
