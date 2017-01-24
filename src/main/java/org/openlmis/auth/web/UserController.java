@@ -93,14 +93,14 @@ public class UserController {
         dbUser.setEnabled(user.getEnabled());
         dbUser.setRole(user.getRole());
 
-        if (!StringUtils.hasText(user.getPassword())) {
+        if (StringUtils.hasText(user.getPassword())) {
           dbUser.setPassword(user.getPassword());
         }
       } else {
         dbUser = user;
       }
 
-      if (!StringUtils.hasText(dbUser.getPassword())) {
+      if (StringUtils.hasText(dbUser.getPassword())) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         dbUser.setPassword(encoder.encode(dbUser.getPassword()));
       }
