@@ -2,7 +2,6 @@
 package org.openlmis.auth.web;
 
 import static org.openlmis.auth.service.notification.NotificationRequest.plainTextNotification;
-import static org.openlmis.auth.util.ValidationUtils.isNullOrWhitespace;
 
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
@@ -25,6 +24,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
@@ -93,14 +93,14 @@ public class UserController {
         dbUser.setEnabled(user.getEnabled());
         dbUser.setRole(user.getRole());
 
-        if (!isNullOrWhitespace(user.getPassword())) {
+        if (!StringUtils.hasText(user.getPassword())) {
           dbUser.setPassword(user.getPassword());
         }
       } else {
         dbUser = user;
       }
 
-      if (!isNullOrWhitespace(dbUser.getPassword())) {
+      if (!StringUtils.hasText(dbUser.getPassword())) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         dbUser.setPassword(encoder.encode(dbUser.getPassword()));
       }

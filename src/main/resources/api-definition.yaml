@@ -156,7 +156,7 @@ resourceTypes:
                 application/json:
                   schema: user
               responses:
-                 "200":
+                 200:
                      description: User saved successfully
                      headers:
                        X-Content-Type-Options:
@@ -164,7 +164,7 @@ resourceTypes:
                      body:
                          application/json:
                             schema: user
-                 "400":
+                 400:
                      headers:
                        X-Content-Type-Options:
                        X-XSS-Protection:
@@ -254,11 +254,11 @@ resourceTypes:
                   is: [ secured ]
                   description: Logout user.
                   responses:
-                     "200":
+                     200:
                          headers:
                            X-Content-Type-Options:
                            X-XSS-Protection:
-                     "500":
+                     500:
                          headers:
                            X-Content-Type-Options:
                            X-XSS-Protection:
@@ -274,13 +274,13 @@ resourceTypes:
                       required: true
                       repeat: false
               responses:
-                  "200":
+                  200:
                       headers:
                         X-Content-Type-Options:
                         X-XSS-Protection:
                       body:
                         application/json:
-                  "500":
+                  500:
                       headers:
                         X-Content-Type-Options:
                         X-XSS-Protection:
@@ -299,13 +299,13 @@ resourceTypes:
                       required: true
                       repeat: false
               responses:
-                  "200":
+                  200:
                       headers:
                         X-Content-Type-Options:
                         X-XSS-Protection:
                       body:
                         application/json:
-                  "500":
+                  500:
                       headers:
                         X-Content-Type-Options:
                         X-XSS-Protection:
