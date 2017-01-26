@@ -22,18 +22,72 @@
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
     "role": "USER",
-    "username": "srmanager",
-    "email": "srmanager@openlmis.org",
+    "username": "srmanager1",
+    "email": "srmanager1@openlmis.org",
+    "reference_data_user_id": "c994d1ea-47f7-435d-9d4d-42fb54197698"
+  },
+  {
+    "id": "383e537b-b8af-4753-be83-8664e157fd79",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "role": "USER",
+    "username": "srmanager2",
+    "email": "srmanager2@openlmis.org",
     "reference_data_user_id": "f72bf4ee-eb86-4bfd-be88-4f481f4e2fe0"
+  },
+  {
+    "id": "96e20de1-04b9-4747-b185-53de23f7a0fa",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "role": "USER",
+    "username": "srmanager3",
+    "email": "srmanager3@openlmis.org",
+    "reference_data_user_id": "7d6c0269-0c6a-4c9a-a098-46de276b9d26"
+  },
+  {
+    "id": "56cfec87-f765-45f9-9694-4b9904d9b77e",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "role": "USER",
+    "username": "srmanager4",
+    "email": "srmanager4@openlmis.org",
+    "reference_data_user_id": "c54df462-66d8-4a02-bee9-b786fe2f30ee"
   },
   {
     "id": "df12fda0-6be1-4063-b312-0d632bbba634",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
     "role": "USER",
-    "username": "smanager",
-    "email": "smanager@openlmis.org",
+    "username": "smanager1",
+    "email": "smanager1@openlmis.org",
+    "reference_data_user_id": "cb5cd52f-f205-475d-8763-90852839424d"
+  },
+  {
+    "id": "e464097a-bca7-43e4-840e-f8b7655d0ff6",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "role": "USER",
+    "username": "smanager2",
+    "email": "smanager2@openlmis.org",
     "reference_data_user_id": "9b2778af-5372-4410-a5c8-899e7f74296b"
+  },
+  {
+    "id": "ed153ddc-5095-4931-8bfd-fc10cbde30ed",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "role": "USER",
+    "username": "smanager3",
+    "email": "smanager3@openlmis.org",
+    "reference_data_user_id": "2fbe9be3-f5e4-47ec-a10a-f3380c0daf75"
+  },
+  {
+    "id": "7819ef61-d440-4452-85ae-140311a6f338",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "role": "USER",
+    "username": "smanager4",
+    "email": "smanager4@openlmis.org",
+    "reference_data_user_id": "469c6e1c-aab7-4640-8925-f3c34bbe752d"
   },
   {
     "id": "17eadf0a-69fc-41a2-aaa8-787cb8f4e11f",
