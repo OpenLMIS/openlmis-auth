@@ -86,23 +86,20 @@ public class UserController {
     LOGGER.debug("Creating or updating user");
     if (bindingResult.getErrorCount() == 0) {
       User dbUser = userRepository.findOneByReferenceDataUserId(user.getReferenceDataUserId());
+      String newPassword = user.getPassword();
 
       if (dbUser != null) {
         dbUser.setUsername(user.getUsername());
         dbUser.setEmail(user.getEmail());
         dbUser.setEnabled(user.getEnabled());
         dbUser.setRole(user.getRole());
-
-        if (StringUtils.hasText(user.getPassword())) {
-          dbUser.setPassword(user.getPassword());
-        }
       } else {
         dbUser = user;
       }
 
-      if (StringUtils.hasText(dbUser.getPassword())) {
+      if (StringUtils.hasText(newPassword)) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        dbUser.setPassword(encoder.encode(dbUser.getPassword()));
+        dbUser.setPassword(encoder.encode(newPassword));
       }
 
       User newUser = userRepository.save(dbUser);
