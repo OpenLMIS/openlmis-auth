@@ -8,6 +8,7 @@ import org.openlmis.auth.domain.User;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.util.PasswordResetRequest;
@@ -24,7 +25,6 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
@@ -52,6 +52,9 @@ public class UserController {
       System.getenv("BASE_URL") + "/#!/resetPassword/";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+
+  @Autowired
+  private UserService userService;
 
   @Autowired
   private UserRepository userRepository;
@@ -85,25 +88,7 @@ public class UserController {
   public ResponseEntity<?> saveUser(@RequestBody User user, BindingResult bindingResult) {
     LOGGER.debug("Creating or updating user");
     if (bindingResult.getErrorCount() == 0) {
-      User dbUser = userRepository.findOneByReferenceDataUserId(user.getReferenceDataUserId());
-      String newPassword = user.getPassword();
-
-      if (dbUser != null) {
-        dbUser.setUsername(user.getUsername());
-        dbUser.setEmail(user.getEmail());
-        dbUser.setEnabled(user.getEnabled());
-        dbUser.setRole(user.getRole());
-      } else {
-        dbUser = user;
-      }
-
-      if (StringUtils.hasText(newPassword)) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        dbUser.setPassword(encoder.encode(newPassword));
-      }
-
-      User newUser = userRepository.save(dbUser);
-
+      User newUser = userService.saveUser(user);
       return new ResponseEntity<>(newUser, HttpStatus.OK);
     } else {
       return new ResponseEntity<>(getErrors(bindingResult), HttpStatus.BAD_REQUEST);
