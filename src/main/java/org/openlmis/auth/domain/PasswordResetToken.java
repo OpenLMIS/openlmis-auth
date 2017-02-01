@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -16,8 +17,8 @@ public class PasswordResetToken extends BaseEntity {
 
   @Getter
   @Setter
-  @Column(nullable = false)
-  private LocalDateTime expiryDate;
+  @Column(nullable = false, columnDefinition = "timestamp with time zone")
+  private ZonedDateTime expiryDate;
 
   @Getter
   @Setter

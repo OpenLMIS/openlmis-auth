@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -188,7 +189,7 @@ public class UserController {
       return new ResponseEntity<>("invalid token", HttpStatus.BAD_REQUEST);
     }
 
-    if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+    if (token.getExpiryDate().isBefore(ZonedDateTime.now())) {
       return new ResponseEntity<>("token expired", HttpStatus.BAD_REQUEST);
     }
 
@@ -223,7 +224,7 @@ public class UserController {
 
     token = new PasswordResetToken();
     token.setUser(user);
-    token.setExpiryDate(LocalDateTime.now().plusHours(RESET_PASSWORD_TOKEN_VALIDITY_HOURS));
+    token.setExpiryDate(ZonedDateTime.now().plusHours(RESET_PASSWORD_TOKEN_VALIDITY_HOURS));
     return passwordResetTokenRepository.save(token);
   }
 
