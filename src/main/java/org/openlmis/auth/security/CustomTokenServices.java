@@ -5,6 +5,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
+import java.time.Instant;
 import java.util.Date;
 
 public class CustomTokenServices extends DefaultTokenServices {
@@ -17,7 +18,8 @@ public class CustomTokenServices extends DefaultTokenServices {
     DefaultOAuth2AccessToken token = (DefaultOAuth2AccessToken)
         super.readAccessToken(accessToken);
     if (null != token && !token.isExpired()) {
-      token.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
+      Instant expiration = Instant.now().minusSeconds(validitySeconds);
+      token.setExpiration(Date.from(expiration));
     }
     return token;
   }
