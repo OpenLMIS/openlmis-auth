@@ -18,7 +18,7 @@ public class CustomTokenServices extends DefaultTokenServices {
     DefaultOAuth2AccessToken token = (DefaultOAuth2AccessToken)
         super.readAccessToken(accessToken);
     if (null != token && !token.isExpired()) {
-      Instant expiration = Instant.now().minusSeconds(validitySeconds);
+      Instant expiration = Instant.now().plusSeconds(validitySeconds);
       token.setExpiration(Date.from(expiration));
     }
     return token;
