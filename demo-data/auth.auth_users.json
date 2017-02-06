@@ -112,9 +112,18 @@
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
     "role": "USER",
-    "username": "wclerk",
-    "email": "wclerk",
+    "username": "wclerk1",
+    "email": "wclerk1@openlmis.org",
     "reference_data_user_id": "247b366d-f8ab-4226-9ae9-a188d5ee8e22"
+  },
+  {
+    "id": "0bdfea30-aff1-4de7-a5b7-dc9f3c474c15",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "role": "USER",
+    "username": "wclerk2",
+    "email": "wclerk2@openlmis.org",
+    "reference_data_user_id": "476415b1-ca81-4561-a3b7-fa3d08434800"
   }
 ]
 
