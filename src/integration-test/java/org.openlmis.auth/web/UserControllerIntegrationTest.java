@@ -1,13 +1,8 @@
 package org.openlmis.auth.web;
 
-import com.jayway.restassured.RestAssured;
-import guru.nidi.ramltester.RamlDefinition;
-import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.junit.RamlMatchers;
-import guru.nidi.ramltester.restassured.RestAssuredClient;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
@@ -31,9 +26,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String REFERENCE_DATA_USER_ID = "35316636-6264-6331-2d34-3933322d3462";
   private static final String PASSWORD = "password";
 
-  private RamlDefinition ramlDefinition;
-  private RestAssuredClient restAssured;
-
   @Autowired
   private ExposedMessageSource messageSource;
 
@@ -42,14 +34,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
-
-  /** Prepare the test environment. */
-  @Before
-  public void setUp() {
-    RestAssured.baseURI = BASE_URL;
-    ramlDefinition = RamlLoaders.fromClasspath().load("api-definition-raml.yaml");
-    restAssured = ramlDefinition.createRestAssured();
-  }
 
   @After
   public void cleanUp() {

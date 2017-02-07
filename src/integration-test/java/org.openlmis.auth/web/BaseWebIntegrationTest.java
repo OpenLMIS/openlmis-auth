@@ -4,8 +4,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 
+import com.jayway.restassured.RestAssured;
+import guru.nidi.ramltester.RamlDefinition;
+import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.restassured.RestAssuredClient;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.commons.codec.binary.Base64;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.openlmis.auth.Application;
@@ -39,6 +44,17 @@ public abstract class BaseWebIntegrationTest {
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(80);
 
+  protected RamlDefinition ramlDefinition;
+  protected RestAssuredClient restAssured;
+
+  /** Prepare the test environment. */
+  @Before
+  public void setUp() {
+    RestAssured.baseURI = BASE_URL;
+    ramlDefinition = RamlLoaders.fromClasspath().load("api-definition-raml.yaml");
+    restAssured = ramlDefinition.createRestAssured();
+  }
+
   /**
    * Constructor for test.
    */
@@ -68,7 +84,7 @@ public abstract class BaseWebIntegrationTest {
 
     HttpEntity<String> request = new HttpEntity<>(headers);
     ResponseEntity<?> response = restTemplate.exchange(
-        BASE_URL + "/api/oauth/token?grant_type=password&username="
+        "http://localhost:8080/api/oauth/token?grant_type=password&username="
             + username + "&password=" + password,
         HttpMethod.POST, request, Object.class);
 

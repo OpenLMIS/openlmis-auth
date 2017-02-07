@@ -5,7 +5,7 @@ def ramlToCopy = copySpec {
         include 'api-definition.yaml'
         rename { 'api-definition-swagger.yaml' }
         filter(ReplaceTokens, tokens: [
-                baseUrl: System.env.BASE_URL,
+                baseUrl: "http://localhost",
                 version: version])
         filter{
             line -> line.replaceAll("\"schemas(.*).json\"","\"#/schemas\$1\"")
@@ -15,7 +15,7 @@ def ramlToCopy = copySpec {
         include 'api-definition.yaml'
         rename { 'api-definition-raml.yaml' }
         filter(ReplaceTokens, tokens: [
-                baseUrl: System.env.BASE_URL,
+                baseUrl: "http://localhost",
                 version: version])
     }
     from('src/main/resources/schemas') {
@@ -29,32 +29,28 @@ def ramlHtmlToCopy = copySpec {
     include 'api-definition.html'
 }
 
-task copyRaml(type:Copy) {
-    with ramlToCopy
-    into 'build/resources/main'
-}
-
-// Generate static (offline) documentation
-task ramlToHtml(type: Exec) {
-    description = 'Convert RAML to HTML document'
-    commandLine 'npm', 'run', 'runApiHtmlConverter'
-}
-ramlToHtml.dependsOn(npm_install, copyRaml)
-
 task copyRamlToBuild(type:Copy) {
     with ramlToCopy
     into 'build/resources/main'
 }
-
-task copyRamlHtmlToBuild(type:Copy) {
-    with ramlHtmlToCopy
-    into 'build/resources/main'
-}
-copyRamlHtmlToBuild.dependsOn ramlToHtml
 
 // Generate live documentation
 task ramlToSwagger(type: Exec) {
     description = 'Convert RAML to Swagger'
     commandLine 'npm', 'run', 'runApiSpecConverter'
 }
-ramlToSwagger.dependsOn(npm_install, copyRaml)
+ramlToSwagger.dependsOn(npm_install, copyRamlToBuild)
+
+// Generate static (offline) documentation
+task ramlToHtml(type: Exec) {
+    description = 'Convert RAML to HTML document'
+    commandLine 'npm', 'run', 'runApiHtmlConverter'
+}
+ramlToHtml.dependsOn(npm_install, copyRamlToBuild)
+
+task copyRamlHtmlToBuild(type:Copy) {
+    with ramlHtmlToCopy
+    into 'build/resources/main'
+}
+
+copyRamlHtmlToBuild.dependsOn ramlToHtml

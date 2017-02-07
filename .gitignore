@@ -11,3 +11,4 @@ gradle/
 gradlew*
 node_modules/
 demo-data/*.sql
+.tx/

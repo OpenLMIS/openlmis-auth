@@ -96,6 +96,7 @@ task integrationTest(type: Test) {
         events "passed", "skipped", "failed"
         exceptionFormat = 'full'
     }
+    environment 'BASE_URL', "http://localhost"
 }
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
@@ -116,13 +117,6 @@ task generateMigration << {
     def fullFileName = "${timestamp}__${fileName}.sql"
     def migrationFile = new File(sourceSets.main.resources.srcDirs.first(),'db/migration/'+fullFileName)
     migrationFile.createNewFile()
-}
-
-test {
-    testLogging {
-        events 'started', 'passed'
-        exceptionFormat = 'full'
-    }
 }
 
 jacocoTestReport {
@@ -178,6 +172,16 @@ task demoDataSeed(type:Exec) {
     args "./demo-data", "node ./demo-data/seed_generator.js"
 }
 
+task checkApiIsRaml(type:Exec) {
+    executable "raml-cop"
+    args "src/main/resources/api-definition.yaml"
+}
+
+configure(checkApiIsRaml) {
+    group = JavaBasePlugin.VERIFICATION_GROUP
+    description = 'Verify that the api-specification is valid RAML'
+}
+
 apply from: "documentation.gradle"
 
 processResources {
@@ -190,8 +194,16 @@ processResources {
 }
 
 test {
-    dependsOn copyRaml
+    testLogging {
+        events 'started', 'passed'
+        exceptionFormat = 'full'
+    }
     dependsOn copyRamlToBuild
+}
+
+check {
+    dependsOn checkApiIsRaml
+    dependsOn integrationTest
 }
 
 apply from: "registration.gradle"
