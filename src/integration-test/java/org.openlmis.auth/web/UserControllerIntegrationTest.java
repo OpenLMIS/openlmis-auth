@@ -18,8 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.UUID;
 
 public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
-  private static final String RAML_ASSERT_MESSAGE = "HTTP request/response should match RAML "
-      + "definition.";
   private static final String USER_ID = "51f6bdc1-4932-4bc3-9589-368646ef7ad3";
   private static final String USERNAME = "admin";
   private static final String EMAIL = "test@openlmis.org";
