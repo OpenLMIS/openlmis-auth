@@ -148,31 +148,6 @@ resourceTypes:
 /api:
   /users:
       displayName: User
-      /{id}:
-          uriParameters:
-              id:
-                  displayName: id
-                  type: string
-                  required: true
-                  repeat: false
-          get:
-              is: [ secured ]
-              description: Get chosen user.
-              body:
-                application/json:
-                  schema: user
-              responses:
-                 200:
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
-                     body:
-                         application/json:
-                            schema: user
-                 400:
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
       /auth:
           post:
               is: [ secured ]
