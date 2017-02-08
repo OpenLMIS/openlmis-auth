@@ -20,7 +20,7 @@ schemas:
           "$schema": "http://json-schema.org/draft-03/schema",
           "title": "User",
           "properties": {
-              "id": { "type": "string", "required": true, "title": "id" },
+              "id": { "type": "string", "required": false, "title": "id" },
               "referenceDataUserId": { "type": "string", "required": true, "title": "referenceDataUserId" },
               "username": { "type": "string", "required": true, "title": "username" },
               "password": { "type": "string", "required": false, "title": "password" },
@@ -73,7 +73,7 @@ schemas:
           "properties": {
               "access_token": { "type": "string", "required": true, "description": "Access token" },
               "token_type": { "type": "string", "required": true, "description": "Type of the token" },
-              "expires_in": { "type": "string", "required": true, "description": "Expiration time in seconds" },
+              "expires_in": { "type": "integer", "required": true, "description": "Expiration time in seconds" },
               "scope": { "type": "string", "required": true, "description": "Scope of access request" },
               "referenceDataUserId": { "type": "string", "required": true, "description": "Id of the user in referencedata" }
           }
@@ -148,6 +148,31 @@ resourceTypes:
 /api:
   /users:
       displayName: User
+      /{id}:
+          uriParameters:
+              id:
+                  displayName: id
+                  type: string
+                  required: true
+                  repeat: false
+          get:
+              is: [ secured ]
+              description: Get chosen user.
+              body:
+                application/json:
+                  schema: user
+              responses:
+                 200:
+                     headers:
+                       X-Content-Type-Options:
+                       X-XSS-Protection:
+                     body:
+                         application/json:
+                            schema: user
+                 400:
+                     headers:
+                       X-Content-Type-Options:
+                       X-XSS-Protection:
       /auth:
           post:
               is: [ secured ]

@@ -57,6 +57,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private String changePassword(String password) {
     PasswordResetRequest passwordResetRequest = new PasswordResetRequest(USERNAME, password);
+
     return restAssured.given()
         .contentType("application/json")
         .content(passwordResetRequest)
@@ -81,8 +82,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         msgArgs, LocaleContextHolder.getLocale());
 
     testChangePassword("test1234", expectedMessage);
-    Assert.assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(),
-        RamlMatchers.hasNoViolations());
 
     String newPassword = getPassword();
     Assert.assertNotNull(newPassword);

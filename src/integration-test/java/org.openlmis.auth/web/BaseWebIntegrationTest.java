@@ -4,12 +4,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 
+import guru.nidi.ramltester.junit.RamlMatchers;
 import com.jayway.restassured.RestAssured;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.commons.codec.binary.Base64;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
@@ -29,6 +31,8 @@ import java.util.Map;
 @SpringApplicationConfiguration(Application.class)
 @WebIntegrationTest("server.port:8080")
 public abstract class BaseWebIntegrationTest {
+  private static final String RAML_ASSERT_MESSAGE = "HTTP request/response should match RAML "
+      + "definition.";
   static final String BASE_URL = System.getenv("BASE_URL");
 
   private String token = null;
@@ -51,7 +55,8 @@ public abstract class BaseWebIntegrationTest {
   @Before
   public void setUp() {
     RestAssured.baseURI = BASE_URL;
-    ramlDefinition = RamlLoaders.fromClasspath().load("api-definition-raml.yaml");
+    ramlDefinition = RamlLoaders.fromClasspath().load("api-definition-raml.yaml")
+        .ignoringXheaders();
     restAssured = ramlDefinition.createRestAssured();
   }
 
@@ -72,27 +77,18 @@ public abstract class BaseWebIntegrationTest {
   }
 
   private String fetchToken(String username, String password) {
-    RestTemplate restTemplate = new RestTemplate();
-
-    String plainCreds = "user-client:changeme";
-    byte[] plainCredsBytes = plainCreds.getBytes();
-    byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-    String base64Creds = new String(base64CredsBytes);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Authorization", "Basic " + base64Creds);
-
-    HttpEntity<String> request = new HttpEntity<>(headers);
-    ResponseEntity<?> response = restTemplate.exchange(
-        "http://localhost:8080/api/oauth/token?grant_type=password&username="
-            + username + "&password=" + password,
-        HttpMethod.POST, request, Object.class);
-
-    return ((Map<String, String>) response.getBody()).get("access_token");
-  }
-
-  String getToken(String username, String password) {
-    token = fetchToken(username, password);
+    String token = restAssured.given()
+        .auth().preemptive().basic("user-client", "changeme")
+        .queryParam("grant_type", "password")
+        .queryParam("username", "admin")
+        .queryParam("password", "password")
+        .when()
+        .post("/api/oauth/token")
+        .then()
+        .extract()
+        .path("access_token");
+    Assert.assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(),
+        RamlMatchers.hasNoViolations());
     return token;
   }
 
@@ -101,9 +97,5 @@ public abstract class BaseWebIntegrationTest {
       token = fetchToken("admin", "password");
     }
     return token;
-  }
-
-  String addTokenToUrl(String url) {
-    return url + "?access_token=" + this.getToken();
   }
 }
