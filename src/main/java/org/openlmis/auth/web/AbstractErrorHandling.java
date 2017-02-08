@@ -21,7 +21,7 @@ abstract class AbstractErrorHandling {
     return getLocalizedMessage(message);
   }
 
-  private Message.LocalizedMessage getLocalizedMessage(Message message) {
+  Message.LocalizedMessage getLocalizedMessage(Message message) {
     return messageService.localize(message);
   }
 

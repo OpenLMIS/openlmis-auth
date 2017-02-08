@@ -5,6 +5,8 @@ import static org.openlmis.auth.service.notification.NotificationRequest.plainTe
 
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.exception.BindingResultException;
+import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
@@ -18,13 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
@@ -34,8 +36,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +48,7 @@ import java.util.UUID;
 import javax.validation.Valid;
 
 @RepositoryRestController
+@Transactional
 public class UserController {
   private static final long RESET_PASSWORD_TOKEN_VALIDITY_HOURS = 12;
 
@@ -86,13 +90,14 @@ public class UserController {
    * @return saved user.
    */
   @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
-  public ResponseEntity<?> saveUser(@RequestBody User user, BindingResult bindingResult) {
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public User saveUser(@RequestBody User user, BindingResult bindingResult) {
     LOGGER.debug("Creating or updating user");
     if (bindingResult.getErrorCount() == 0) {
-      User newUser = userService.saveUser(user);
-      return new ResponseEntity<>(newUser, HttpStatus.OK);
+      return userService.saveUser(user);
     } else {
-      return new ResponseEntity<>(getErrors(bindingResult), HttpStatus.BAD_REQUEST);
+      throw new BindingResultException(getErrors(bindingResult));
     }
   }
 
@@ -101,14 +106,16 @@ public class UserController {
    */
   @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/users/auth/logout", method = RequestMethod.POST)
-  public ResponseEntity<?> revokeToken(OAuth2Authentication auth) {
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public String revokeToken(OAuth2Authentication auth) {
     OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) auth.getDetails();
     String token = details.getTokenValue();
     tokenStore.removeAccessToken(new DefaultOAuth2AccessToken(token));
 
     String[] msgArgs = {};
-    return new ResponseEntity<String>(messageSource.getMessage(
-        "users.logout.confirmation", msgArgs, LocaleContextHolder.getLocale()), HttpStatus.OK);
+    return messageSource
+        .getMessage("users.logout.confirmation", msgArgs, LocaleContextHolder.getLocale());
   }
 
   /**
@@ -118,7 +125,9 @@ public class UserController {
    */
   @PreAuthorize("hasAuthority('ADMIN')")
   @RequestMapping(value = "/users/auth/passwordReset", method = RequestMethod.POST)
-  public ResponseEntity<?> passwordReset(
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public String passwordReset(
       @RequestBody @Valid PasswordResetRequest passwordResetRequest, BindingResult bindingResult) {
     Map<String, String> errors = new HashMap<>();
 
@@ -132,9 +141,8 @@ public class UserController {
         userRepository.save(user.get());
 
         String[] msgArgs = {username};
-        return new ResponseEntity<String>(messageSource.getMessage(
-            "users.passwordReset.confirmation", msgArgs, LocaleContextHolder.getLocale()),
-            HttpStatus.OK);
+        return messageSource.getMessage(
+            "users.passwordReset.confirmation", msgArgs, LocaleContextHolder.getLocale());
       } else {
         String[] msgArgs = {};
         errors.put("username", messageSource.getMessage("users.passwordReset.userNotFound",
@@ -143,20 +151,21 @@ public class UserController {
     } else {
       errors.putAll(getErrors(bindingResult));
     }
-    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    throw new BindingResultException(errors);
   }
 
   /**
    * Generates token which can be used to change user's password.
    */
   @RequestMapping(value = "/users/auth/forgotPassword", method = RequestMethod.POST)
-  public ResponseEntity<?> forgotPassword(@RequestParam(value = "email") String email) {
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public void forgotPassword(@RequestParam(value = "email") String email) {
 
     User user = userRepository.findOneByEmail(email);
 
     if (user == null) {
-      return new ResponseEntity<>(messageSource.getMessage("users.forgotPassword.userNotFound",
-          null, LocaleContextHolder.getLocale()), HttpStatus.BAD_REQUEST);
+      throw new ValidationMessageException("users.forgotPassword.userNotFound");
     }
 
     PasswordResetToken token = createPasswordResetToken(user);
@@ -171,26 +180,25 @@ public class UserController {
             LocaleContextHolder.getLocale()),
         messageSource.getMessage("auth.email.reset-password.body", emailBodyMsgArgs,
             LocaleContextHolder.getLocale())));
-
-    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
    * Changes user's password if valid reset token is provided.
    */
   @RequestMapping(value = "/users/auth/changePassword", method = RequestMethod.POST)
-  public ResponseEntity<?> showChangePasswordPage(
+  @ResponseStatus(HttpStatus.OK)
+  public void showChangePasswordPage(
       @RequestBody PasswordChangeRequest passwordChangeRequest) {
 
     PasswordResetToken token =
         passwordResetTokenRepository.findOne(passwordChangeRequest.getToken());
 
     if (token == null) {
-      return new ResponseEntity<>("invalid token", HttpStatus.BAD_REQUEST);
+      throw new ValidationMessageException("auth.error.invalidToken");
     }
 
     if (token.getExpiryDate().isBefore(ZonedDateTime.now())) {
-      return new ResponseEntity<>("token expired", HttpStatus.BAD_REQUEST);
+      throw new ValidationMessageException("auth.error.tokenExpired");
     }
 
     User user = token.getUser();
@@ -199,21 +207,21 @@ public class UserController {
     userRepository.save(user);
 
     passwordResetTokenRepository.delete(token);
-
-    return new ResponseEntity(HttpStatus.OK);
   }
 
   /**
    * Creates token which can be used to change user's password.
    */
   @RequestMapping(value = "/users/auth/passwordResetToken", method = RequestMethod.POST)
-  public ResponseEntity<?> generatePasswordResetToken(
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UUID generatePasswordResetToken(
       @RequestParam(value = "userId") UUID referenceDataUserId) {
     User user = userRepository.findOneByReferenceDataUserId(referenceDataUserId);
 
     PasswordResetToken token = createPasswordResetToken(user);
 
-    return new ResponseEntity<>(token.getId(), HttpStatus.OK);
+    return token.getId();
   }
 
   private PasswordResetToken createPasswordResetToken(User user) {
