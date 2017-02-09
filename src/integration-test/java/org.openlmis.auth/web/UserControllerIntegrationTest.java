@@ -1,6 +1,9 @@
 package org.openlmis.auth.web;
 
-import guru.nidi.ramltester.junit.RamlMatchers;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -138,6 +141,26 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     User changedUser = userRepository.findOne(UUID.fromString(USER_ID));
     Assert.assertNotNull(changedUser);
     Assert.assertNotEquals(changedUser.getPassword(), user.getPassword());
+  }
+
+  @Test
+  public void testForgotPasswordRollback() {
+    wireMockRule.stubFor(post(urlPathEqualTo("/api/notification"))
+        .willReturn(aResponse()
+            .withStatus(400)));
+
+    restAssured.given()
+        .queryParam("email", EMAIL)
+        .when()
+        .post("/api/users/auth/forgotPassword")
+        .then()
+        .statusCode(500);
+
+    User user = userRepository.findOne(UUID.fromString(USER_ID));
+    Assert.assertNotNull(user);
+
+    PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
+    Assert.assertNull(token);
   }
 
   @Test

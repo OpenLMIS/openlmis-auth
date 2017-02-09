@@ -4,13 +4,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 
-import guru.nidi.ramltester.junit.RamlMatchers;
-import com.jayway.restassured.RestAssured;
-import guru.nidi.ramltester.RamlDefinition;
-import guru.nidi.ramltester.RamlLoaders;
-import guru.nidi.ramltester.restassured.RestAssuredClient;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.apache.commons.codec.binary.Base64;
+import com.jayway.restassured.RestAssured;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -18,14 +14,12 @@ import org.junit.runner.RunWith;
 import org.openlmis.auth.Application;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
+import guru.nidi.ramltester.RamlDefinition;
+import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.junit.RamlMatchers;
+import guru.nidi.ramltester.restassured.RestAssuredClient;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(Application.class)
@@ -76,6 +70,13 @@ public abstract class BaseWebIntegrationTest {
                     .withStatus(200)));
   }
 
+  String getToken() {
+    if (token == null) {
+      token = fetchToken("admin", "password");
+    }
+    return token;
+  }
+
   private String fetchToken(String username, String password) {
     String token = restAssured.given()
         .auth().preemptive().basic("user-client", "changeme")
@@ -89,13 +90,6 @@ public abstract class BaseWebIntegrationTest {
         .path("access_token");
     Assert.assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(),
         RamlMatchers.hasNoViolations());
-    return token;
-  }
-
-  String getToken() {
-    if (token == null) {
-      token = fetchToken("admin", "password");
-    }
     return token;
   }
 }
