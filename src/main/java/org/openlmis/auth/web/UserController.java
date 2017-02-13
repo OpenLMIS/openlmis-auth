@@ -52,7 +52,7 @@ import javax.validation.Valid;
 public class UserController {
   private static final long RESET_PASSWORD_TOKEN_VALIDITY_HOURS = 12;
 
-  private static final String MAIL_USERNAME = System.getenv("MAIL_USERNAME");
+  private static final String MAIL_ADDRESS = System.getenv("MAIL_ADDRESS");
   private static final String RESET_PASSWORD_URL =
       System.getenv("BASE_URL") + "/#!/resetPassword/";
 
@@ -174,7 +174,7 @@ public class UserController {
     String[] emailSubjectMsgArgs = {};
 
     notificationService.send(plainTextNotification(
-        MAIL_USERNAME,
+        MAIL_ADDRESS,
         email,
         messageSource.getMessage("auth.email.reset-password.subject", emailSubjectMsgArgs,
             LocaleContextHolder.getLocale()),
