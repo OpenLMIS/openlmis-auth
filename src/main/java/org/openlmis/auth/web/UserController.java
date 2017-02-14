@@ -228,6 +228,7 @@ public class UserController {
     PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
     if (token != null) {
       passwordResetTokenRepository.delete(token);
+      passwordResetTokenRepository.flush();
     }
 
     token = new PasswordResetToken();
