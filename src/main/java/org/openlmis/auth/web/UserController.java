@@ -50,7 +50,7 @@ import javax.validation.Valid;
 @RepositoryRestController
 @Transactional
 public class UserController {
-  private static final long RESET_PASSWORD_TOKEN_VALIDITY_HOURS = 12;
+  static final long RESET_PASSWORD_TOKEN_VALIDITY_HOURS = 12;
 
   private static final String MAIL_ADDRESS = System.getenv("MAIL_ADDRESS");
   private static final String RESET_PASSWORD_URL =
@@ -228,6 +228,13 @@ public class UserController {
     PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
     if (token != null) {
       passwordResetTokenRepository.delete(token);
+      // the JPA provider feels free to reorganize and/or optimize the database writes of the
+      // pending changes from the persistent context, in particular the JPA provider does not
+      // feel obliged to perform the database writes in the ordering and form implicated by
+      // the individual changes of the persistent context.
+
+      // the flush() flushes the changes to the database so when the flush() is executed after
+      // delete(), sql gets executed and the following save will have no problems.
       passwordResetTokenRepository.flush();
     }
 
