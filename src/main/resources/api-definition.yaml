@@ -3,6 +3,7 @@
 title: OpenLMIS Auth API
 version: "@version@"
 baseUri: "@baseUrl@"
+protocols: [ HTTP, HTTPS ]
 
 securitySchemes:
   - basic:
