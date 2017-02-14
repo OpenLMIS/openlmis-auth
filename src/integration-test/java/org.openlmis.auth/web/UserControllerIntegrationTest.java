@@ -3,9 +3,14 @@ package org.openlmis.auth.web;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.openlmis.auth.web.UserController.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
@@ -18,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
@@ -70,13 +76,13 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private void testChangePassword(String password, String expectedMessage) {
     String response = changePassword(password);
-    Assert.assertTrue(response.contains(expectedMessage));
+    assertTrue(response.contains(expectedMessage));
   }
 
   @Test
   public void testPasswordReset() {
     String password = getPassword();
-    Assert.assertNotNull(password);
+    assertNotNull(password);
 
     String[] msgArgs = {USERNAME};
     String expectedMessage = messageSource.getMessage("users.passwordReset.confirmation",
@@ -85,8 +91,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     testChangePassword("test1234", expectedMessage);
 
     String newPassword = getPassword();
-    Assert.assertNotNull(newPassword);
-    Assert.assertNotEquals(password, newPassword);
+    assertNotNull(newPassword);
+    assertNotEquals(password, newPassword);
 
     testChangePassword("1234567", "size must be between 8 and 16");
     testChangePassword("sdokfsodpfjsaidjasj2akdsjk", "size must be between 8 and 16");
@@ -109,7 +115,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     String accessToken = getToken();
     String response = logoutUser(200, accessToken);
 
-    Assert.assertTrue(response.contains("You have successfully logged out!"));
+    assertTrue(response.contains("You have successfully logged out!"));
 
     logoutUser(401, accessToken);
   }
@@ -124,10 +130,10 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(200);
 
     User user = userRepository.findOne(UUID.fromString(USER_ID));
-    Assert.assertNotNull(user);
+    assertNotNull(user);
 
     PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
-    Assert.assertNotNull(token);
+    assertNotNull(token);
 
     PasswordChangeRequest request = new PasswordChangeRequest(token.getId(), "test");
     restAssured.given()
@@ -139,8 +145,35 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(200);
 
     User changedUser = userRepository.findOne(UUID.fromString(USER_ID));
-    Assert.assertNotNull(changedUser);
-    Assert.assertNotEquals(changedUser.getPassword(), user.getPassword());
+    assertNotNull(changedUser);
+    assertNotEquals(changedUser.getPassword(), user.getPassword());
+  }
+
+  @Test
+  public void shouldCreateNewTokenAfterEachForgotPasswordRequest() {
+    User user1 = userRepository.findOne(UUID.fromString(USER_ID));
+    assertNotNull(user1);
+
+    PasswordResetToken token1 = new PasswordResetToken();
+    token1.setUser(user1);
+    token1.setExpiryDate(ZonedDateTime.now().plusHours(RESET_PASSWORD_TOKEN_VALIDITY_HOURS));
+
+    passwordResetTokenRepository.save(token1);
+
+    restAssured.given()
+        .queryParam("email", EMAIL)
+        .when()
+        .post("/api/users/auth/forgotPassword")
+        .then()
+        .statusCode(200);
+
+    User user2 = userRepository.findOne(UUID.fromString(USER_ID));
+    assertNotNull(user2);
+    assertEquals(user1.getId(), user2.getId());
+
+    PasswordResetToken token2 = passwordResetTokenRepository.findOneByUser(user2);
+    assertNotNull(token2);
+    assertNotEquals(token1.getId(), token2.getId());
   }
 
   @Test
@@ -157,10 +190,10 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(500);
 
     User user = userRepository.findOne(UUID.fromString(USER_ID));
-    Assert.assertNotNull(user);
+    assertNotNull(user);
 
     PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
-    Assert.assertNull(token);
+    assertNull(token);
   }
 
   @Test
@@ -175,6 +208,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .extract().as(UUID.class);
 
     PasswordResetToken token = passwordResetTokenRepository.findOne(tokenId);
-    Assert.assertNotNull(token);
+    assertNotNull(token);
   }
 }
