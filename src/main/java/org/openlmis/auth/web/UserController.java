@@ -1,8 +1,6 @@
 
 package org.openlmis.auth.web;
 
-import static org.openlmis.auth.service.notification.NotificationRequest.plainTextNotification;
-
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.exception.BindingResultException;
@@ -14,6 +12,7 @@ import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.util.PasswordResetRequest;
+import org.openlmis.util.NotificationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,7 +172,7 @@ public class UserController {
     String[] emailBodyMsgArgs = {user.getUsername(), RESET_PASSWORD_URL + token.getId().toString()};
     String[] emailSubjectMsgArgs = {};
 
-    notificationService.send(plainTextNotification(
+    notificationService.send(new NotificationRequest(
         MAIL_ADDRESS,
         email,
         messageSource.getMessage("auth.email.reset-password.subject", emailSubjectMsgArgs,

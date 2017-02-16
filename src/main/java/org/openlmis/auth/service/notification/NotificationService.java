@@ -1,6 +1,7 @@
 package org.openlmis.auth.service.notification;
 
 import org.openlmis.auth.service.BaseCommunicationService;
+import org.openlmis.util.NotificationRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;

@@ -14,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.service.BaseCommunicationServiceTest;
+import org.openlmis.util.NotificationRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -28,8 +29,7 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
 
   @Test
   public void shouldSendNotification() {
-    NotificationRequest request = NotificationRequest
-            .plainTextNotification("from", "to", "subject", "plainContent");
+    NotificationRequest request = new NotificationRequest("from", "to", "subject", "plainContent");
 
     NotificationService service = prepareService();
     service.send(request);
@@ -52,13 +52,11 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
     assertThat(sent.getTo(), is(equalTo(request.getTo())));
     assertThat(sent.getSubject(), is(equalTo(request.getSubject())));
     assertThat(sent.getContent(), is(equalTo(request.getContent())));
-    assertThat(sent.getHtmlContent(), is(equalTo(request.getHtmlContent())));
   }
 
   @Test(expected = HttpServerErrorException.class)
   public void shouldReturnFalseIfCannotSendNotification() {
-    NotificationRequest request = NotificationRequest
-            .plainTextNotification("from", "to", "subject", "plainContent");
+    NotificationRequest request = new NotificationRequest("from", "to", "subject", "plainContent");
 
     when(restTemplate
             .postForEntity(any(URI.class), any(HttpEntity.class), eq(NotificationRequest.class)))
