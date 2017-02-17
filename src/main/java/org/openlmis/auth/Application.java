@@ -1,11 +1,13 @@
 package org.openlmis.auth;
 
+import org.openlmis.auth.domain.BaseEntity;
 import org.openlmis.auth.i18n.ExposedMessageSourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
+import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
@@ -18,6 +20,7 @@ import java.util.Locale;
 @SpringBootApplication
 @EnableAuthorizationServer
 @ImportResource("applicationContext.xml")
+@EntityScan(basePackageClasses = BaseEntity.class, basePackages = "org.openlmis.util.converter")
 public class Application {
 
   private Logger logger = LoggerFactory.getLogger(Application.class);
