@@ -30,10 +30,10 @@ public class Client {
   @Id
   @Getter
   @Setter
-  @Column(name = "client_id")
+  @Column(name = "clientid")
   private String clientId;
 
-  @Column(name = "client_secret")
+  @Column(name = "clientsecret")
   @Getter
   @Setter
   private String clientSecret;
@@ -43,17 +43,17 @@ public class Client {
   @Setter
   private String scope;
 
-  @Column(name = "resource_ids")
+  @Column(name = "resourceids")
   @Getter
   @Setter
   private String resourceIds;
 
-  @Column(name = "authorized_grant_types")
+  @Column(name = "authorizedgranttypes")
   @Getter
   @Setter
   private String authorizedGrantTypes;
 
-  @Column(name = "redirect_uri")
+  @Column(name = "redirecturi")
   @Getter
   @Setter
   private String registeredRedirectUris;
@@ -68,22 +68,22 @@ public class Client {
   @Setter
   private String authorities;
 
-  @Column(name = "access_token_validity")
+  @Column(name = "accesstokenvalidity")
   @Getter
   @Setter
   private Integer accessTokenValiditySeconds;
 
-  @Column(name = "refresh_token_validity")
+  @Column(name = "refreshtokenvalidity")
   @Getter
   @Setter
   private Integer refreshTokenValiditySeconds;
 
-  @Column(name = "additional_information")
+  @Column(name = "additionalinformation")
   @Getter
   @Setter
   private String additionalInformation;
 
-  @Column(name = "web_server_redirect_uri")
+  @Column(name = "webserverredirecturi")
   @Getter
   @Setter
   private String webServerRedirectUri;

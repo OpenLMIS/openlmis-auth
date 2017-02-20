@@ -51,7 +51,6 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.5'
     compile 'org.flywaydb:flyway-core:4.0.3'
 
-
     testCompile 'io.rest-assured:rest-assured:3.0.0'
     testCompile 'io.rest-assured:json-schema-validator:3.0.0'
     testCompile 'io.rest-assured:spring-mock-mvc:3.0.0'
@@ -68,7 +67,7 @@ flyway {
     url = "$System.env.DATABASE_URL"
     user = "$System.env.POSTGRES_USER"
     password = "$System.env.POSTGRES_PASSWORD"
-    schemas = ['public']
+    schemas = ['auth']
     sqlMigrationPrefix = ''
     placeholderPrefix = '#['
     placeholderSuffix = ']'

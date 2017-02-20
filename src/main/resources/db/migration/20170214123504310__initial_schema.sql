@@ -7,7 +7,7 @@ CREATE TABLE auth_users (
     email character varying(255) NOT NULL,
     enabled boolean,
     password character varying(255),
-    reference_data_user_id uuid NOT NULL,
+    referencedatauserid uuid NOT NULL,
     role character varying(255) NOT NULL,
     username character varying(255) NOT NULL
 );
@@ -18,13 +18,13 @@ CREATE TABLE auth_users (
 --
 
 CREATE TABLE oauth_access_token (
-    token_id character varying(256),
+    tokenid character varying(256),
     token bytea,
-    authentication_id character varying(256),
-    user_name character varying(256),
-    client_id character varying(256),
+    authenticationid character varying(256),
+    username character varying(256),
+    clientid character varying(256),
     authentication bytea,
-    refresh_token character varying(256)
+    refreshtoken character varying(256)
 );
 
 
@@ -47,18 +47,18 @@ CREATE TABLE oauth_approvals (
 --
 
 CREATE TABLE oauth_client_details (
-    client_id character varying(255) NOT NULL,
-    access_token_validity integer,
-    additional_information character varying(255),
+    clientid character varying(255) NOT NULL,
+    accesstokenvalidity integer,
+    additionalinformation character varying(255),
     authorities character varying(255),
-    authorized_grant_types character varying(255),
+    authorizedgranttypes character varying(255),
     autoapprove character varying(255),
-    client_secret character varying(255),
-    refresh_token_validity integer,
-    redirect_uri character varying(255),
-    resource_ids character varying(255),
+    clientsecret character varying(255),
+    refreshtokenvalidity integer,
+    redirecturi character varying(255),
+    resourceids character varying(255),
     scope character varying(255),
-    web_server_redirect_uri character varying(255)
+    webserverredirecturi character varying(255)
 );
 
 
@@ -67,11 +67,11 @@ CREATE TABLE oauth_client_details (
 --
 
 CREATE TABLE oauth_client_token (
-    token_id character varying(256),
+    tokenid character varying(256),
     token bytea,
-    authentication_id character varying(256),
-    user_name character varying(256),
-    client_id character varying(256)
+    authenticationid character varying(256),
+    username character varying(256),
+    clientid character varying(256)
 );
 
 
@@ -90,7 +90,7 @@ CREATE TABLE oauth_code (
 --
 
 CREATE TABLE oauth_refresh_token (
-    token_id character varying(256),
+    tokenid character varying(256),
     token bytea,
     authentication bytea
 );
@@ -102,8 +102,8 @@ CREATE TABLE oauth_refresh_token (
 
 CREATE TABLE password_reset_tokens (
     id uuid NOT NULL,
-    expiry_date timestamp with time zone NOT NULL,
-    user_id uuid NOT NULL
+    expirydate timestamp with time zone NOT NULL,
+    userid uuid NOT NULL
 );
 
 
@@ -122,7 +122,7 @@ ALTER TABLE ONLY auth_users
 --
 
 ALTER TABLE ONLY oauth_client_details
-    ADD CONSTRAINT oauth_client_details_pkey PRIMARY KEY (client_id);
+    ADD CONSTRAINT oauth_client_details_pkey PRIMARY KEY (clientid);
 
 
 --
@@ -146,7 +146,7 @@ ALTER TABLE ONLY auth_users
 --
 
 ALTER TABLE ONLY auth_users
-    ADD CONSTRAINT uk_bghjccoicx7tll3ky3rf30sij UNIQUE (reference_data_user_id);
+    ADD CONSTRAINT uk_bghjccoicx7tll3ky3rf30sij UNIQUE (referencedatauserid);
 
 
 --
@@ -162,7 +162,7 @@ ALTER TABLE ONLY auth_users
 --
 
 ALTER TABLE ONLY password_reset_tokens
-    ADD CONSTRAINT uk_la2ts67g4oh2sreayswhox1i6 UNIQUE (user_id);
+    ADD CONSTRAINT uk_la2ts67g4oh2sreayswhox1i6 UNIQUE (userid);
 
 
 --
@@ -170,5 +170,5 @@ ALTER TABLE ONLY password_reset_tokens
 --
 
 ALTER TABLE ONLY password_reset_tokens
-    ADD CONSTRAINT fk_la2ts67g4oh2sreayswhox1i6 FOREIGN KEY (user_id) REFERENCES auth_users(id);
+    ADD CONSTRAINT fk_la2ts67g4oh2sreayswhox1i6 FOREIGN KEY (userid) REFERENCES auth_users(id);
 

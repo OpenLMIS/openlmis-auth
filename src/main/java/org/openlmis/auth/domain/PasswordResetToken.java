@@ -18,8 +18,8 @@ package org.openlmis.auth.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -38,6 +38,6 @@ public class PasswordResetToken extends BaseEntity {
   @Getter
   @Setter
   @OneToOne
-  @JoinColumn(nullable = false, unique = true)
+  @JoinColumn(name = "userId", nullable = false, unique = true)
   private User user;
 }
