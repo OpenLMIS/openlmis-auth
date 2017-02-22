@@ -46,7 +46,7 @@ services:
     image: openlmis/auth
 
   db:
-    image: openlmis/postgres
+    image: openlmis/postgres:9.4
     ports:
       - "5432"
     env_file: .env
