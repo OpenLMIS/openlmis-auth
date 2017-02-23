@@ -97,4 +97,4 @@ expected use-case for this is when this service is deployed through the
 Environment variables common to all services are listed here: https://github.com/OpenLMIS/openlmis-template-service/blob/master/README.md#environment-variables
 
 The auth service also uses the following variables:
-* **TOKEN_DURATION** - The duration in seconds after which authentication tokens will expire. For example set this to 900 in order to have tokens expire after 15 minutes. The default value is 1800 (30 minutes).
+* **TOKEN_DURATION** - The period of inactivity in seconds after which authentication tokens will expire. For example set this to 900 in order to have tokens expire after 15 minutes of inactivity. The default value is 1800 (30 minutes).
