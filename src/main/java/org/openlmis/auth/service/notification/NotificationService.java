@@ -15,7 +15,6 @@
 
 package org.openlmis.auth.service.notification;
 
-import lombok.Getter;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.util.NotificationRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,23 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class NotificationService extends BaseCommunicationService<NotificationRequest> {
+public class NotificationService extends BaseCommunicationService {
 
-  @Getter
   @Value("${service.url}")
-  private String serviceUrl;
-
-  protected String getUrl() {
-    return "/api/notification";
-  }
-
-  protected Class<NotificationRequest> getResultClass() {
-    return NotificationRequest.class;
-  }
-
-  protected Class<NotificationRequest[]> getArrayResultClass() {
-    return NotificationRequest[].class;
-  }
+  private String notificationUrl;
 
   /**
     * Send a notification request.
@@ -50,7 +36,7 @@ public class NotificationService extends BaseCommunicationService<NotificationRe
     * @param request details about notification.
     */
   public void send(NotificationRequest request) {
-    String url = getServiceUrl() + getUrl();
+    String url = getNotificationUrl() + "/api/notification";
 
     Map<String, String> params = new HashMap<>();
     params.put(ACCESS_TOKEN, obtainAccessToken());
@@ -60,4 +46,7 @@ public class NotificationService extends BaseCommunicationService<NotificationRe
     restTemplate.postForEntity(buildUri(url, params), body, NotificationRequest.class);
   }
 
+  String getNotificationUrl() {
+    return notificationUrl;
+  }
 }

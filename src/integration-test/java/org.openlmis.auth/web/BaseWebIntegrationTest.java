@@ -16,9 +16,7 @@
 package org.openlmis.auth.web;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -48,15 +46,6 @@ public abstract class BaseWebIntegrationTest {
 
   private String token = null;
 
-  protected static final String REFERENCEDATA_API_USERS = "/api/users/";
-
-  protected static final String UUID_REGEX =
-      "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
-
-  protected static final String CONTENT_TYPE = "Content-Type";
-
-  protected static final String APPLICATION_JSON = "application/json";
-
   private static final String MOCK_TOKEN_REQUEST_RESPONSE = "{"
           + "  \"access_token\": \"418c89c5-7f21-4cd1-a63a-38c47892b0fe\",\n"
           + "  \"token_type\": \"bearer\",\n"
@@ -64,24 +53,6 @@ public abstract class BaseWebIntegrationTest {
           + "  \"scope\": \"read write\",\n"
           + "  \"referenceDataUserId\": \"35316636-6264-6331-2d34-3933322d3462\"\n"
           + "}";
-
-  private static final String MOCK_FIND_USER_RESULT = "{"
-      + "\"id\":\"51f6bdc1-4932-4bc3-9589-368646ef7ad3\","
-      + "\"username\":\"admin\","
-      + "\"firstName\":\"Admin\","
-      + "\"lastName\":\"User\","
-      + "\"email\":\"example@mail.com\","
-      + "\"verified\":false"
-      + "}";
-
-  private static final String MOCK_USER_SEARCH_RESULT = "[{"
-      + "\"id\":\"35316636-6264-6331-2d34-3933322d3462\","
-      + "\"username\":\"admin\","
-      + "\"firstName\":\"Admin\","
-      + "\"lastName\":\"User\","
-      + "\"email\":\"example@mail.com\","
-      + "\"verified\":false"
-      + "}]";
 
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(80);
@@ -112,18 +83,6 @@ public abstract class BaseWebIntegrationTest {
     wireMockRule.stubFor(post(urlPathEqualTo("/api/notification"))
             .willReturn(aResponse()
                     .withStatus(200)));
-
-    // This mocks for find one user
-    wireMockRule.stubFor(get(urlMatching(REFERENCEDATA_API_USERS + UUID_REGEX + ".*"))
-        .willReturn(aResponse()
-            .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-            .withBody(MOCK_FIND_USER_RESULT)));
-
-    // This mocks searching for users
-    wireMockRule.stubFor(post(urlMatching(REFERENCEDATA_API_USERS + "search.*"))
-        .willReturn(aResponse()
-            .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-            .withBody(MOCK_USER_SEARCH_RESULT)));
   }
 
   String getToken() {

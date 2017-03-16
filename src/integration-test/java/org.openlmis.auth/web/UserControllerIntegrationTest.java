@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
+import static org.openlmis.auth.web.UserController.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
 
 import org.junit.After;
 import org.junit.Test;

@@ -53,7 +53,7 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
             .postForEntity(uriCaptor.capture(), captor.capture(), eq(NotificationRequest.class));
 
     URI uri = uriCaptor.getValue();
-    String url = service.getServiceUrl() + service.getUrl() + "?" + ACCESS_TOKEN;
+    String url = service.getNotificationUrl() + "/api/notification?" + ACCESS_TOKEN;
     assertThat(uri.toString(), is(equalTo(url)));
 
     HttpEntity entity = captor.getValue();
@@ -90,7 +90,7 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
   protected NotificationService prepareService() {
     BaseCommunicationService service = super.prepareService();
 
-    ReflectionTestUtils.setField(service, "serviceUrl", "http://localhost/notification");
+    ReflectionTestUtils.setField(service, "notificationUrl", "http://localhost/notification");
 
     return (NotificationService) service;
   }
