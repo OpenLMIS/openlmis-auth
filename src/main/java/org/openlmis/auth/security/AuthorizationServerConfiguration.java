@@ -50,20 +50,28 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
   @Value("${token.validitySeconds}")
   private Integer tokenValiditySeconds;
 
-  @Override
-  public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+  /**
+   * Default token services bean initializer.
+   * @return custom token services
+   */
+  @Bean
+  public DefaultTokenServices defaultTokenServices() {
     DefaultTokenServices tokenServices = new CustomTokenServices();
     tokenServices.setTokenStore(tokenStore);
     tokenServices.setSupportRefreshToken(true);
     tokenServices.setClientDetailsService(clientDetailsService);
     tokenServices.setTokenEnhancer(tokenEnhancer());
     tokenServices.setAccessTokenValiditySeconds(tokenValiditySeconds);
+    return tokenServices;
+  }
 
+  @Override
+  public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
     endpoints.setClientDetailsService(clientDetailsService);
     endpoints
         .tokenStore(tokenStore)
         .authenticationManager(authenticationManager)
-        .tokenServices(tokenServices)
+        .tokenServices(defaultTokenServices())
         .pathMapping("/oauth/token", "/api/oauth/token")
         .pathMapping("/oauth/check_token", "/api/oauth/check_token");
   }

@@ -26,19 +26,21 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
-import org.openlmis.auth.Application;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(Application.class)
-@WebIntegrationTest("server.port:8080")
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+@DirtiesContext
 public abstract class BaseWebIntegrationTest {
   private static final String RAML_ASSERT_MESSAGE = "HTTP request/response should match RAML "
       + "definition.";
@@ -57,6 +59,9 @@ public abstract class BaseWebIntegrationTest {
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(80);
 
+  @LocalServerPort
+  private int randomPort;
+
   protected RamlDefinition ramlDefinition;
   protected RestAssuredClient restAssured;
 
@@ -64,6 +69,7 @@ public abstract class BaseWebIntegrationTest {
   @Before
   public void setUp() {
     RestAssured.baseURI = BASE_URL;
+    RestAssured.port = randomPort;
     ramlDefinition = RamlLoaders.fromClasspath().load("api-definition-raml.yaml")
         .ignoringXheaders();
     restAssured = ramlDefinition.createRestAssured();
