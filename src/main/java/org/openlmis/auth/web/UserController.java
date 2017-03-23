@@ -24,10 +24,8 @@ import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.UserService;
-import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.util.PasswordResetRequest;
-import org.openlmis.util.NotificationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,12 +62,6 @@ import javax.validation.Valid;
 @RepositoryRestController
 @Transactional
 public class UserController {
-  static final long RESET_PASSWORD_TOKEN_VALIDITY_HOURS = 12;
-
-  private static final String MAIL_ADDRESS = System.getenv("MAIL_ADDRESS");
-  private static final String RESET_PASSWORD_URL =
-      System.getenv("BASE_URL") + "/#!/resetPassword/";
-
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
   @Autowired
@@ -95,19 +87,17 @@ public class UserController {
   @Autowired
   private TokenStore tokenStore;
 
-  @Autowired
-  private NotificationService notificationService;
-
   /**
    * Custom endpoint for creating and updating users. Encrypts password with BCryptPasswordEncoder.
    *
    * @return saved user.
    */
-  @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
+  @RequestMapping(value = "/users/auth", method = RequestMethod.PUT)
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public User saveUser(@RequestBody User user, BindingResult bindingResult) {
     LOGGER.debug("Creating or updating user");
+
     if (bindingResult.getErrorCount() == 0) {
       return userService.saveUser(user);
     } else {
@@ -182,18 +172,7 @@ public class UserController {
       throw new ValidationMessageException("users.forgotPassword.userNotFound");
     }
 
-    PasswordResetToken token = createPasswordResetToken(user);
-
-    String[] emailBodyMsgArgs = {user.getUsername(), RESET_PASSWORD_URL + token.getId().toString()};
-    String[] emailSubjectMsgArgs = {};
-
-    notificationService.send(new NotificationRequest(
-        MAIL_ADDRESS,
-        email,
-        messageSource.getMessage("auth.email.reset-password.subject", emailSubjectMsgArgs,
-            LocaleContextHolder.getLocale()),
-        messageSource.getMessage("auth.email.reset-password.body", emailBodyMsgArgs,
-            LocaleContextHolder.getLocale())));
+    userService.sendResetPasswordEmail(user, email, false);
   }
 
   /**
@@ -233,29 +212,9 @@ public class UserController {
       @RequestParam(value = "userId") UUID referenceDataUserId) {
     User user = userRepository.findOneByReferenceDataUserId(referenceDataUserId);
 
-    PasswordResetToken token = createPasswordResetToken(user);
+    PasswordResetToken token = userService.createPasswordResetToken(user);
 
     return token.getId();
-  }
-
-  private PasswordResetToken createPasswordResetToken(User user) {
-    PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
-    if (token != null) {
-      passwordResetTokenRepository.delete(token);
-      // the JPA provider feels free to reorganize and/or optimize the database writes of the
-      // pending changes from the persistent context, in particular the JPA provider does not
-      // feel obliged to perform the database writes in the ordering and form implicated by
-      // the individual changes of the persistent context.
-
-      // the flush() flushes the changes to the database so when the flush() is executed after
-      // delete(), sql gets executed and the following save will have no problems.
-      passwordResetTokenRepository.flush();
-    }
-
-    token = new PasswordResetToken();
-    token.setUser(user);
-    token.setExpiryDate(ZonedDateTime.now().plusHours(RESET_PASSWORD_TOKEN_VALIDITY_HOURS));
-    return passwordResetTokenRepository.save(token);
   }
 
   private Map<String, String> getErrors(final BindingResult bindingResult) {

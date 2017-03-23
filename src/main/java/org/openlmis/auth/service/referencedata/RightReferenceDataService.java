@@ -13,51 +13,49 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.service.notification;
+package org.openlmis.auth.service.referencedata;
 
 import lombok.Getter;
+import org.openlmis.auth.dto.RightDto;
 import org.openlmis.auth.service.BaseCommunicationService;
-import org.openlmis.util.NotificationRequest;
+import org.openlmis.auth.service.RequestParameters;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Service
-public class NotificationService extends BaseCommunicationService<NotificationRequest> {
+public class RightReferenceDataService extends BaseCommunicationService<RightDto> {
 
   @Getter
   @Value("${service.url}")
   private String serviceUrl;
 
+
+  @Override
   protected String getUrl() {
-    return "/api/notification";
+    return "/api/rights/";
   }
 
-  protected Class<NotificationRequest> getResultClass() {
-    return NotificationRequest.class;
+  @Override
+  protected Class<RightDto> getResultClass() {
+    return RightDto.class;
   }
 
-  protected Class<NotificationRequest[]> getArrayResultClass() {
-    return NotificationRequest[].class;
+  @Override
+  protected Class<RightDto[]> getArrayResultClass() {
+    return RightDto[].class;
   }
 
   /**
-    * Send a notification request.
-    *
-    * @param request details about notification.
-    */
-  public void send(NotificationRequest request) {
-    String url = getServiceUrl() + getUrl();
-
-    Map<String, String> params = new HashMap<>();
-    params.put(ACCESS_TOKEN, obtainAccessToken());
-
-    HttpEntity<NotificationRequest> body = new HttpEntity<>(request);
-
-    restTemplate.postForEntity(buildUri(url, params), body, NotificationRequest.class);
+   * Find a correct right by the provided name.
+   *
+   * @param name right name
+   * @return right related with the name or {@code null}.
+   */
+  public RightDto findRight(String name) {
+    List<RightDto> rights = findAll("search", RequestParameters.init().set("name", name));
+    return rights.isEmpty() ? null : rights.get(0);
   }
 
 }

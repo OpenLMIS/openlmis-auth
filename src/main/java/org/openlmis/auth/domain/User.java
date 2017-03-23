@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
+import org.openlmis.auth.dto.referencedata.UserDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,6 +36,7 @@ import java.util.UUID;
 @Table(name = "auth_users")
 @JsonIgnoreProperties(value = { "authorities" }, ignoreUnknown = true)
 public class User extends BaseEntity implements UserDetails {
+  private static final UserRole DEFAULT_ROLE = UserRole.USER;
 
   @Getter
   @Setter
@@ -91,5 +93,18 @@ public class User extends BaseEntity implements UserDetails {
   @Override
   public boolean isEnabled() {
     return this.getEnabled();
+  }
+
+  /**
+   * Update user from RefDUserDto. Assign default role if none provided.
+   * @param userDto dto to update from.
+   */
+  public void updateFrom(UserDto userDto) {
+    if (this.role == null) {
+      this.role = DEFAULT_ROLE;
+    }
+    this.username = userDto.getUsername();
+    this.email = userDto.getEmail();
+    this.referenceDataUserId = userDto.getId();
   }
 }

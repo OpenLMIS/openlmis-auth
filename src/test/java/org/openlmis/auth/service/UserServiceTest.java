@@ -17,46 +17,87 @@ package org.openlmis.auth.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.exception.ValidationMessageException;
+import org.openlmis.auth.i18n.ExposedMessageSource;
+import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.service.notification.NotificationService;
+import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 
+import java.util.Locale;
 import java.util.UUID;
 
+@SuppressWarnings({"PMD.UnusedPrivateField"})
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest extends BaseServiceTest {
+
   @Mock
   private UserRepository userRepository;
+
+  @Mock
+  private PermissionService permissionService;
+
+  @Mock
+  private UserReferenceDataService userReferenceDataService;
+
+  @Mock
+  private PasswordResetTokenRepository passwordResetTokenRepository;
+
+  @Mock
+  private ExposedMessageSource messageSource;
+
+  @Mock
+  private NotificationService notificationService;
 
   @InjectMocks
   private UserService userService;
 
+  @Before
+  public void setUp() {
+    when(passwordResetTokenRepository.findOneByUser(any(User.class))).thenReturn(null);
+    given(passwordResetTokenRepository.save(any(PasswordResetToken.class)))
+        .willAnswer(new SaveAnswer<PasswordResetToken>());
+
+    when(messageSource.getMessage(anyString(), any(String[].class), any(Locale.class)))
+        .thenReturn(null);
+  }
+
   @Test
   public void shouldCreateNewUser() {
     // given
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
     when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(null);
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    User result = userService.saveUser(new User());
+    userService.saveUser(new User());
 
     // then
-    assertNotNull(result.getId());
+    verify(userRepository, times(1)).save(any(User.class));
   }
 
   @Test
   public void shouldUpdateExistingUser() {
     // given
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
     User oldUser = mock(User.class);
     UUID oldUserId = UUID.randomUUID();
     when(oldUser.getId()).thenReturn(oldUserId);
@@ -65,15 +106,16 @@ public class UserServiceTest extends BaseServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    User result = userService.saveUser(new User());
+    userService.saveUser(new User());
 
     // then
-    assertEquals(oldUserId, result.getId());
+    verify(userRepository, times(1)).save(any(User.class));
   }
 
   @Test
   public void shouldReplacePasswordDuringUserUpdate() {
     // given
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
     User oldUser = new User();
     UUID oldUserId = UUID.randomUUID();
     String oldUserPassword = "oldPassword";
@@ -85,19 +127,22 @@ public class UserServiceTest extends BaseServiceTest {
     when(newUser.getPassword()).thenReturn("newPassword");
 
     when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(oldUser);
-    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
+    ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
+    given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
     // when
-    User result = userService.saveUser(newUser);
+    userService.saveUser(newUser);
 
     // then
-    assertEquals(oldUserId, result.getId());
+    verify(userRepository, times(1)).save(any(User.class));
+    User result = argumentCaptor.getValue();
     assertNotEquals(oldUserPassword, result.getPassword());
   }
 
   @Test
   public void shouldNotReplacePasswordWhenNotProvidedDuringUserUpdate() {
     // given
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
     User oldUser = new User();
     UUID oldUserId = UUID.randomUUID();
     String oldUserPassword = "oldPassword";
@@ -106,13 +151,26 @@ public class UserServiceTest extends BaseServiceTest {
     oldUser.setPassword(oldUserPassword);
 
     when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(oldUser);
+    ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
+    given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
+
+    // when
+    userService.saveUser(new User());
+
+    // then
+    verify(userRepository, times(1)).save(any(User.class));
+    User result = argumentCaptor.getValue();
+    assertEquals(oldUserPassword, result.getPassword());
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionIfReferenceDataUserNotFound() throws Exception {
+    // given
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(null);
+    when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(null);
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    User result = userService.saveUser(new User());
-
-    // then
-    assertEquals(oldUserId, result.getId());
-    assertEquals(oldUserPassword, result.getPassword());
+    userService.saveUser(new User());
   }
 }
