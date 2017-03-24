@@ -19,7 +19,7 @@ import org.openlmis.auth.dto.ResultDto;
 import org.openlmis.auth.dto.RightDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
-import org.openlmis.auth.web.PermissionMessageException;
+import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.util.AuthenticationHelper;
 import org.openlmis.auth.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;

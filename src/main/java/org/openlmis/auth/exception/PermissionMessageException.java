@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.web;
+package org.openlmis.auth.exception;
 
 
 import org.openlmis.auth.exception.BaseMessageException;

@@ -88,7 +88,7 @@ public class UserService {
 
     User dbUser = userRepository.findOneByReferenceDataUserId(user.getReferenceDataUserId());
 
-    Boolean isNewUser = dbUser == null;
+    boolean isNewUser = dbUser == null;
     if (!isNewUser) {
       dbUser.setUsername(user.getUsername());
       dbUser.setEmail(user.getEmail());
@@ -108,7 +108,7 @@ public class UserService {
     try {
       sendResetPasswordEmail(dbUser, dbUser.getEmail(), isNewUser);
     } catch (RestClientException ex) {
-      LOGGER.warn("Reset password email could not be send", ex);
+      LOGGER.warn("Reset password email could not be sent", ex);
     }
     return dbUser;
   }
