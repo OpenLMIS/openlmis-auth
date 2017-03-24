@@ -19,6 +19,10 @@ public abstract class MessageKeys {
   private static final String SERVICE_PREFIX = "auth";
   private static final String ERROR_PREFIX = SERVICE_PREFIX + ".error";
 
+  public static final String ERROR_TOKEN_INVALID = ERROR_PREFIX
+          + ".token.invalid";
+  public static final String ERROR_TOKEN_EXPIRED = ERROR_PREFIX
+          + ".token.expired";
   public static final String ERROR_USER_NOT_FOUND = ERROR_PREFIX
       + ".authentication.userCanNotBeFound";
   public static final String ERROR_RIGHT_NOT_FOUND = ERROR_PREFIX

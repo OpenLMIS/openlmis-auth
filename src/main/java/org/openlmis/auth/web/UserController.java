@@ -59,6 +59,9 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
+
 @RepositoryRestController
 @Transactional
 public class UserController {
@@ -187,11 +190,11 @@ public class UserController {
         passwordResetTokenRepository.findOne(passwordChangeRequest.getToken());
 
     if (token == null) {
-      throw new ValidationMessageException("auth.error.invalidToken");
+      throw new ValidationMessageException(ERROR_TOKEN_INVALID);
     }
 
     if (token.getExpiryDate().isBefore(ZonedDateTime.now())) {
-      throw new ValidationMessageException("auth.error.tokenExpired");
+      throw new ValidationMessageException(ERROR_TOKEN_EXPIRED);
     }
 
     User user = token.getUser();
