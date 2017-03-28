@@ -32,11 +32,11 @@ public abstract class MessageKeys {
   public static final String ERROR_REFERENCE_DATA_USER_NOT_FOUND = ERROR_PREFIX
           + ".users.referenceDataUserNotFound";
   public static final String ACCOUNT_CREATED_EMAIL_SUBJECT =
-      SERVICE_PREFIX + "email.accountCreated.subject";
+      SERVICE_PREFIX + ".email.accountCreated.subject";
   public static final String PASSWORD_RESET_EMAIL_SUBJECT =
-      SERVICE_PREFIX + "email.resetPassword.subject";
+      SERVICE_PREFIX + ".email.resetPassword.subject";
   public static final String PASSWORD_RESET_EMAIL_BODY =
-      SERVICE_PREFIX + "email.resetPassword.body";
+      SERVICE_PREFIX + ".email.resetPassword.body";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();
