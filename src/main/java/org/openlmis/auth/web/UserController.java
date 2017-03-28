@@ -95,7 +95,7 @@ public class UserController {
    *
    * @return saved user.
    */
-  @RequestMapping(value = "/users/auth", method = RequestMethod.PUT)
+  @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public User saveUser(@RequestBody User user, BindingResult bindingResult) {
