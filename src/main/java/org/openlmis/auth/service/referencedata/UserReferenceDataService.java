@@ -21,8 +21,10 @@ import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.service.RequestParameters;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,11 +56,11 @@ public class UserReferenceDataService extends BaseCommunicationService<UserDto> 
    * @return RefDUserDto containing user's data, or null if such user was not found.
    */
   public UserDto findUser(String name) {
-    Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put("username", name);
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("username", name);
 
-    List<UserDto> users = findAll("search", RequestParameters.init(), requestBody);
-    return users.isEmpty() ? null : users.get(0);
+    Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
+    return users.getContent().isEmpty() ? null : users.getContent().get(0);
   }
 
   /**

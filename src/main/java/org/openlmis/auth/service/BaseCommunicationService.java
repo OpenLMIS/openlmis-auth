@@ -17,10 +17,13 @@ package org.openlmis.auth.service;
 
 import org.apache.commons.codec.binary.Base64;
 import org.openlmis.auth.dto.ResultDto;
+import org.openlmis.auth.util.DynamicPageTypeReference;
 import org.openlmis.auth.util.DynamicResultDtoTypeReference;
+import org.openlmis.auth.util.PageImplRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -236,6 +239,51 @@ public abstract class BaseCommunicationService<T> {
     } catch (HttpStatusCodeException ex) {
       throw buildDataRetrievalException(ex);
     }
+  }
+
+  protected Page<T> getPage(String resourceUrl, Map<String, Object> parameters) {
+    return getPage(resourceUrl, parameters, null, HttpMethod.GET, getResultClass());
+  }
+
+  /**
+   * Return all reference data T objects for Page that need to be retrieved with POST request.
+   *
+   * @param resourceUrl Endpoint url.
+   * @param parameters  Map of query parameters.
+   * @param payload     body to include with the outgoing request.
+   * @return Page of reference data T objects.
+   */
+  protected Page<T> getPage(String resourceUrl, Map<String, Object> parameters, Object payload) {
+    return getPage(resourceUrl, parameters, payload, HttpMethod.POST, getResultClass());
+  }
+
+  protected <P> Page<P> getPage(String resourceUrl, Map<String, Object> parameters, Object payload,
+                                HttpMethod method, Class<P> type) {
+    String url = getServiceUrl() + getUrl() + resourceUrl;
+
+    Map<String, Object> params = new HashMap<>();
+    params.put(ACCESS_TOKEN, obtainAccessToken());
+    params.putAll(parameters);
+
+    ResponseEntity<PageImplRepresentation<P>> response;
+
+    if (HttpMethod.GET == method) {
+      response = restTemplate.exchange(
+              buildUri(url, params),
+              HttpMethod.GET,
+              null,
+              new DynamicPageTypeReference<>(type)
+      );
+    } else {
+      response = restTemplate.exchange(
+              buildUri(url, params),
+              HttpMethod.POST,
+              new HttpEntity<>(payload),
+              new DynamicPageTypeReference<>(type)
+      );
+    }
+
+    return response.getBody();
   }
 
   private DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
