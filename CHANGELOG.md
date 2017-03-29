@@ -11,7 +11,6 @@ New functionality added in a backwards-compatible manner:
 3.0.0 / 2017-03-01
 ==================
 
-* Released openlmis-auth 3.0.0 as part of openlmis-ref-distro 3.0.0. See [3.0.0 Release Notes]
-(https://openlmis.atlassian.net/wiki/display/OP/3.0.0+Release+Notes).
+* Released openlmis-auth 3.0.0 as part of openlmis-ref-distro 3.0.0. See [3.0.0 Release Notes](https://openlmis.atlassian.net/wiki/display/OP/3.0.0+Release+Notes).
  * This was the first stable release of openlmis-auth. It builds on the code, patterns, and lessons
  learned from OpenLMIS 1 and 2.
