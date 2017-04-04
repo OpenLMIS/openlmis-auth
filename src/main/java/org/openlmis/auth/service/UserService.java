@@ -91,7 +91,6 @@ public class UserService {
     boolean isNewUser = dbUser == null;
     if (!isNewUser) {
       dbUser.setUsername(user.getUsername());
-      dbUser.setEmail(user.getEmail());
       dbUser.setEnabled(user.getEnabled());
       dbUser.setRole(user.getRole());
     } else {
@@ -106,7 +105,7 @@ public class UserService {
     dbUser = userRepository.save(dbUser);
 
     try {
-      sendResetPasswordEmail(dbUser, dbUser.getEmail(), isNewUser);
+      sendResetPasswordEmail(dbUser, referenceDataUser.getEmail(), isNewUser);
     } catch (RestClientException ex) {
       LOGGER.warn("Reset password email could not be sent", ex);
     }

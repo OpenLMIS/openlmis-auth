@@ -26,7 +26,5 @@ public interface UserRepository extends CrudRepository<User, UUID> {
 
   Optional<User> findOneByUsername(@Param("username") String username);
 
-  User findOneByEmail(@Param("email") String email);
-
   User findOneByReferenceDataUserId(@Param("referenceDataUserId") UUID referenceDataUserId);
 }

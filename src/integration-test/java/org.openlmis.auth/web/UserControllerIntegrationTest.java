@@ -66,34 +66,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     userRepository.save(user);
   }
 
-  private String getPassword() {
-    User user = restAssured.given()
-        .queryParam("access_token", getToken())
-        .when()
-        .get("/api/users/" + USER_ID)
-        .then()
-        .statusCode(200)
-        .extract().as(User.class);
-    return user.getPassword();
-  }
-
-  private String changePassword(String password) {
-    PasswordResetRequest passwordResetRequest = new PasswordResetRequest(USERNAME, password);
-
-    return restAssured.given()
-        .contentType("application/json")
-        .content(passwordResetRequest)
-        .when()
-        .post("/api/users/auth/passwordReset")
-        .then()
-        .extract().asString();
-  }
-
-  private void testChangePassword(String password, String expectedMessage) {
-    String response = changePassword(password);
-    assertTrue(response.contains(expectedMessage));
-  }
-
   @Test
   public void testPasswordReset() {
     String password = getPassword();
@@ -113,16 +85,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     testChangePassword("sdokfsodpfjsaidjasj2akdsjk", "size must be between 8 and 16");
     testChangePassword("vvvvvvvvvvv", "must contain at least 1 number");
     testChangePassword("1sample text", "must not contain spaces");
-  }
-
-  private String logoutUser(Integer statusCode, String token) {
-    return restAssured.given()
-        .queryParam("access_token", token)
-        .when()
-        .post("/api/users/auth/logout")
-        .then()
-        .statusCode(statusCode)
-        .extract().asString();
   }
 
   @Test
@@ -224,5 +186,43 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
     PasswordResetToken token = passwordResetTokenRepository.findOne(tokenId);
     assertNotNull(token);
+  }
+
+  private void testChangePassword(String password, String expectedMessage) {
+    String response = changePassword(password);
+    assertTrue(response.contains(expectedMessage));
+  }
+
+  private String getPassword() {
+    User user = restAssured.given()
+        .queryParam("access_token", getToken())
+        .when()
+        .get("/api/users/" + USER_ID)
+        .then()
+        .statusCode(200)
+        .extract().as(User.class);
+    return user.getPassword();
+  }
+
+  private String changePassword(String password) {
+    PasswordResetRequest passwordResetRequest = new PasswordResetRequest(USERNAME, password);
+
+    return restAssured.given()
+        .contentType("application/json")
+        .content(passwordResetRequest)
+        .when()
+        .post("/api/users/auth/passwordReset")
+        .then()
+        .extract().asString();
+  }
+
+  private String logoutUser(Integer statusCode, String token) {
+    return restAssured.given()
+        .queryParam("access_token", token)
+        .when()
+        .post("/api/users/auth/logout")
+        .then()
+        .statusCode(statusCode)
+        .extract().asString();
   }
 }

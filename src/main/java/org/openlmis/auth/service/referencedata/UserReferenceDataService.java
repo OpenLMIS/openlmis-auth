@@ -53,10 +53,23 @@ public class UserReferenceDataService extends BaseCommunicationService<UserDto> 
    * This method retrieves a user with given name.
    *
    * @param name the name of user.
-   * @return RefDUserDto containing user's data, or null if such user was not found.
+   * @return UserDto containing user's data, or null if such user was not found.
    */
-  public UserDto findUser(String name) {
+  public UserDto findUserByName(String name) {
     Map<String, Object> payload = Collections.singletonMap("username", name);
+
+    Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
+    return users.getContent().isEmpty() ? null : users.getContent().get(0);
+  }
+
+  /**
+   * This method retrieves a user with given email address.
+   *
+   * @param email the email address of user.
+   * @return UserDto containing user's data, or null if such user was not found.
+   */
+  public UserDto findUserByEmail(String email) {
+    Map<String, Object> payload = Collections.singletonMap("email", email);
 
     Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
     return users.getContent().isEmpty() ? null : users.getContent().get(0);
@@ -66,7 +79,7 @@ public class UserReferenceDataService extends BaseCommunicationService<UserDto> 
    * This method creates or updates a user.
    *
    * @param user the user to put.
-   * @return RefDUserDto containing user's data.
+   * @return UserDto containing user's data.
    */
   public UserDto putUser(UserDto user) {
     return put("", user);

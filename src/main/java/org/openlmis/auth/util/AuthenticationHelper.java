@@ -46,7 +46,7 @@ public class AuthenticationHelper {
    */
   public UserDto getCurrentUser() {
     User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    UserDto userDto = userReferenceDataService.findUser(user.getUsername());
+    UserDto userDto = userReferenceDataService.findUserByName(user.getUsername());
 
     if (userDto == null) {
       throw new AuthenticationMessageException(new Message(ERROR_USER_NOT_FOUND,

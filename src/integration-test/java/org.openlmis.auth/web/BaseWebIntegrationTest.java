@@ -74,7 +74,7 @@ public abstract class BaseWebIntegrationTest {
       + "\"verified\":false"
       + "}";
 
-  private static final String MOCK_USER_SEARCH_RESULT = "[{"
+  private static final String MOCK_USER_SEARCH_LIST = "[{"
       + "\"id\":\"35316636-6264-6331-2d34-3933322d3462\","
       + "\"username\":\"admin\","
       + "\"firstName\":\"Admin\","
@@ -82,6 +82,18 @@ public abstract class BaseWebIntegrationTest {
       + "\"email\":\"example@mail.com\","
       + "\"verified\":false"
       + "}]";
+
+  private static final String MOCK_USER_SEARCH_RESULT = "{"
+      + "\"content\":" + MOCK_USER_SEARCH_LIST + ","
+      + "\"sort\":null,"
+      + "\"first\":true,"
+      + "\"last\":true,"
+      + "\"totalPages\":1,"
+      + "\"totalElements\":1,"
+      + "\"numberOfElements\":1,"
+      + "\"size\":1000,"
+      + "\"number\":0"
+      + "}";
 
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(80);

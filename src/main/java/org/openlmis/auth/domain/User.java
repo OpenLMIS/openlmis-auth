@@ -54,11 +54,6 @@ public class User extends BaseEntity implements UserDetails {
 
   @Getter
   @Setter
-  @Column(nullable = false, unique = true)
-  private String email;
-
-  @Getter
-  @Setter
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private UserRole role;

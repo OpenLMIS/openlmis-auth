@@ -18,12 +18,14 @@ package org.openlmis.auth.web;
 
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.exception.BindingResultException;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.UserService;
+import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.util.PasswordResetRequest;
 import org.slf4j.Logger;
@@ -78,6 +80,9 @@ public class UserController {
 
   @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
+
+  @Autowired
+  private UserReferenceDataService userReferenceDataService;
 
   @InitBinder
   protected void initBinder(WebDataBinder binder) {
@@ -168,13 +173,13 @@ public class UserController {
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public void forgotPassword(@RequestParam(value = "email") String email) {
+    UserDto refDataUser = userReferenceDataService.findUserByEmail(email);
 
-    User user = userRepository.findOneByEmail(email);
-
-    if (user == null) {
+    if (refDataUser == null) {
       throw new ValidationMessageException("users.forgotPassword.userNotFound");
     }
 
+    User user = userRepository.findOneByReferenceDataUserId(refDataUser.getId());
     userService.sendResetPasswordEmail(user, email, false);
   }
 
