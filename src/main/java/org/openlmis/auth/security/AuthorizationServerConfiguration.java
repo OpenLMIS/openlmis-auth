@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -50,20 +51,29 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
   @Value("${token.validitySeconds}")
   private Integer tokenValiditySeconds;
 
-  @Override
-  public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+  /**
+    * Default token services bean initializer.
+    * @return custom token services
+    */
+  @Primary
+  @Bean
+  public DefaultTokenServices defaultTokenServices() {
     DefaultTokenServices tokenServices = new CustomTokenServices();
     tokenServices.setTokenStore(tokenStore);
     tokenServices.setSupportRefreshToken(true);
     tokenServices.setClientDetailsService(clientDetailsService);
     tokenServices.setTokenEnhancer(tokenEnhancer());
     tokenServices.setAccessTokenValiditySeconds(tokenValiditySeconds);
+    return tokenServices;
+  }
 
+  @Override
+  public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
     endpoints.setClientDetailsService(clientDetailsService);
     endpoints
         .tokenStore(tokenStore)
         .authenticationManager(authenticationManager)
-        .tokenServices(tokenServices)
+        .tokenServices(defaultTokenServices())
         .pathMapping("/oauth/token", "/api/oauth/token")
         .pathMapping("/oauth/check_token", "/api/oauth/check_token");
   }
