@@ -1,4 +1,4 @@
-+3.0.2 / 2017-05-08
+3.0.2 / 2017-05-08
 ===================
 
 Improvements which are backwards-compatible:
