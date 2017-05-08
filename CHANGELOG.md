@@ -1,3 +1,18 @@
++3.0.2 / 2017-05-08
+===================
+
+Improvements which are backwards-compatible:
+* [OLMIS-2155](https://openlmis.atlassian.net/browse/OLMIS-2155): Migrated service to Spring Boot 1.4.1
+  * Performance issue with custom ZonedDateTimeAttributeConverter.
+* [OLMIS-2267](https://openlmis.atlassian.net/browse/OLMIS-2267): Remove email from auth-user, pull email from referenceda service
+  * This change was part of making email optional for user setup.
+
+Dev and tooling updates made in a backwards-compatible manner:
+* [OLMIS-1972](https://openlmis.atlassian.net/browse/OLMIS-1972): Update Postgres from 9.4 to 9.6
+  * This upgrade will apply automatically and all data will migrate.
+* Update [Docker Dev Image](https://github.com/OpenLMIS/docker-dev) for builds from v1 to v2
+  * Moves the sync_transifex.sh script out of each service and into the Docker Dev Image.
+
 3.0.1 / 2017-03-29
 ==================
 
