@@ -1,4 +1,4 @@
-3.0.2 / WIP
+3.0.3 / 2017-06-23
 ===================
 
 Improvements which are backwards-compatible:
