@@ -3,6 +3,8 @@
 
 Improvements which are backwards-compatible:
 
+* [OLMIS-1498](https://openlmis.atlassian.net/browse/OLMIS-1498): The service will now fetch list of available services from consul,
+and update OAuth resources dynamically when a new service is registered or deregistered. Those are no longer hard-coded.
 * [OLMIS-2611](https://openlmis.atlassian.net/browse/OLMIS-2611): Added using locale from env file.
 
 3.0.2 / 2017-05-08

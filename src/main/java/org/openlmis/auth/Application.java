@@ -25,15 +25,15 @@ import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
+
 import java.util.Locale;
 
-import static org.apache.commons.lang3.LocaleUtils.toLocale;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 @SpringBootApplication
+@EnableScheduling
 @EnableAuthorizationServer
 @ImportResource("applicationContext.xml")
 public class Application {
