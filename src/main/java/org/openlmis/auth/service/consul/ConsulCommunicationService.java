@@ -34,6 +34,7 @@ import org.springframework.web.client.RestTemplate;
 import lombok.AccessLevel;
 import lombok.Setter;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,8 +62,8 @@ class ConsulCommunicationService {
     Iterable<Client> clients = clientRepository.findAll();
 
     for (Client client : clients) {
-      Set<String> clientServices = Sets.newHashSet(
-          client.getResourceIds().split(SERVICE_SEPARATOR));
+      String resourceIds = Optional.ofNullable(client.getResourceIds()).orElse("");
+      Set<String> clientServices = Sets.newHashSet(resourceIds.split(SERVICE_SEPARATOR));
 
       if (!services.equals(clientServices)) {
         client.setResourceIds(servicesString);

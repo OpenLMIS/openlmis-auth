@@ -2,8 +2,8 @@
 -- Data for Name: oauth_client_details; Type: TABLE DATA; Schema: auth; Owner: postgres
 --
 
-INSERT INTO auth.oauth_client_details (clientid, clientsecret, authorities, authorizedgranttypes, resourceids, scope) VALUES ('trusted-client', 'secret', 'TRUSTED_CLIENT', 'client_credentials', '', 'read,write');
-INSERT INTO auth.oauth_client_details (clientid, clientsecret, authorities, authorizedgranttypes, resourceids, scope) VALUES ('user-client', 'changeme', 'TRUSTED_CLIENT', 'password', '', 'read,write');
+INSERT INTO auth.oauth_client_details (clientid, clientsecret, authorities, authorizedgranttypes,  resourceids, scope) VALUES ('trusted-client', 'secret', 'TRUSTED_CLIENT', 'client_credentials', 'auth,example,requisition,notification,referencedata,fulfillment,stockmanagement', 'read,write');
+INSERT INTO auth.oauth_client_details (clientid, clientsecret, authorities, authorizedgranttypes,  resourceids, scope) VALUES ('user-client', 'changeme', 'TRUSTED_CLIENT', 'password', 'auth,example,requisition,notification,referencedata,fulfillment,stockmanagement', 'read,write');
 
 --
 -- Data for Name: auth_users; Type: TABLE DATA; Schema: auth; Owner: postgres
