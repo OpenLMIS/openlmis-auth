@@ -36,7 +36,7 @@ public class ConfigurationSettingServiceTest {
   public void shouldReturnConsulProtocol() {
     // given
     String expected = "https";
-    ReflectionTestUtils.setField(configurationSettingService, "consulProtocolSetting", expected);
+    ReflectionTestUtils.setField(configurationSettingService, "consulProtocol", expected);
 
     // when
     String result = configurationSettingService.getConsulProtocol();
@@ -49,7 +49,7 @@ public class ConfigurationSettingServiceTest {
   public void shouldReturnConsulHost() {
     // given
     String expected = "consul";
-    ReflectionTestUtils.setField(configurationSettingService, "consulHostSetting", expected);
+    ReflectionTestUtils.setField(configurationSettingService, "consulHost", expected);
 
     // when
     String result = configurationSettingService.getConsulHost();
@@ -64,7 +64,7 @@ public class ConfigurationSettingServiceTest {
     String expected = "/v1/catalog/services";
     ReflectionTestUtils.setField(
         configurationSettingService,
-        "consulServicesUrlSetting",
+        "consulServicesUrl",
         expected
     );
 
@@ -79,7 +79,7 @@ public class ConfigurationSettingServiceTest {
   public void shouldReturnConsulServicesTag() {
     // given
     String expected = "openlmis-service";
-    ReflectionTestUtils.setField(configurationSettingService, "consulServiceTagSetting", expected);
+    ReflectionTestUtils.setField(configurationSettingService, "consulServiceTag", expected);
 
     // when
     String result = configurationSettingService.getConsulServiceTag();
@@ -94,7 +94,7 @@ public class ConfigurationSettingServiceTest {
     int expected = 8500;
     ReflectionTestUtils.setField(
         configurationSettingService,
-        "consulPortSetting",
+        "consulPort",
         String.valueOf(expected)
     );
 
@@ -108,7 +108,7 @@ public class ConfigurationSettingServiceTest {
   @Test(expected = ConfigurationSettingException.class)
   public void shouldThrowExceptionIfNumericValueIsInvalid() {
     // given
-    ReflectionTestUtils.setField(configurationSettingService, "consulPortSetting", "port");
+    ReflectionTestUtils.setField(configurationSettingService, "consulPort", "port");
 
     // when
     configurationSettingService.getConsulPort();

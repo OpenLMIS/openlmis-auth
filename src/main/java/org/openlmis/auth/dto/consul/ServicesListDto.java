@@ -15,14 +15,9 @@
 
 package org.openlmis.auth.dto.consul;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.HashMap;
 import java.util.List;
 
-@Getter
-@Setter
 public class ServicesListDto extends HashMap<String, List<String>> {
 
   public boolean isTagged(String key, String tag) {

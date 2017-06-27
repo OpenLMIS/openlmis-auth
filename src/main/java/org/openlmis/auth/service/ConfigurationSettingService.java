@@ -19,45 +19,34 @@ import org.openlmis.auth.exception.ConfigurationSettingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Service
 @NoArgsConstructor
 public class ConfigurationSettingService {
 
+  @Getter
   @Value("${consul.protocol}")
-  private String consulProtocolSetting;
+  private String consulProtocol;
 
+  @Getter
   @Value("${consul.host}")
-  private String consulHostSetting;
+  private String consulHost;
 
   @Value("${consul.port}")
-  private String consulPortSetting;
+  private String consulPort;
 
+  @Getter
   @Value("${consul.services.url}")
-  private String consulServicesUrlSetting;
+  private String consulServicesUrl;
 
+  @Getter
   @Value("${consul.services.serviceTag}")
-  private String consulServiceTagSetting;
-
-  public String getConsulProtocol() {
-    return consulProtocolSetting;
-  }
-
-  public String getConsulHost() {
-    return consulHostSetting;
-  }
+  private String consulServiceTag;
 
   public int getConsulPort() {
-    return getInteger(consulPortSetting);
-  }
-
-  public String getConsulServicesUrl() {
-    return consulServicesUrlSetting;
-  }
-
-  public String getConsulServiceTag() {
-    return consulServiceTagSetting;
+    return getInteger(consulPort);
   }
 
   private int getInteger(String value) {

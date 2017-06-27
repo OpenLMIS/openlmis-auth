@@ -90,10 +90,10 @@ class ConsulCommunicationService {
   }
 
   private String getConsulServicesUrl() {
-    String services = configurationSettingService.getConsulServicesUrl();
     String protocol = configurationSettingService.getConsulProtocol();
     String host = configurationSettingService.getConsulHost();
     int port = configurationSettingService.getConsulPort();
+    String services = configurationSettingService.getConsulServicesUrl();
 
     return String.format("%s://%s:%d%s", protocol, host, port, services);
   }
