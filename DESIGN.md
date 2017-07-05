@@ -68,7 +68,7 @@ The Auth Service has a default client ID and secret for these two Client IDs:
 
 **Security Note:** For security purposes, implementers **must** change the ID and secret of both clients when deploying an OpenLMIS implementation. These credentials must be changed in the Auth service, in every other OpenLMIS service, and in the UI app.
 
-In the Auth Service, the Client credentials are generated from the [Auth Service Bootstrap data](https://github.com/OpenLMIS/openlmis-auth/blob/master/src/main/resources/bootstrap.sql). The Auth Service also comes with [Demo Data](https://github.com/OpenLMIS/openlmis-auth/tree/master/demo-data) that includes demo user accounts. In the other OpenLMIS services, the credentials are stored in the Spring Boot application inside the application.properties file. EG, see the [Reference Data application.properties](https://github.com/OpenLMIS/openlmis-referencedata/blob/master/src/main/resources/application.properties) file. In the UI app, the Client credentials are stored in the [auth_server_client.json](https://github.com/OpenLMIS/openlmis-requisition-refUI/blob/master/src/main/resources/auth_server_client.json) file.
+In the Auth Service, the Client credentials are generated from the [Auth Service Bootstrap data](https://github.com/OpenLMIS/openlmis-auth/blob/master/src/main/resources/db/migration/20170214123932959__initial_bootstrap_data.sql). The Auth Service also comes with [Demo Data](https://github.com/OpenLMIS/openlmis-auth/tree/master/demo-data) that includes demo user accounts. In the other OpenLMIS services, the credentials are stored in the Spring Boot application inside the application.properties file. EG, see the [Reference Data application.properties](https://github.com/OpenLMIS/openlmis-referencedata/blob/master/src/main/resources/application.properties) file. In the UI app, the Client credentials are stored in the [auth_server_client.json](https://github.com/OpenLMIS/openlmis-requisition-refUI/blob/master/src/main/resources/auth_server_client.json) file.
 
 In short, implementors **must** change these credentials in all services. Bootstrap and Demo data are public knowledge and should not be used in any production system.
 
@@ -77,6 +77,10 @@ Inside the Auth Service, client credentials are stored in the database in the `o
 ## Connecting a New Service to the Auth Service
 
 If you are developing an additional service, you will want to connect to the Auth Service in order to use OpenLMIS authentication. The instructions below explain these steps for a Java Spring Boot application based off of the [OpenLMIS Template Service](https://github.com/OpenLMIS/openlmis-template-service).
+
+### Services allowed by Auth Service
+
+Auth service stores a list of resourceIds that are allowed to communicate. Each service specifies it's resource name in [application.properties](https://github.com/OpenLMIS/openlmis-template-service/blob/master/src/main/resources/application.properties#L25) file. Auth won't allow a service to communicate unless it's resource identifier is allowed. How are those identifiers updated? Auth service automatically fetches the list of active services from Consul (see: [OpenLMIS NGINX](https://github.com/OpenLMIS/openlmis-template)) each 60 seconds. So, as soon as a new service is registered for an OpenLMIS distribution, Auth will automatically allow it to connect. Services, that are not present in Consul storage, will be automatically rejected.
 
 To use the Auth Service to secure Service endpoints, follow these steps:
 
