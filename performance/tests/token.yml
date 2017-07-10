@@ -1,0 +1,27 @@
+execution:
+  - concurrency: 10
+    hold-for: 2m
+    scenario: get-user-token
+  - concurrency: 50
+    hold-for: 2m
+    scenario: get-service-token
+
+scenarios:
+  get-user-token:
+    requests:
+      - url: ${__P(base-uri)}/api/oauth/token
+        method: POST
+        headers:
+          Authorization: Basic ${__base64Encode(${__P(user-auth)})}
+        body:
+          grant_type: password
+          username: ${__P(username)}
+          password: ${__P(password)}
+  get-service-token:
+    requests:
+      - url: ${__P(base-uri)}/api/oauth/token
+        method: POST
+        headers:
+          Authorization: Basic ${__base64Encode(${__P(service-auth)})}
+        body:
+          grant_type: client_credentials
