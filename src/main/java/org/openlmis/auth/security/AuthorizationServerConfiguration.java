@@ -18,10 +18,8 @@ package org.openlmis.auth.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -29,9 +27,12 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+
+import javax.annotation.PostConstruct;
 
 @Configuration
 @EnableAuthorizationServer
@@ -48,23 +49,20 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
   @Qualifier("clientDetailsServiceImpl")
   private ClientDetailsService clientDetailsService;
 
-  @Value("${token.validitySeconds}")
-  private Integer tokenValiditySeconds;
+  @Autowired
+  private AuthorizationEndpoint authorizationEndpoint;
 
-  /**
-    * Default token services bean initializer.
-    * @return custom token services
-    */
-  @Primary
+  @Autowired
+  private DefaultTokenServices tokenServices;
+
   @Bean
-  public DefaultTokenServices defaultTokenServices() {
-    DefaultTokenServices tokenServices = new CustomTokenServices();
-    tokenServices.setTokenStore(tokenStore);
-    tokenServices.setSupportRefreshToken(true);
-    tokenServices.setClientDetailsService(clientDetailsService);
-    tokenServices.setTokenEnhancer(tokenEnhancer());
-    tokenServices.setAccessTokenValiditySeconds(tokenValiditySeconds);
-    return tokenServices;
+  public TokenEnhancer tokenEnhancer() {
+    return new AccessTokenEnhancer();
+  }
+
+  @PostConstruct
+  public void init() {
+    authorizationEndpoint.setUserApprovalPage("forward:/api/oauth/confirm_access");
   }
 
   @Override
@@ -73,9 +71,12 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     endpoints
         .tokenStore(tokenStore)
         .authenticationManager(authenticationManager)
-        .tokenServices(defaultTokenServices())
+        .tokenServices(tokenServices)
+        .tokenEnhancer(tokenEnhancer())
         .pathMapping("/oauth/token", "/api/oauth/token")
-        .pathMapping("/oauth/check_token", "/api/oauth/check_token");
+        .pathMapping("/oauth/check_token", "/api/oauth/check_token")
+        .pathMapping("/oauth/authorize", "/api/oauth/authorize")
+        .pathMapping("/oauth/error", "/api/oauth/error");
   }
 
   @Override
@@ -86,10 +87,5 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
   @Override
   public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
     clients.withClientDetails(clientDetailsService);
-  }
-
-  @Bean
-  public TokenEnhancer tokenEnhancer() {
-    return new AccessTokenEnhancer();
   }
 }
