@@ -360,5 +360,82 @@ resourceTypes:
                               example: |
                                {"access_token":"35c1a202-02f3-470e-a011-bf209ee11de2","token_type":"bearer","expires_in":1799,"scope":"read write","referenceDataUserId":"35316636-6264-6331-2d34-3933322d3462"}
                   400:
-                     body:
-                         application/json:
+                      body:
+                          application/json:
+      /check_token:
+          post:
+              description: Check access token.
+              securedBy: [basic]
+              queryParameters:
+                  token:
+                      displayName: access_token
+                      description: OAuth2 access token
+                      type: string
+                      required: true
+                      repeat: false
+              responses:
+                  200:
+                      description: Token is valid.
+                      body:
+                          application/json:
+                              example: |
+                                {"aud":["notification","reports","auth","requisition","referencedata","fulfillment"],"user_name":"admin","referenceDataUserId":"35316636-6264-6331-2d34-3933322d3462","scope":["read","write"],"exp":1499877574,"authorities":["USER","ADMIN"],"client_id":"user-client"}
+                  400:
+                      body:
+                          application/json:
+                              example: |
+                                {"error":"invalid_token","error_description":"Token was not recognised"}
+      /authorize:
+          get:
+              description: Displays user approval page or performs redirection if the user allowed it previously.
+              securedBy: [basic]
+              queryParameters:
+                  response_type:
+                      description: Value MUST be set to "code".
+                      type: string
+                      required: true
+                      repeat: false
+                  client_id:
+                      description: The client identifier.
+                      type: string
+                      required: true
+                      repeat: false
+                  redirect_uri:
+                      description: Redirection Endpoint.
+                      type: string
+                      required: false
+                      repeat: false
+                  scope:
+                      description: The scope of the access request. If omitted all scopes will be granted.
+                      type: string
+                      required: false
+                      repeat: false
+                  state:
+                      description: An opaque value used by the client to maintain state between the request and callback. The authorization server includes this value when redirecting the user-agent back to the client. The parameter SHOULD be used for preventing cross-site request forgery.
+                      type: string
+                      required: false
+                      repeat: false
+              responses:
+                  200:
+                  302:
+                      description: Redirection to the client.
+          post:
+              description: Submit the authorization form and perform redirection to the client. Form data includes flags such as user_oauth_approval, scope.write and scope.read.
+              securedBy: [basic]
+              responses:
+                  200:
+                  302:
+                      description: Redirection to the client.
+      /confirm_access:
+          get:
+              description: Used to render approval form in the authorization server.
+              securedBy: [basic]
+              responses:
+                  200:
+                  500:
+      /error:
+          get:
+              description: Used to render errors in the authorization server.
+              securedBy: [basic]
+              responses:
+                  200:
