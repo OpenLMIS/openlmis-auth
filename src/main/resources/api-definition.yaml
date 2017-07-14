@@ -427,15 +427,17 @@ resourceTypes:
                   302:
                       description: Redirection to the client.
                   400:
-                      description: Credentials or other parameters are invalid.
+                      description: Request parameters, such as redirect_uri, or scope, are invalid.
+                  401:
+                      description: Credentials are invalid.
       /confirm_access:
           get:
               description: Used to render approval form in the authorization server.
               securedBy: [basic]
               responses:
                   200:
-                  400:
-                      description: Credentials or other parameters are invalid.
+                  401:
+                      description: Credentials are invalid.
                   500:
       /error:
           get:
@@ -443,5 +445,5 @@ resourceTypes:
               securedBy: [basic]
               responses:
                   200:
-                  400:
-                      description: Credentials or other parameters are invalid.
+                  401:
+                      description: Credentials are invalid.
