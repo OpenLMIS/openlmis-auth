@@ -426,12 +426,16 @@ resourceTypes:
                   200:
                   302:
                       description: Redirection to the client.
+                  400:
+                      description: Credentials or other parameters are invalid.
       /confirm_access:
           get:
               description: Used to render approval form in the authorization server.
               securedBy: [basic]
               responses:
                   200:
+                  400:
+                      description: Credentials or other parameters are invalid.
                   500:
       /error:
           get:
@@ -439,3 +443,5 @@ resourceTypes:
               securedBy: [basic]
               responses:
                   200:
+                  400:
+                      description: Credentials or other parameters are invalid.
