@@ -11,6 +11,7 @@ scenarios:
     requests:
       - url: ${__P(base-uri)}/api/oauth/token
         method: POST
+        label: GetUserToken
         headers:
           Authorization: Basic ${__base64Encode(${__P(user-auth)})}
         body:
@@ -21,7 +22,14 @@ scenarios:
     requests:
       - url: ${__P(base-uri)}/api/oauth/token
         method: POST
+        label: GetServiceToken
         headers:
           Authorization: Basic ${__base64Encode(${__P(service-auth)})}
         body:
           grant_type: client_credentials
+
+reporting:
+    - module: passfail
+      criteria:
+        - avg-rt of GetUserToken>500ms, stop as failed
+        - avg-rt of GetServiceToken>500ms, stop as failed
