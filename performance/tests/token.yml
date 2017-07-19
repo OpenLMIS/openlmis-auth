@@ -35,5 +35,5 @@ scenarios:
 reporting:
     - module: passfail
       criteria:
-        - p90 of GetUserToken>1500ms, continue as failed
-        - p90 of GetServiceToken>200ms, continue as failed
+        90% of users fail to get a token in time: p90 of GetUserToken>1500ms
+        90% of services fail to get a token in time: p90 of GetServiceToken>200ms
