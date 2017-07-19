@@ -35,5 +35,5 @@ scenarios:
 reporting:
     - module: passfail
       criteria:
-        - avg-rt of GetUserToken>500ms, stop as failed
-        - avg-rt of GetServiceToken>500ms, stop as failed
+        - p90 of GetUserToken>1500ms, continue as failed
+        - p90 of GetServiceToken>200ms, continue as failed

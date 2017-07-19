@@ -10,3 +10,4 @@ modules:
       responseData: true
 reporting:
   - module: final-stats
+    failed-labels: true
