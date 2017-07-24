@@ -223,6 +223,7 @@ public class UserController {
   @ResponseBody
   public UUID generatePasswordResetToken(
       @RequestParam(value = "userId") UUID referenceDataUserId) {
+    permissionService.canManageUsers();
     User user = userRepository.findOneByReferenceDataUserId(referenceDataUserId);
 
     PasswordResetToken token = userService.createPasswordResetToken(user);

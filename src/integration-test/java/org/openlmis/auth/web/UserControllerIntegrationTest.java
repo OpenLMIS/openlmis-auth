@@ -183,6 +183,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void testCreatePasswordResetToken() {
+    doNothing().when(permissionService).canManageUsers();
+
     UUID tokenId = restAssured.given()
         .queryParam("access_token", getToken())
         .queryParam("userId", REFERENCE_DATA_USER_ID)
