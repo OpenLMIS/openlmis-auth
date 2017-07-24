@@ -108,6 +108,7 @@ public class UserController {
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public User saveUser(@RequestBody User user, BindingResult bindingResult) {
+    permissionService.canManageUsers();
     LOGGER.debug("Creating or updating user");
 
     if (bindingResult.getErrorCount() == 0) {
