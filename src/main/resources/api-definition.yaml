@@ -230,6 +230,7 @@ resourceTypes:
                          description: There were errors validating the request
           /passwordResetToken:
               post:
+                  is: [ secured ]
                   description: Create token which can be used to change user's password.
                   queryParameters:
                       userId:
