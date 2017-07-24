@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
 
 import org.junit.After;
@@ -32,9 +33,11 @@ import org.openlmis.auth.domain.User;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -57,6 +60,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
 
+  @SpyBean
+  private PermissionService permissionService;
+
   @After
   public void cleanUp() {
     passwordResetTokenRepository.deleteAll();
@@ -68,6 +74,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void testPasswordReset() {
+    doNothing().when(permissionService).canManageUsers();
+
     String password = getPassword();
     assertNotNull(password);
 

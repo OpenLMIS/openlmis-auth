@@ -24,6 +24,7 @@ import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.auth.util.PasswordChangeRequest;
@@ -77,6 +78,9 @@ public class UserController {
 
   @Autowired
   private Validator validator;
+
+  @Autowired
+  private PermissionService permissionService;
 
   @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
@@ -135,12 +139,12 @@ public class UserController {
    *
    * @return confirmation message or map with field errors.
    */
-  @PreAuthorize("hasAuthority('ADMIN')")
   @RequestMapping(value = "/users/auth/passwordReset", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public String passwordReset(
       @RequestBody @Valid PasswordResetRequest passwordResetRequest, BindingResult bindingResult) {
+    permissionService.canManageUsers();
     Map<String, String> errors = new HashMap<>();
 
     if (!bindingResult.hasErrors()) {

@@ -54,18 +54,12 @@ public class User extends BaseEntity implements UserDetails {
 
   @Getter
   @Setter
-  @Column(nullable = false)
-  @Enumerated(EnumType.STRING)
-  private UserRole role;
-
-  @Getter
-  @Setter
   @Column
   private Boolean enabled;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return AuthorityUtils.createAuthorityList(this.getRole().name(), UserRole.USER.name());
+    return AuthorityUtils.createAuthorityList(UserRole.USER.name());
   }
 
   @Override

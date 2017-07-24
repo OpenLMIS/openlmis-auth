@@ -73,10 +73,6 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
             "/static/auth/docs/index.html",
             "/generated/api-definition.json"
         ).permitAll()
-        .antMatchers(
-            "/api/users/auth",
-            "/api/passwordResetTokens"
-        ).hasAuthority("ADMIN")
         .antMatchers("/**").fullyAuthenticated();
   }
 }
