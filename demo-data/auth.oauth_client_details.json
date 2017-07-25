@@ -1,0 +1,10 @@
+[
+  {
+    "clientid": "tableau-wdc",
+    "clientsecret": "changeme",
+    "authorities": "TRUSTED_CLIENT",
+    "authorizedgranttypes": "implicit",
+    "resourceids": "",
+    "scope": "read,write"
+  }
+]
