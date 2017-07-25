@@ -96,7 +96,7 @@ schemas:
           },
           "messageKey": {
             "type": "string",
-            "title": "description"
+            "title": "messageKey"
           }
         },
         "required": [

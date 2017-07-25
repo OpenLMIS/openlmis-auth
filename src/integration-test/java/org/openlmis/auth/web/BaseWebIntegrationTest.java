@@ -31,6 +31,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
+import org.openlmis.auth.i18n.MessageService;
+import org.openlmis.auth.util.Message;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -44,6 +47,7 @@ public abstract class BaseWebIntegrationTest {
       + "definition.";
   static final String BASE_URL = System.getenv("BASE_URL");
   static final String ACCESS_TOKEN = "access_token";
+  static final String MESSAGE = "message";
 
   private String token = null;
 
@@ -97,6 +101,9 @@ public abstract class BaseWebIntegrationTest {
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(80);
 
+  @Autowired
+  protected MessageService messageService;
+
   @LocalServerPort
   private int randomPort;
 
@@ -146,6 +153,10 @@ public abstract class BaseWebIntegrationTest {
       token = fetchToken("admin", "password");
     }
     return token;
+  }
+
+  String getMessage(Message message) {
+    return messageService.localize(message).asMessage();
   }
 
   private String fetchToken(String username, String password) {

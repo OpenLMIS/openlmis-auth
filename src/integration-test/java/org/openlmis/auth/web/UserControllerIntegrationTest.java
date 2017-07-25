@@ -24,6 +24,7 @@ import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
+import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import java.util.UUID;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -45,6 +47,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
 
 @SuppressWarnings("PMD.TooManyMethods")
@@ -78,8 +81,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotSaveUserWhenUserHasNoPermission() {
-    PermissionMessageException ex = new PermissionMessageException("messageKey");
-    doThrow(ex).when(permissionService).canManageUsers();
+    PermissionMessageException ex = mockUserManagePermissionError();
 
     restAssured.given()
         .queryParam(ACCESS_TOKEN, getToken())
@@ -88,7 +90,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .when()
         .post("/api/users/auth")
         .then()
-        .statusCode(403);
+        .statusCode(403)
+        .body(MESSAGE, equalTo(getMessage(ex.asMessage())));
   }
 
   @Test
@@ -116,8 +119,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotResetPasswordWhenUserHasNoPermission() {
-    PermissionMessageException ex = new PermissionMessageException("messageKey");
-    doThrow(ex).when(permissionService).canManageUsers();
+    PermissionMessageException ex = mockUserManagePermissionError();
+
     PasswordResetRequest passwordResetRequest = new PasswordResetRequest(USERNAME, "newpassword");
 
     restAssured.given()
@@ -127,7 +130,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .when()
         .post("/api/users/auth/passwordReset")
         .then()
-        .statusCode(403);
+        .statusCode(403)
+        .body(MESSAGE, equalTo(getMessage(ex.asMessage())));
   }
 
   @Test
@@ -235,8 +239,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotCreatePasswordResetTokenWhenUserHasNoPermission() {
-    PermissionMessageException ex = new PermissionMessageException("messageKey");
-    doThrow(ex).when(permissionService).canManageUsers();
+    PermissionMessageException ex = mockUserManagePermissionError();
 
     restAssured.given()
         .queryParam(ACCESS_TOKEN, getToken())
@@ -245,7 +248,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .when()
         .post("/api/users/auth/passwordResetToken")
         .then()
-        .statusCode(403);
+        .statusCode(403)
+        .body(MESSAGE, equalTo(getMessage(ex.asMessage())));
   }
 
   private void testChangePassword(String password, String expectedMessage) {
@@ -284,5 +288,14 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .then()
         .statusCode(statusCode)
         .extract().asString();
+  }
+
+  private PermissionMessageException mockUserManagePermissionError() {
+    Message exMessage = new Message(ERROR_NO_FOLLOWING_PERMISSION, "USERS_MANAGE");
+
+    PermissionMessageException ex = new PermissionMessageException(exMessage);
+    doThrow(ex).when(permissionService).canManageUsers();
+
+    return ex;
   }
 }
