@@ -16,6 +16,7 @@
 package org.openlmis.auth.security;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +26,9 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -32,6 +36,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Configuration
 @EnableResourceServer
@@ -41,6 +46,12 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
 
   @Value("${auth.resourceId}")
   private String resourceId;
+
+  @Value("${cors.allowedOrigins}")
+  private String[] allowedOrigins;
+
+  @Value("${cors.allowedMethods}")
+  private String[] allowedMethods;
 
   @Override
   public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
@@ -65,6 +76,7 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
     http.csrf().disable();
 
     http
+        .cors().and()
         .authorizeRequests()
         .antMatchers(
             "/api/users/auth/forgotPassword",
@@ -74,5 +86,21 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
             "/generated/api-definition.json"
         ).permitAll()
         .antMatchers("/**").fullyAuthenticated();
+  }
+
+  /**
+   * CorsConfigurationSource bean initializer.
+   * @return cors configuration
+   */
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    if (allowedOrigins.length > 0) {
+      CorsConfiguration configuration = new CorsConfiguration();
+      configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+      configuration.setAllowedMethods(Arrays.asList(allowedMethods));
+      source.registerCorsConfiguration("/**", configuration);
+    }
+    return source;
   }
 }
