@@ -16,8 +16,9 @@
 package org.openlmis.auth.web;
 
 import org.openlmis.auth.exception.BindingResultException;
+import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.exception.ValidationMessageException;
-import org.openlmis.auth.i18n.Message;
+import org.openlmis.auth.util.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,6 +52,18 @@ public class WebErrorHandling extends AbstractErrorHandling {
   }
 
   /**
+   * Handles the {@link PermissionMessageException} which signals unauthorized access.
+   *
+   * @return the localized message
+   */
+  @ExceptionHandler(PermissionMessageException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  @ResponseBody
+  public Message.LocalizedMessage handlePermissionMessageException(PermissionMessageException ex) {
+    return getLocalizedMessage(ex.asMessage());
+  }
+
+  /**
    * Handles the {@link BindingResultException} which signals a validation problems.
    *
    * @return a map of binding result field and message
@@ -58,7 +71,7 @@ public class WebErrorHandling extends AbstractErrorHandling {
   @ExceptionHandler(BindingResultException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
-  public Map<String, String> handleBindingRequltException(BindingResultException ex) {
+  public Map<String, String> handleBindingResultException(BindingResultException ex) {
     return ex.getErrors();
   }
 
@@ -70,7 +83,7 @@ public class WebErrorHandling extends AbstractErrorHandling {
   @ExceptionHandler(ValidationMessageException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
-  public Message.LocalizedMessage handleBindingRequltException(ValidationMessageException ex) {
+  public Message.LocalizedMessage handleValidationMessageException(ValidationMessageException ex) {
     return getLocalizedMessage(ex.asMessage());
   }
 

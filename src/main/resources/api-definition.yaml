@@ -49,6 +49,7 @@ schemas:
               "webServerRedirectUri": { "type": "string", "required": false, "title": "webServerRedirectUri" }
           }
       }
+
   - passwordResetRequest: |
       {   "type": "object",
           "$schema": "http://json-schema.org/draft-03/schema",
@@ -58,6 +59,7 @@ schemas:
               "newPassword": { "type": "string", "required": true, "title": "new password" }
           }
       }
+
   - passwordChangeRequest: |
       {   "type": "object",
           "$schema": "http://json-schema.org/draft-03/schema",
@@ -67,6 +69,7 @@ schemas:
               "newPassword": { "type": "string", "required": true, "title": "new password" }
           }
       }
+
   - token: |
       {   "type": "object",
           "$schema": "http://json-schema.org/draft-03/schema",
@@ -80,6 +83,26 @@ schemas:
           }
       }
 
+  - localizedMessage: |
+      {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-04/schema",
+        "title": "LocalizedMessage",
+        "description": "Localized message ",
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "message"
+          },
+          "description": {
+            "type": "string",
+            "title": "messageKey"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
 
 traits:
     - secured:
@@ -247,10 +270,13 @@ resourceTypes:
                            X-XSS-Protection:
                          body:
                              application/json:
-                     500:
-                          headers:
-                            X-Content-Type-Options:
-                            X-XSS-Protection:
+                     403:
+                         headers:
+                           X-Content-Type-Options:
+                           X-XSS-Protection:
+                         body:
+                             application/json:
+                                schema: localizedMessage
           /logout:
               post:
                   is: [ secured ]

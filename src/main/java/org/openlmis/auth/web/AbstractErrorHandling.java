@@ -15,8 +15,8 @@
 
 package org.openlmis.auth.web;
 
-import org.openlmis.auth.i18n.Message;
 import org.openlmis.auth.i18n.MessageService;
+import org.openlmis.auth.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

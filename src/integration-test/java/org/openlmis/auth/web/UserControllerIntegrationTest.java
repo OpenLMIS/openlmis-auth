@@ -15,21 +15,11 @@
 
 package org.openlmis.auth.web;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
-
 import org.junit.After;
 import org.junit.Test;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
@@ -44,6 +34,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
+
+@SuppressWarnings("PMD.TooManyMethods")
 public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String USER_ID = "51f6bdc1-4932-4bc3-9589-368646ef7ad3";
   private static final String USERNAME = "admin";
@@ -93,6 +96,20 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     testChangePassword("sdokfsodpfjsaidjasj2akdsjk", "size must be between 8 and 16");
     testChangePassword("vvvvvvvvvvv", "must contain at least 1 number");
     testChangePassword("1sample text", "must not contain spaces");
+  }
+
+  @Test
+  public void shouldNotResetPasswordWhenUserHasNoPermission() {
+    doThrow(PermissionMessageException.class).when(permissionService).canManageUsers();
+    PasswordResetRequest passwordResetRequest = new PasswordResetRequest(USERNAME, "newpassword");
+
+    restAssured.given()
+        .contentType("application/json")
+        .content(passwordResetRequest)
+        .when()
+        .post("/api/users/auth/passwordReset")
+        .then()
+        .statusCode(401);
   }
 
   @Test
