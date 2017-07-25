@@ -88,19 +88,19 @@ schemas:
         "type": "object",
         "$schema": "http://json-schema.org/draft-04/schema",
         "title": "LocalizedMessage",
-        "description": "Localized message ",
+        "description": "Localized message",
         "properties": {
           "message": {
             "type": "string",
             "title": "message"
           },
-          "description": {
+          "messageKey": {
             "type": "string",
-            "title": "messageKey"
+            "title": "description"
           }
         },
         "required": [
-          "message"
+          "message", "messageKey"
         ]
       }
 

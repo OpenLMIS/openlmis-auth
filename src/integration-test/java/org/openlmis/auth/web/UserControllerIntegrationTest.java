@@ -29,6 +29,7 @@ import org.openlmis.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.ZonedDateTime;
@@ -76,6 +77,21 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
+  public void shouldNotSaveUserWhenUserHasNoPermission() {
+    PermissionMessageException ex = new PermissionMessageException("messageKey");
+    doThrow(ex).when(permissionService).canManageUsers();
+
+    restAssured.given()
+        .queryParam(ACCESS_TOKEN, getToken())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(new User())
+        .when()
+        .post("/api/users/auth")
+        .then()
+        .statusCode(403);
+  }
+
+  @Test
   public void testPasswordReset() {
     doNothing().when(permissionService).canManageUsers();
 
@@ -100,16 +116,18 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotResetPasswordWhenUserHasNoPermission() {
-    doThrow(PermissionMessageException.class).when(permissionService).canManageUsers();
+    PermissionMessageException ex = new PermissionMessageException("messageKey");
+    doThrow(ex).when(permissionService).canManageUsers();
     PasswordResetRequest passwordResetRequest = new PasswordResetRequest(USERNAME, "newpassword");
 
     restAssured.given()
-        .contentType("application/json")
+        .queryParam(ACCESS_TOKEN, getToken())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
         .content(passwordResetRequest)
         .when()
         .post("/api/users/auth/passwordReset")
         .then()
-        .statusCode(401);
+        .statusCode(403);
   }
 
   @Test
@@ -203,7 +221,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     doNothing().when(permissionService).canManageUsers();
 
     UUID tokenId = restAssured.given()
-        .queryParam("access_token", getToken())
+        .queryParam(ACCESS_TOKEN, getToken())
         .queryParam("userId", REFERENCE_DATA_USER_ID)
         .when()
         .post("/api/users/auth/passwordResetToken")
@@ -215,6 +233,21 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     assertNotNull(token);
   }
 
+  @Test
+  public void shouldNotCreatePasswordResetTokenWhenUserHasNoPermission() {
+    PermissionMessageException ex = new PermissionMessageException("messageKey");
+    doThrow(ex).when(permissionService).canManageUsers();
+
+    restAssured.given()
+        .queryParam(ACCESS_TOKEN, getToken())
+        .queryParam("userId", REFERENCE_DATA_USER_ID)
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when()
+        .post("/api/users/auth/passwordResetToken")
+        .then()
+        .statusCode(403);
+  }
+
   private void testChangePassword(String password, String expectedMessage) {
     String response = changePassword(password);
     assertTrue(response.contains(expectedMessage));
@@ -222,7 +255,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private String getPassword() {
     User user = restAssured.given()
-        .queryParam("access_token", getToken())
+        .queryParam(ACCESS_TOKEN, getToken())
         .when()
         .get("/api/users/" + USER_ID)
         .then()
@@ -245,7 +278,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private String logoutUser(Integer statusCode, String token) {
     return restAssured.given()
-        .queryParam("access_token", token)
+        .queryParam(ACCESS_TOKEN, token)
         .when()
         .post("/api/users/auth/logout")
         .then()

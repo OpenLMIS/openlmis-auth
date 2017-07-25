@@ -16,10 +16,13 @@
 package org.openlmis.auth.exception;
 
 
-import org.openlmis.auth.exception.BaseMessageException;
 import org.openlmis.auth.util.Message;
 
 public class PermissionMessageException extends BaseMessageException {
+
+  public PermissionMessageException(String messageKey) {
+    super(messageKey);
+  }
 
   public PermissionMessageException(Message message) {
     super(message);

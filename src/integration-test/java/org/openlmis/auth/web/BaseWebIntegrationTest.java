@@ -43,6 +43,7 @@ public abstract class BaseWebIntegrationTest {
   private static final String RAML_ASSERT_MESSAGE = "HTTP request/response should match RAML "
       + "definition.";
   static final String BASE_URL = System.getenv("BASE_URL");
+  static final String ACCESS_TOKEN = "access_token";
 
   private String token = null;
 
