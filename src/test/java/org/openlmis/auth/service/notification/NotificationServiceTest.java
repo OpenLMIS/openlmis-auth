@@ -53,7 +53,7 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
             .postForEntity(uriCaptor.capture(), captor.capture(), eq(NotificationRequest.class));
 
     URI uri = uriCaptor.getValue();
-    String url = service.getServiceUrl() + service.getUrl() + "?" + ACCESS_TOKEN;
+    String url = service.getServiceUrl() + service.getUrl();
     assertThat(uri.toString(), is(equalTo(url)));
 
     HttpEntity entity = captor.getValue();
@@ -67,6 +67,8 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
     assertThat(sent.getTo(), is(equalTo(request.getTo())));
     assertThat(sent.getSubject(), is(equalTo(request.getSubject())));
     assertThat(sent.getContent(), is(equalTo(request.getContent())));
+
+    assertAuthHeader(entity);
   }
 
   @Test(expected = HttpServerErrorException.class)

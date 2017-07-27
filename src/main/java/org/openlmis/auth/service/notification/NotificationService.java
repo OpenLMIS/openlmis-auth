@@ -17,6 +17,7 @@ package org.openlmis.auth.service.notification;
 
 import lombok.Getter;
 import org.openlmis.auth.service.BaseCommunicationService;
+import org.openlmis.auth.util.RequestHelper;
 import org.openlmis.util.NotificationRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -52,12 +53,8 @@ public class NotificationService extends BaseCommunicationService<NotificationRe
   public void send(NotificationRequest request) {
     String url = getServiceUrl() + getUrl();
 
-    Map<String, String> params = new HashMap<>();
-    params.put(ACCESS_TOKEN, obtainAccessToken());
-
-    HttpEntity<NotificationRequest> body = new HttpEntity<>(request);
-
-    restTemplate.postForEntity(buildUri(url, params), body, NotificationRequest.class);
+    restTemplate.postForEntity(RequestHelper.createUri(url),
+            RequestHelper.createEntity(obtainAccessToken(), request),
+            NotificationRequest.class);
   }
-
 }

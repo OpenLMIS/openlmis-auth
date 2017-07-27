@@ -42,11 +42,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.openlmis.auth.util.RequestHelper.createEntity;
 import static org.openlmis.auth.util.RequestHelper.createUri;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public abstract class BaseCommunicationService<T> {
-  protected static final String ACCESS_TOKEN = "access_token";
+  private static final String ACCESS_TOKEN = "access_token";
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected RestOperations restTemplate = new RestTemplate();
@@ -122,12 +123,14 @@ public abstract class BaseCommunicationService<T> {
 
     RequestParameters params = RequestParameters
             .init()
-            .setAll(parameters)
-            .set(ACCESS_TOKEN, obtainAccessToken());
+            .setAll(parameters);
 
     try {
       return restTemplate
-              .getForEntity(createUri(url, params), type)
+              .exchange(createUri(url, params),
+                      HttpMethod.GET,
+                      createEntity(obtainAccessToken()),
+                      type)
               .getBody();
     } catch (HttpStatusCodeException ex) {
       // rest template will handle 404 as an exception, instead of returning null
@@ -178,19 +181,15 @@ public abstract class BaseCommunicationService<T> {
 
     RequestParameters params = RequestParameters
         .init()
-        .setAll(parameters)
-        .set(ACCESS_TOKEN, obtainAccessToken());
+        .setAll(parameters);
 
     try {
-      ResponseEntity<P[]> response;
-
-      if (HttpMethod.GET == method) {
-        response = restTemplate
-            .getForEntity(createUri(url, params), type);
-      } else {
-        response = restTemplate
-            .postForEntity(createUri(url, params), payload, type);
-      }
+      ResponseEntity<P[]> response = restTemplate.exchange(
+              createUri(url, params),
+              method,
+              createEntity(obtainAccessToken(), payload),
+              type
+      );
 
       return Stream.of(response.getBody()).collect(Collectors.toList());
     } catch (HttpStatusCodeException ex) {
@@ -201,15 +200,11 @@ public abstract class BaseCommunicationService<T> {
   protected T put(String resourceUrl, T instance) {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
-    RequestParameters params = RequestParameters
-        .init()
-        .set(ACCESS_TOKEN, obtainAccessToken());
-
     try {
       ResponseEntity<T> response = restTemplate.exchange(
-          createUri(url, params),
+          createUri(url),
           HttpMethod.PUT,
-          new HttpEntity<T>(instance),
+          createEntity(obtainAccessToken(), instance),
           getResultClass()
       );
       return response.getBody();
@@ -224,14 +219,13 @@ public abstract class BaseCommunicationService<T> {
     String url = getServiceUrl() + getUrl() + resourceUrl;
     RequestParameters params = RequestParameters
         .init()
-        .setAll(parameters)
-        .set(ACCESS_TOKEN, obtainAccessToken());
+        .setAll(parameters);
 
     try {
       ResponseEntity<ResultDto<P>> response = restTemplate.exchange(
           createUri(url, params),
           HttpMethod.GET,
-          null,
+          createEntity(obtainAccessToken()),
           new DynamicResultDtoTypeReference<>(type)
       );
       return response.getBody();
@@ -262,14 +256,13 @@ public abstract class BaseCommunicationService<T> {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
     Map<String, Object> params = new HashMap<>();
-    params.put(ACCESS_TOKEN, obtainAccessToken());
     params.putAll(parameters);
 
     try {
       ResponseEntity<PageImplRepresentation<P>> response = restTemplate.exchange(
               buildUri(url, params),
               method,
-              (payload != null) ? new HttpEntity<>(payload) : null,
+              createEntity(obtainAccessToken(), payload),
               new DynamicPageTypeReference<>(type)
       );
       return response.getBody();
@@ -288,7 +281,7 @@ public abstract class BaseCommunicationService<T> {
   protected URI buildUri(String url, Map<String, ?> params) {
     UriComponentsBuilder builder = UriComponentsBuilder.newInstance().uri(URI.create(url));
 
-    params.entrySet().forEach(e -> builder.queryParam(e.getKey(), e.getValue()));
+    params.forEach((key, value) -> builder.queryParam(key, value));
 
     return builder.build(true).toUri();
   }
