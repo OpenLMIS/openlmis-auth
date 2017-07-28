@@ -4,6 +4,7 @@
 Improvements which are backwards-compatible:
 * [OLMIS-1498](https://openlmis.atlassian.net/browse/OLMIS-1498): The service will now fetch list of available services from consul, and update OAuth2 resources dynamically when a new service is registered or de-registered. Those tokens are no longer hard-coded.
 * [OLMIS-2866](https://openlmis.atlassian.net/browse/OLMIS-2866): The service will no longer used self-contained user roles (USER, ADMIN), and depend solely on referencedata's roles for user management.
+* [OLMIS-2871](https://openlmis.atlassian.net/browse/OLMIS-2871): The service now uses an Authorization header instead of an access_token request parameter when communicating with other services.
 
 3.0.3 / 2017-06-23
 ===================
