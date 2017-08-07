@@ -425,7 +425,7 @@ resourceTypes:
               securedBy: [basic]
               queryParameters:
                   response_type:
-                      description: Value MUST be set to "code".
+                      description: The value MUST be one of "code" for requesting an authorization code or "token" for requesting an access token (implicit grant).
                       type: string
                       required: true
                       repeat: false
