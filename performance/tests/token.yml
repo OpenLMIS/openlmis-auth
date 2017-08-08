@@ -6,7 +6,7 @@ execution:
   - concurrency: 10
     hold-for: 2m
     scenario: get-user-token
-  - concurrency: 50
+  - concurrency: 20
     hold-for: 2m
     scenario: get-service-token
 
