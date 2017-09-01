@@ -1,10 +1,19 @@
-3.0.4 / WIP
+3.1.0 / WIP
 ===================
 
-Improvements which are backwards-compatible:
+Improvements and new functionality which are backwards-compatible:
 * [OLMIS-1498](https://openlmis.atlassian.net/browse/OLMIS-1498): The service will now fetch list of available services from consul, and update OAuth2 resources dynamically when a new service is registered or de-registered. Those tokens are no longer hard-coded.
+* [OLMIS-2812](https://openlmis.atlassian.net/browse/OLMIS-2812): Index username column
+  * This column appears to be used frequently by the user details implemtation, indexing should help performance.
+* [OLMIS-2851](https://openlmis.atlassian.net/browse/OLMIS-2851): Let external applications (that run in a browser) access our APIs
+  * Allow for implicit grant flow.
+  * Expose every endpoint that oauth2 has and document them with RAML.
+  * Add CORS support.
+  * Add tableau-wdc client to the demo data.
 * [OLMIS-2866](https://openlmis.atlassian.net/browse/OLMIS-2866): The service will no longer used self-contained user roles (USER, ADMIN), and depend solely on referencedata's roles for user management.
 * [OLMIS-2871](https://openlmis.atlassian.net/browse/OLMIS-2871): The service now uses an Authorization header instead of an access_token request parameter when communicating with other services.
+* [OLMIS-2957](https://openlmis.atlassian.net/browse/OLMIS-2957): Enable tomcat access logs
+* [OLMIS-2619](https://openlmis.atlassian.net/browse/OLMIS-2619): Add cce manager user and remove redundant fields from auth demo data
 
 3.0.3 / 2017-06-23
 ===================
