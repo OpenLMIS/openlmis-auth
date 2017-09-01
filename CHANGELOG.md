@@ -1,4 +1,4 @@
-3.1.0 / WIP
+3.1.0 / 2017-09-01
 ===================
 
 Improvements and new functionality which are backwards-compatible:
