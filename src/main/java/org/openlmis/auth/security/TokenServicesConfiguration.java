@@ -15,6 +15,8 @@
 
 package org.openlmis.auth.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +30,8 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 
 @Configuration
 public class TokenServicesConfiguration {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(TokenServicesConfiguration.class);
 
   @Autowired
   private TokenStore tokenStore;
@@ -49,6 +53,8 @@ public class TokenServicesConfiguration {
   @Primary
   @Bean
   public DefaultTokenServices defaultTokenServices() {
+    LOGGER.debug("Using {} seconds as the token validity time", tokenValiditySeconds);
+
     DefaultTokenServices tokenServices = new CustomTokenServices();
     tokenServices.setTokenStore(tokenStore);
     tokenServices.setSupportRefreshToken(true);
