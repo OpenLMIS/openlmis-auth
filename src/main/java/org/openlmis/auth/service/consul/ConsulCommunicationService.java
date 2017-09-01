@@ -68,7 +68,7 @@ class ConsulCommunicationService {
       if (!services.equals(clientServices)) {
         client.setResourceIds(servicesString);
         clientRepository.save(client);
-        LOGGER.info("Updated resources for {}: {}", client.getClientId(), servicesString);q
+        LOGGER.info("Updated resources for {}: {}", client.getClientId(), servicesString);
       }
     }
 
