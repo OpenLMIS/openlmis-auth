@@ -18,24 +18,16 @@ package org.openlmis.auth.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
-import javax.annotation.PostConstruct;
-
-@Configuration
-@EnableAuthorizationServer
 public class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
   @Autowired
@@ -50,20 +42,10 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
   private ClientDetailsService clientDetailsService;
 
   @Autowired
-  private AuthorizationEndpoint authorizationEndpoint;
-
-  @Autowired
   private DefaultTokenServices tokenServices;
 
-  @Bean
-  public TokenEnhancer tokenEnhancer() {
-    return new AccessTokenEnhancer();
-  }
-
-  @PostConstruct
-  public void init() {
-    authorizationEndpoint.setUserApprovalPage("forward:/api/oauth/confirm_access");
-  }
+  @Autowired
+  private TokenEnhancer tokenEnhancer;
 
   @Override
   public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
@@ -72,7 +54,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         .tokenStore(tokenStore)
         .authenticationManager(authenticationManager)
         .tokenServices(tokenServices)
-        .tokenEnhancer(tokenEnhancer())
+        .tokenEnhancer(tokenEnhancer)
         .pathMapping("/oauth/token", "/api/oauth/token")
         .pathMapping("/oauth/check_token", "/api/oauth/check_token")
         .pathMapping("/oauth/authorize", "/api/oauth/authorize")

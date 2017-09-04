@@ -100,4 +100,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   public AccessTokenConverter accessTokenConverter() {
     return new DefaultAccessTokenConverter();
   }
+
+  @Bean
+  public AuthorizationServerConfiguration authServerConfiguration() {
+    return new AuthorizationServerConfiguration();
+  }
 }

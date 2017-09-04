@@ -34,7 +34,6 @@ import java.util.Locale;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableAuthorizationServer
 @ImportResource("applicationContext.xml")
 public class Application {
 

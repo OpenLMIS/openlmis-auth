@@ -23,12 +23,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 @Configuration
+@EnableAuthorizationServer
 public class TokenServicesConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TokenServicesConfiguration.class);
@@ -40,11 +43,16 @@ public class TokenServicesConfiguration {
   @Qualifier("clientDetailsServiceImpl")
   private ClientDetailsService clientDetailsService;
 
+  @Autowired
+  private AuthenticationManager authenticationManager;
+
   @Value("${token.validitySeconds}")
   private Integer tokenValiditySeconds;
 
-  @Autowired
-  private TokenEnhancer tokenEnhancer;
+  @Bean
+  public TokenEnhancer tokenEnhancer() {
+    return new AccessTokenEnhancer();
+  }
 
   /**
    * Default token services bean initializer.
@@ -59,8 +67,10 @@ public class TokenServicesConfiguration {
     tokenServices.setTokenStore(tokenStore);
     tokenServices.setSupportRefreshToken(true);
     tokenServices.setClientDetailsService(clientDetailsService);
-    tokenServices.setTokenEnhancer(tokenEnhancer);
+    tokenServices.setTokenEnhancer(tokenEnhancer());
     tokenServices.setAccessTokenValiditySeconds(tokenValiditySeconds);
+    tokenServices.setAuthenticationManager(authenticationManager);
+
     return tokenServices;
   }
 }
