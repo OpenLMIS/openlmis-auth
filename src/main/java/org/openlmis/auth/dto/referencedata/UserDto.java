@@ -15,14 +15,13 @@
 
 package org.openlmis.auth.dto.referencedata;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.minidev.json.JSONObject;
-
-import java.util.Map;
-import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -49,11 +48,7 @@ public class UserDto extends BaseDto {
   private String timezone;
 
   @Getter
-  private JSONObject homeFacility;
-
-  @Getter
-  @Setter
-  private String homeFacilityCode;
+  private UUID homeFacilityId;
 
   @Getter
   @Setter
