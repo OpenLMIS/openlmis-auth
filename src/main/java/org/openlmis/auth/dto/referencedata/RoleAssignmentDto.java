@@ -30,14 +30,14 @@ public class RoleAssignmentDto {
 
   @Getter
   @Setter
-  private String programCode;
+  private UUID programId;
 
   @Getter
   @Setter
-  private String supervisoryNodeCode;
+  private UUID supervisoryNodeId;
 
   @Getter
   @Setter
-  private String warehouseCode;
+  private UUID warehouseId;
 }
 
