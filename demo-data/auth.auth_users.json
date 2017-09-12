@@ -103,5 +103,12 @@
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
     "username": "ccemanager",
     "referenceDataUserId": "7214eb3d-3a74-4048-9a4a-619927fbc501"
+  },
+  {
+    "id": "3d6ecbcb-b2a8-4a5d-a7ca-20b045441a43",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "username": "divo",
+    "referenceDataUserId": "560be32a-ea2e-4d12-ae00-1f69376ad535"
   }
 ]
