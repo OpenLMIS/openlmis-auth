@@ -15,7 +15,6 @@
 
 package org.openlmis.auth.util;
 
-import org.apache.commons.codec.Charsets;
 import org.openlmis.auth.exception.EncodingException;
 import org.openlmis.auth.service.RequestParameters;
 import org.springframework.http.HttpEntity;
@@ -25,6 +24,7 @@ import org.springframework.web.util.UriUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 public final class RequestHelper {
 
@@ -49,7 +49,9 @@ public final class RequestHelper {
       parameters.forEach(e -> {
         try {
           builder.queryParam(e.getKey(),
-                  UriUtils.encodeQueryParam(String.valueOf(e.getValue()), Charsets.UTF_8.name()));
+              UriUtils.encodeQueryParam(
+                  String.valueOf(e.getValue()),
+                  StandardCharsets.UTF_8.name()));
         } catch (UnsupportedEncodingException ex) {
           throw new EncodingException(ex);
         }

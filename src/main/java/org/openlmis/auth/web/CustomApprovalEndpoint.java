@@ -33,17 +33,19 @@ import org.springframework.web.servlet.ModelAndView;
 @SessionAttributes("authorizationRequest")
 public class CustomApprovalEndpoint extends WhitelabelApprovalEndpoint {
   private static final String PREFIX = "/api";
+  private static final String CSRF = "_csrf";
 
   /**
    * Displays approval page.
    */
+  @Override
   @RequestMapping("/api/oauth/confirm_access")
   public ModelAndView getAccessConfirmation(Map<String, Object> model, HttpServletRequest request)
       throws Exception {
     String template = createTemplate(model, request)
         .replace("/oauth/authorize", PREFIX + "/oauth/authorize");
-    if (request.getAttribute("_csrf") != null) {
-      model.put("_csrf", request.getAttribute("_csrf"));
+    if (request.getAttribute(CSRF) != null) {
+      model.put(CSRF, request.getAttribute(CSRF));
     }
     return new ModelAndView(new SpelView(template), model);
   }

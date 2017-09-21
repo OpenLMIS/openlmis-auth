@@ -281,7 +281,7 @@ public abstract class BaseCommunicationService<T> {
   protected URI buildUri(String url, Map<String, ?> params) {
     UriComponentsBuilder builder = UriComponentsBuilder.newInstance().uri(URI.create(url));
 
-    params.forEach((key, value) -> builder.queryParam(key, value));
+    params.forEach(builder::queryParam);
 
     return builder.build(true).toUri();
   }

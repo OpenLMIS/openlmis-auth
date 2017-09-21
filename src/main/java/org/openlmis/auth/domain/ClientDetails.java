@@ -78,7 +78,7 @@ public class ClientDetails implements org.springframework.security.oauth2.provid
 
   @Getter
   @Setter
-  private Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
+  private Map<String, Object> additionalInformation = new LinkedHashMap<>();
 
   /** Initializes ClientDetails with properties from given client.
    *

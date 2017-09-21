@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
@@ -39,12 +38,12 @@ public class Application {
 
   private Logger logger = LoggerFactory.getLogger(Application.class);
 
+  @Value("${defaultLocale}")
+  private Locale locale;
+
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
   }
-
-  @Value("${defaultLocale}")
-  private Locale locale;
 
   /**
    * Creates new LocaleResolver.

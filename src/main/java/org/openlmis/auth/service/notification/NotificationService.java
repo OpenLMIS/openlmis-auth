@@ -20,11 +20,7 @@ import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.util.RequestHelper;
 import org.openlmis.util.NotificationRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class NotificationService extends BaseCommunicationService<NotificationRequest> {

@@ -88,16 +88,16 @@ public class UserController {
   @Autowired
   private UserReferenceDataService userReferenceDataService;
 
-  @InitBinder
-  protected void initBinder(WebDataBinder binder) {
-    binder.setValidator(this.validator);
-  }
-
   @Autowired
   private ExposedMessageSource messageSource;
 
   @Autowired
   private TokenStore tokenStore;
+
+  @InitBinder
+  protected void initBinder(WebDataBinder binder) {
+    binder.setValidator(this.validator);
+  }
 
   /**
    * Custom endpoint for creating and updating users. Encrypts password with BCryptPasswordEncoder.

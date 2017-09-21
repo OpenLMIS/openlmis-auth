@@ -64,7 +64,7 @@ class SpelView implements View {
 
   public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
       throws Exception {
-    Map<String, Object> map = new HashMap<String, Object>(model);
+    Map<String, Object> map = new HashMap<>(model);
     String path = ServletUriComponentsBuilder.fromContextPath(request).build()
         .getPath();
     map.put("path", path == null ? "" : path);
