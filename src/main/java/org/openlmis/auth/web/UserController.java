@@ -232,12 +232,10 @@ public class UserController {
   }
 
   private Map<String, String> getErrors(final BindingResult bindingResult) {
-    return new HashMap<String, String>() {
-      {
-        for (FieldError error : bindingResult.getFieldErrors()) {
-          put(error.getField(), error.getDefaultMessage());
-        }
-      }
-    };
+    Map<String, String> errors = new HashMap<>();
+    for (FieldError error : bindingResult.getFieldErrors()) {
+      errors.put(error.getField(), error.getDefaultMessage());
+    }
+    return errors;
   }
 }
