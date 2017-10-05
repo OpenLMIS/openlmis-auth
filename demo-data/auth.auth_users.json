@@ -105,10 +105,38 @@
     "referenceDataUserId": "7214eb3d-3a74-4048-9a4a-619927fbc501"
   },
   {
+    "id": "04525438-5817-469f-adb0-b2242c901aba",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "username": "rivo",
+    "referenceDataUserId": "1e3b03a5-1d48-4de1-bb4a-389beece2277"
+  },
+  {
     "id": "3d6ecbcb-b2a8-4a5d-a7ca-20b045441a43",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "divo",
+    "username": "divo1",
     "referenceDataUserId": "560be32a-ea2e-4d12-ae00-1f69376ad535"
+  },
+  {
+    "id": "91a297da-e979-4f42-b0b6-76f9b0a82801",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "username": "divo2",
+    "referenceDataUserId": "0053b56d-be93-4d82-a021-b713dbaae2a9"
+  },
+  {
+    "id": "e99addbc-e90d-4b6b-96a4-7e9063408235",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "username": "vsrmanager1",
+    "referenceDataUserId": "211a6b4d-3c59-4fb2-8075-eedb79a18103"
+  },
+  {
+    "id": "0e4055fa-c060-4e7c-9265-18972db4aff9",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "username": "vwclerk1",
+    "referenceDataUserId": "ce962fad-c872-4244-92fe-2f70995d311a"
   }
 ]
