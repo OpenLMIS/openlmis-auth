@@ -22,6 +22,11 @@ There are 13 user accounts:
 12. psupervisor (password=password)
 13. wclerk1 (password=password)
 14. wclerk2 (password=password)
+15. rivo (password=password)
+16. divo1 (password=password)
+17. divo2 (password=password)
+18. vsrmanager1 (password=password)
+19. vwclerk1 (password=password)
 
 The [Reference Data service's demo data](https://github.com/OpenLMIS/openlmis-referencedata/tree/master/demo-data)
 connects these users to specific rights at facilities and programs.
