@@ -33,7 +33,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import java.time.ZonedDateTime;
 
@@ -105,8 +105,11 @@ public class UserService {
 
     try {
       sendResetPasswordEmail(dbUser, referenceDataUser.getEmail(), isNewUser);
-    } catch (RestClientException ex) {
-      LOGGER.warn("Reset password email could not be sent", ex);
+    } catch (HttpStatusCodeException ex) {
+      LOGGER.error(
+          "Unable to send reset password email. Error code: {}, response message: {}",
+          ex.getStatusCode(), ex.getResponseBodyAsString()
+      );
     }
     return dbUser;
   }
