@@ -23,6 +23,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -92,6 +93,7 @@ public class UserServiceTest extends BaseServiceTest {
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
+    verifyZeroInteractions(notificationService);
   }
 
   @Test
@@ -110,6 +112,7 @@ public class UserServiceTest extends BaseServiceTest {
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
+    verifyZeroInteractions(notificationService);
   }
 
   @Test
@@ -135,6 +138,8 @@ public class UserServiceTest extends BaseServiceTest {
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
+    verifyZeroInteractions(notificationService);
+
     User result = argumentCaptor.getValue();
     assertNotEquals(oldUserPassword, result.getPassword());
   }
@@ -159,6 +164,8 @@ public class UserServiceTest extends BaseServiceTest {
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
+    verifyZeroInteractions(notificationService);
+
     User result = argumentCaptor.getValue();
     assertEquals(oldUserPassword, result.getPassword());
   }

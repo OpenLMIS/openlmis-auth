@@ -16,6 +16,11 @@
 package org.openlmis.auth.service;
 
 
+import static org.openlmis.auth.i18n.MessageKeys.ACCOUNT_CREATED_EMAIL_SUBJECT;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_REFERENCE_DATA_USER_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
+import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
+
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.referencedata.UserDto;
@@ -26,21 +31,13 @@ import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.util.NotificationRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpStatusCodeException;
 
 import java.time.ZonedDateTime;
-
-import static org.openlmis.auth.i18n.MessageKeys.ACCOUNT_CREATED_EMAIL_SUBJECT;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_REFERENCE_DATA_USER_NOT_FOUND;
-import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
-import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
 
 @Service
 public class UserService {
@@ -50,7 +47,6 @@ public class UserService {
   static final String RESET_PASSWORD_URL =
       System.getenv("BASE_URL") + "/#!/resetPassword/";
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
   private static final String MAIL_ADDRESS = System.getenv("MAIL_ADDRESS");
 
   @Autowired
@@ -103,14 +99,6 @@ public class UserService {
     }
     dbUser = userRepository.save(dbUser);
 
-    try {
-      sendResetPasswordEmail(dbUser, referenceDataUser.getEmail(), isNewUser);
-    } catch (HttpStatusCodeException ex) {
-      LOGGER.error(
-          "Unable to send reset password email. Error code: {}, response message: {}",
-          ex.getStatusCode(), ex.getResponseBodyAsString()
-      );
-    }
     return dbUser;
   }
 
@@ -143,8 +131,8 @@ public class UserService {
   /**
    * Sends password reset email.
    *
-   * @param user the user whose password is being reset
-   * @param email recipient's email address
+   * @param user      the user whose password is being reset
+   * @param email     recipient's email address
    * @param isNewUser whether the user was just created
    */
   public void sendResetPasswordEmail(User user, String email, boolean isNewUser) {
