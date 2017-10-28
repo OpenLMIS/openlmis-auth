@@ -4,7 +4,7 @@
 Bug fixes added in a backwards-compatible manner:
 * [OLMIS-3119](https://openlmis.atlassian.net/browse/OLMIS-3119): Fixed issue with TOKEN_DURATION variable being ingored, which
 in reality was an issue with set up of the Spring context and autowiring not working as expected.
-* [OLMIS-3357](https://openlmis.atlassian.net/browse/OLMIS-3357): Reset email will not be sent when user is updated
+* [OLMIS-3357](https://openlmis.atlassian.net/browse/OLMIS-3357): Reset email will not be sent when user is created or updated
 
 3.1.0 / 2017-09-01
 ===================
