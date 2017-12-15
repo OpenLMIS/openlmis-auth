@@ -33,7 +33,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ApiKey extends BaseEntity {
+public final class ApiKey extends BaseEntity {
 
   @Getter
   @Setter

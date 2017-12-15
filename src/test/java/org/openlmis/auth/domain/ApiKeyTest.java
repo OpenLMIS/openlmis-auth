@@ -15,28 +15,21 @@
 
 package org.openlmis.auth.domain;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import org.junit.Test;
 
-import java.util.UUID;
+public class ApiKeyTest {
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(ApiKey.class)
+        .withRedefinedSuperclass()
+        .suppress(Warning.NONFINAL_FIELDS) // we can't make fields as final in domain class
+        .verify();
+  }
 
-@MappedSuperclass
-@EqualsAndHashCode
-public abstract class BaseEntity {
 
-  @Id
-  @GeneratedValue(generator = "uuid-gen")
-  @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
-  @Type(type = "pg-uuid")
-  @Getter
-  @Setter
-  private UUID id;
 }
