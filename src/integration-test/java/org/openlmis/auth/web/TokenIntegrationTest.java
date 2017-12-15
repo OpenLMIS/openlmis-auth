@@ -15,17 +15,18 @@
 
 package org.openlmis.auth.web;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.openlmis.auth.web.TestWebData.DummyUserDto;
+import static org.openlmis.auth.web.TestWebData.Fields;
+import static org.openlmis.auth.web.TestWebData.GrantTypes;
+import static org.openlmis.auth.web.TestWebData.Tokens.DURATION;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 public class TokenIntegrationTest extends BaseWebIntegrationTest {
-
-  private static final int DURATION = 1000;
 
   @BeforeClass
   public static void setUpClass() {
@@ -34,16 +35,19 @@ public class TokenIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldSetExpirationForTokens() {
-    DefaultOAuth2AccessToken token = restAssured.given()
-        .auth().preemptive().basic("user-client", "changeme")
-        .queryParam("grant_type", "password")
-        .queryParam("username", "admin")
-        .queryParam("password", "password")
+    OAuth2AccessToken token = startRequest()
+        .auth()
+        .preemptive()
+        .basic("user-client", "changeme")
+        .queryParam(Fields.PASSWORD, GrantTypes.PASSWORD)
+        .queryParam(Fields.USERNAME, DummyUserDto.USERNAME)
+        .queryParam(Fields.GRANT_TYPE, DummyUserDto.PASSWORD)
         .when()
         .post("/api/oauth/token")
         .then()
         .statusCode(200)
-        .extract().as(DefaultOAuth2AccessToken.class);
+        .extract()
+        .as(OAuth2AccessToken.class);
 
     assertNotNull(token);
     assertEquals(OAuth2AccessToken.BEARER_TYPE.toLowerCase(), token.getTokenType());

@@ -15,6 +15,8 @@
 
 package org.openlmis.auth.web;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_SEND_REQUEST;
+
 import org.openlmis.auth.exception.BindingResultException;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.exception.ValidationMessageException;
@@ -45,7 +47,7 @@ public class WebErrorHandling extends AbstractErrorHandling {
   public Message.LocalizedMessage handleHttpStatusCodeException(HttpStatusCodeException ex) {
     return logErrorAndRespond(
         "Unable to send a request", ex, new Message(
-            "error.sendRequest",
+            ERROR_SEND_REQUEST,
             ex.getStatusCode().toString(), ex.getResponseBodyAsString()
         )
     );

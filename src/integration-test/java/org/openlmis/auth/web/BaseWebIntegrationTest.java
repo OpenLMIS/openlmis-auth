@@ -15,163 +15,196 @@
 
 package org.openlmis.auth.web;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.mockito.BDDMockito.given;
+import static org.openlmis.auth.web.TestWebData.ClientIds.API_KEY_CLIENT_ID;
+import static org.openlmis.auth.web.TestWebData.ClientIds.SERVICE_CLIENT_ID;
+import static org.openlmis.auth.web.TestWebData.ClientIds.USER_CLIENT_ID;
+import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
+import static org.openlmis.auth.web.TestWebData.Tokens.BEARER;
+import static org.openlmis.auth.web.TestWebData.Tokens.SERVICE_TOKEN;
+import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.RestAssured;
-import guru.nidi.ramltester.RamlDefinition;
-import guru.nidi.ramltester.RamlLoaders;
-import guru.nidi.ramltester.junit.RamlMatchers;
-import guru.nidi.ramltester.restassured.RestAssuredClient;
-import org.junit.Assert;
+import com.jayway.restassured.config.ObjectMapperConfig;
+import com.jayway.restassured.config.RestAssuredConfig;
+import com.jayway.restassured.filter.log.LogDetail;
+import com.jayway.restassured.response.ValidatableResponse;
+import com.jayway.restassured.specification.RequestSpecification;
+
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.openlmis.auth.i18n.MessageService;
+import org.openlmis.auth.security.AccessTokenEnhancer;
+import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.auth.util.Message;
+import org.openlmis.auth.web.TestWebData.DummyOAuth2Authentication;
+import org.openlmis.auth.web.TestWebData.DummyUserDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import guru.nidi.ramltester.RamlDefinition;
+import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.restassured.RestAssuredClient;
+
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @DirtiesContext
 public abstract class BaseWebIntegrationTest {
-  private static final String RAML_ASSERT_MESSAGE = "HTTP request/response should match RAML "
-      + "definition.";
-  static final String BASE_URL = System.getenv("BASE_URL");
-  static final String ACCESS_TOKEN = "access_token";
-  static final String MESSAGE = "message";
+  private static final String BASE_URL = System.getenv("BASE_URL");
 
-  private String token = null;
+  static final String RAML_ASSERT_MESSAGE = "HTTP request/response should match RAML definition.";
 
-  protected static final String REFERENCEDATA_API_USERS = "/api/users/";
+  RestAssuredClient restAssured;
 
-  protected static final String UUID_REGEX =
-      "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
-
-  protected static final String CONTENT_TYPE = "Content-Type";
-
-  protected static final String APPLICATION_JSON = "application/json";
-
-  private static final String MOCK_TOKEN_REQUEST_RESPONSE = "{"
-          + "  \"access_token\": \"418c89c5-7f21-4cd1-a63a-38c47892b0fe\",\n"
-          + "  \"token_type\": \"bearer\",\n"
-          + "  \"expires_in\": 847,\n"
-          + "  \"scope\": \"read write\",\n"
-          + "  \"referenceDataUserId\": \"35316636-6264-6331-2d34-3933322d3462\"\n"
-          + "}";
-
-  private static final String MOCK_FIND_USER_RESULT = "{"
-      + "\"id\":\"51f6bdc1-4932-4bc3-9589-368646ef7ad3\","
-      + "\"username\":\"admin\","
-      + "\"firstName\":\"Admin\","
-      + "\"lastName\":\"User\","
-      + "\"email\":\"example@mail.com\","
-      + "\"verified\":false"
-      + "}";
-
-  private static final String MOCK_USER_SEARCH_LIST = "[{"
-      + "\"id\":\"35316636-6264-6331-2d34-3933322d3462\","
-      + "\"username\":\"admin\","
-      + "\"firstName\":\"Admin\","
-      + "\"lastName\":\"User\","
-      + "\"email\":\"example@mail.com\","
-      + "\"verified\":false"
-      + "}]";
-
-  private static final String MOCK_USER_SEARCH_RESULT = "{"
-      + "\"content\":" + MOCK_USER_SEARCH_LIST + ","
-      + "\"sort\":null,"
-      + "\"first\":true,"
-      + "\"last\":true,"
-      + "\"totalPages\":1,"
-      + "\"totalElements\":1,"
-      + "\"numberOfElements\":1,"
-      + "\"size\":1000,"
-      + "\"number\":0"
-      + "}";
-
-  @Rule
-  public WireMockRule wireMockRule = new WireMockRule(80);
+  private static final RamlDefinition ramlDefinition =
+      RamlLoaders.fromClasspath().load("api-definition-raml.yaml").ignoringXheaders();
 
   @Autowired
-  protected MessageService messageService;
+  private MessageService messageService;
 
   @LocalServerPort
   private int randomPort;
 
-  protected RamlDefinition ramlDefinition;
-  protected RestAssuredClient restAssured;
+  @Autowired
+  private ObjectMapper objectMapper;
 
-  /** Prepare the test environment. */
-  @Before
-  public void setUp() {
+  @MockBean
+  UserReferenceDataService userReferenceDataService;
+
+  /**
+   * Initialize the REST Assured client. Done here and not in the constructor, so that randomPort is
+   * available.
+   */
+  @PostConstruct
+  public void init() {
     RestAssured.baseURI = BASE_URL;
     RestAssured.port = randomPort;
-    ramlDefinition = RamlLoaders.fromClasspath().load("api-definition-raml.yaml")
-        .ignoringXheaders();
+    RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
+        new ObjectMapperConfig().jackson2ObjectMapperFactory((clazz, charset) -> objectMapper)
+    );
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+
     restAssured = ramlDefinition.createRestAssured();
   }
 
-  /**
-   * Constructor for test.
-   */
-  public BaseWebIntegrationTest() {
-    // This mocks the auth token request response
-    wireMockRule.stubFor(post(urlPathEqualTo("/api/oauth/token?grant_type=client_credentials"))
-            .willReturn(aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(MOCK_TOKEN_REQUEST_RESPONSE)));
-
-    // This mocks the call to notification to post a notification.
-    wireMockRule.stubFor(post(urlPathEqualTo("/api/notification"))
-            .willReturn(aResponse()
-                    .withStatus(200)));
-
-    // This mocks for find one user
-    wireMockRule.stubFor(get(urlMatching(REFERENCEDATA_API_USERS + UUID_REGEX + ".*"))
-        .willReturn(aResponse()
-            .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-            .withBody(MOCK_FIND_USER_RESULT)));
-
-    // This mocks searching for users
-    wireMockRule.stubFor(post(urlMatching(REFERENCEDATA_API_USERS + "search.*"))
-        .willReturn(aResponse()
-            .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-            .withBody(MOCK_USER_SEARCH_RESULT)));
-  }
-
-  String getToken() {
-    if (token == null) {
-      token = fetchToken("admin", "password");
+  @Before
+  public void setUp() {
+    try {
+      given(userReferenceDataService.findUserByName(DummyUserDto.USERNAME))
+          .willReturn(new DummyUserDto());
+    } catch (Exception exp) {
+      throw new IllegalStateException(exp);
     }
-    return token;
   }
 
   String getMessage(Message message) {
     return messageService.localize(message).asMessage();
   }
 
-  private String fetchToken(String username, String password) {
-    String token = restAssured.given()
-        .auth().preemptive().basic("user-client", "changeme")
-        .queryParam("grant_type", "password")
-        .queryParam("username", username)
-        .queryParam("password", password)
+  ValidatableResponse sendPostRequest(String token, String url, Object content,
+                                      Map<String, Object> query) {
+    RequestSpecification request = startRequest(token);
+
+    if (null != query) {
+      for (Map.Entry<String, Object> entry : query.entrySet()) {
+        request = request.queryParam(entry.getKey(), entry.getValue());
+      }
+    }
+
+    if (null != content) {
+      request = request.content(content);
+    }
+
+    return request
+        .contentType(APPLICATION_JSON_VALUE)
         .when()
-        .post("/api/oauth/token")
-        .then()
-        .extract()
-        .path("access_token");
-    Assert.assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(),
-        RamlMatchers.hasNoViolations());
-    return token;
+        .post(url)
+        .then();
   }
+
+  RequestSpecification startRequest() {
+    return restAssured.given().log().ifValidationFails(LogDetail.ALL, true);
+  }
+
+  RequestSpecification startRequest(String token) {
+    RequestSpecification request = startRequest();
+
+    if (isNotBlank(token)) {
+      request = request.header(HttpHeaders.AUTHORIZATION, BEARER + token);
+    }
+
+    return request;
+  }
+
+  @TestConfiguration
+  static class TestConfig {
+
+    @Autowired
+    private TokenStore tokenStore;
+
+    @Autowired
+    @Qualifier("clientDetailsServiceImpl")
+    private ClientDetailsService clientDetailsService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Value("${token.validitySeconds}")
+    private Integer tokenValiditySeconds;
+
+    @Bean
+    public DefaultTokenServices defaultTokenServices() {
+      DefaultTokenServices tokenServices = new TestTokenServices();
+      tokenServices.setTokenStore(tokenStore);
+      tokenServices.setSupportRefreshToken(true);
+      tokenServices.setClientDetailsService(clientDetailsService);
+      tokenServices.setTokenEnhancer(new AccessTokenEnhancer());
+      tokenServices.setAccessTokenValiditySeconds(tokenValiditySeconds);
+      tokenServices.setAuthenticationManager(authenticationManager);
+
+      return tokenServices;
+    }
+
+    private static class TestTokenServices extends DefaultTokenServices {
+
+      @Override
+      public OAuth2Authentication loadAuthentication(String accessTokenValue) {
+        switch (accessTokenValue) {
+          case USER_TOKEN:
+            return new DummyOAuth2Authentication(USER_CLIENT_ID, "admin");
+          case SERVICE_TOKEN:
+            return new DummyOAuth2Authentication(SERVICE_CLIENT_ID);
+          case API_KEY_TOKEN:
+            return new DummyOAuth2Authentication(API_KEY_CLIENT_ID);
+          default:
+            return super.loadAuthentication(accessTokenValue);
+        }
+      }
+    }
+
+  }
+
 }

@@ -16,6 +16,13 @@
 
 package org.openlmis.auth.web;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_FORGOT_PASSWORD_USER_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_CONFIRMATION;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
+
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.referencedata.UserDto;
@@ -33,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -41,6 +47,7 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -62,11 +69,9 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
-
-@RepositoryRestController
+@Controller
 @Transactional
+@RequestMapping("/api")
 public class UserController {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
@@ -132,7 +137,7 @@ public class UserController {
 
     String[] msgArgs = {};
     return messageSource
-        .getMessage("users.logout.confirmation", msgArgs, LocaleContextHolder.getLocale());
+        .getMessage(USERS_LOGOUT_CONFIRMATION, msgArgs, LocaleContextHolder.getLocale());
   }
 
   /**
@@ -159,10 +164,10 @@ public class UserController {
 
         String[] msgArgs = {username};
         return messageSource.getMessage(
-            "users.passwordReset.confirmation", msgArgs, LocaleContextHolder.getLocale());
+            USERS_PASSWORD_RESET_CONFIRMATION, msgArgs, LocaleContextHolder.getLocale());
       } else {
         String[] msgArgs = {};
-        errors.put("username", messageSource.getMessage("users.passwordReset.userNotFound",
+        errors.put("username", messageSource.getMessage(USERS_PASSWORD_RESET_USER_NOT_FOUND,
             msgArgs, LocaleContextHolder.getLocale()));
       }
     } else {
@@ -181,7 +186,7 @@ public class UserController {
     UserDto refDataUser = userReferenceDataService.findUserByEmail(email);
 
     if (refDataUser == null) {
-      throw new ValidationMessageException("users.forgotPassword.userNotFound");
+      throw new ValidationMessageException(USERS_FORGOT_PASSWORD_USER_NOT_FOUND);
     }
 
     User user = userRepository.findOneByReferenceDataUserId(refDataUser.getId());

@@ -345,6 +345,56 @@ resourceTypes:
                         X-Content-Type-Options:
                         X-XSS-Protection:
 
+  /apiKeys:
+      displayName: API Keys
+      post:
+          is: [ secured ]
+          description: Create API Key.
+          queryParameters:
+              serviceAccountId:
+                  displayName: Service Account ID
+                  type: string
+                  required: true
+                  repeat: false
+          responses:
+              201:
+                  body:
+                      text/plain:
+              400:
+                  body:
+                      application/json:
+                          schema: localizedMessage
+              401:
+                  body:
+                      application/json:
+              403:
+                  body:
+                      application/json:
+                          schema: localizedMessage
+      /{key}:
+          uriParameters:
+              key:
+                  displayName: key
+                  type: string
+                  required: true
+                  repeat: false
+          delete:
+              is: [ secured ]
+              description: "Completely removes API Key. This action is not recoverable."
+              responses:
+                  204:
+                  401:
+                      body:
+                        application/json:
+                  400:
+                      body:
+                          application/json:
+                              schema: localizedMessage
+                  403:
+                      body:
+                          application/json:
+                              schema: localizedMessage
+
   /oauth:
       /token:
           post:

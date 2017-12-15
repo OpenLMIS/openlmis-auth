@@ -15,19 +15,22 @@
 
 package org.openlmis.auth.service;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
+
 import org.openlmis.auth.dto.ResultDto;
 import org.openlmis.auth.dto.RightDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
-import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.auth.exception.PermissionMessageException;
+import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.auth.util.AuthenticationHelper;
 import org.openlmis.auth.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @Service
@@ -40,23 +43,59 @@ public class PermissionService {
   @Autowired
   private UserReferenceDataService userReferenceDataService;
 
+  @Value("${auth.server.clientId}")
+  private String serviceTokenClientId;
+
   public void canManageUsers() {
-    checkPermission(USERS_MANAGE, null, null, null);
+    checkPermission(USERS_MANAGE, null, null, null, true, false, false);
   }
 
-  private void checkPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
-    if (!hasPermission(rightName, program, facility, warehouse)) {
-      throw new PermissionMessageException(new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName));
+  public void canManageApiKeys() {
+    checkPermission(null, null, null, null, false, true, false);
+  }
+
+  private void checkPermission(String rightName, UUID program, UUID facility, UUID warehouse,
+                               boolean allowUserTokens, boolean allowServiceTokens,
+                               boolean allowApiKey) {
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
+        .getContext()
+        .getAuthentication();
+
+    if (authentication.isClientOnly()) {
+      if (checkServiceToken(allowServiceTokens, allowApiKey, authentication)) {
+        return;
+      }
+    } else {
+      if (checkUserToken(rightName, program, facility, warehouse, allowUserTokens)) {
+        return;
+      }
     }
+
+    // at this point, token is unauthorized
+    throw new PermissionMessageException(new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName));
   }
 
-  private Boolean hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
+  private boolean checkUserToken(String rightName, UUID program, UUID facility, UUID warehouse,
+                                 boolean allowUserTokens) {
+    if (!allowUserTokens) {
+      return false;
+    }
+
     UserDto user = authenticationHelper.getCurrentUser();
     RightDto right = authenticationHelper.getRight(rightName);
     ResultDto<Boolean> result = userReferenceDataService.hasRight(
         user.getId(), right.getId(), program, facility, warehouse
     );
+
     return null != result && result.getResult();
+  }
+
+  private boolean checkServiceToken(boolean allowServiceTokens, boolean allowApiKey,
+                                    OAuth2Authentication authentication) {
+    String clientId = authentication.getOAuth2Request().getClientId();
+    boolean isServiceToken = serviceTokenClientId.equals(clientId);
+
+    return isServiceToken ? allowServiceTokens : allowApiKey;
   }
 
 

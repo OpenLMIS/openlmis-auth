@@ -16,6 +16,7 @@
 package org.openlmis.auth.domain;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Column;
@@ -25,6 +26,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "oauth_client_details")
+@NoArgsConstructor
 public class Client {
 
   @Id
@@ -87,4 +89,17 @@ public class Client {
   @Getter
   @Setter
   private String webServerRedirectUri;
+
+  /**
+   * Creates new instance of {@link Client}.
+   */
+  public Client(String clientId, String clientSecret, String authorities,
+                String authorizedGrantTypes, String scope, Integer accessTokenValiditySeconds) {
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+    this.scope = scope;
+    this.authorizedGrantTypes = authorizedGrantTypes;
+    this.authorities = authorities;
+    this.accessTokenValiditySeconds = accessTokenValiditySeconds;
+  }
 }
