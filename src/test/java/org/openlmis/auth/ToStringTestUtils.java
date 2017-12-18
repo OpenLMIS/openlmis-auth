@@ -13,31 +13,19 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.domain;
+package org.openlmis.auth;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
+import be.joengenduvel.java.verifiers.ToStringVerifier;
 
-import org.junit.Test;
-import org.openlmis.auth.ApiKeyDataBuilder;
-import org.openlmis.auth.ToStringTestUtils;
+public class ToStringTestUtils {
 
-public class ApiKeyTest {
-
-  @Test
-  public void equalsContract() {
-    EqualsVerifier
-        .forClass(ApiKey.class)
-        .withRedefinedSuperclass()
-        .suppress(Warning.NONFINAL_FIELDS) // we can't make fields as final in domain class
-        .verify();
+  /**
+   * Checks if given class has proper toString method.
+   */
+  public static <T> void verify(Class<T> clazz, T object) {
+    ToStringVerifier
+        .forClass(clazz)
+        .ignore("$jacocoData") // external library is checking for this field, has to be ignored
+        .containsAllPrivateFields(object);
   }
-
-  @Test
-  public void shouldImplementToString() {
-    ApiKey key = new ApiKeyDataBuilder().build();
-    ToStringTestUtils.verify(ApiKey.class, key);
-  }
-
-
 }
