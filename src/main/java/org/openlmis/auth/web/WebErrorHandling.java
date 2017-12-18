@@ -18,6 +18,7 @@ package org.openlmis.auth.web;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_SEND_REQUEST;
 
 import org.openlmis.auth.exception.BindingResultException;
+import org.openlmis.auth.exception.NotFoundException;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.util.Message;
@@ -86,6 +87,13 @@ public class WebErrorHandling extends AbstractErrorHandling {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public Message.LocalizedMessage handleValidationMessageException(ValidationMessageException ex) {
+    return getLocalizedMessage(ex.asMessage());
+  }
+
+  @ExceptionHandler(NotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public Message.LocalizedMessage handleNotFoundException(NotFoundException ex) {
     return getLocalizedMessage(ex.asMessage());
   }
 

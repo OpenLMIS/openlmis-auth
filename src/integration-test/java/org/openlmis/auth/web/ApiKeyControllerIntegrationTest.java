@@ -224,7 +224,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .willReturn(Optional.empty());
 
     delete(SERVICE_TOKEN)
-        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .statusCode(HttpStatus.NOT_FOUND.value())
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_CLIENT_NOT_FOUND));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
@@ -244,7 +244,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .willReturn(Optional.empty());
 
     delete(SERVICE_TOKEN)
-        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .statusCode(HttpStatus.NOT_FOUND.value())
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_API_KEY_NOT_FOUND));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());

@@ -23,6 +23,7 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 import org.apache.commons.codec.binary.Base64;
 import org.openlmis.auth.domain.ApiKey;
 import org.openlmis.auth.domain.Client;
+import org.openlmis.auth.exception.NotFoundException;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.repository.ApiKeyRepository;
 import org.openlmis.auth.repository.ClientRepository;
@@ -141,12 +142,12 @@ public class ApiKeyController {
     profiler.start("FIND_CLIENT");
     final Client client = clientRepository
         .findOneByClientId(clientId)
-        .orElseThrow(() -> new ValidationMessageException(ERROR_CLIENT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ERROR_CLIENT_NOT_FOUND));
 
     profiler.start("FIND_API_KEY");
     final ApiKey apiKey = apiKeyRepository
         .findOneByClientId(clientId)
-        .orElseThrow(() -> new ValidationMessageException(ERROR_API_KEY_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ERROR_API_KEY_NOT_FOUND));
 
     profiler.start("REMOVE_ACCESS_TOKEN");
     tokenStore.removeAccessToken(new DefaultOAuth2AccessToken(key));

@@ -395,6 +395,10 @@ resourceTypes:
                       body:
                           application/json:
                               schema: localizedMessage
+                  404:
+                      body:
+                          application/json:
+                              schema: localizedMessage
 
   /oauth:
       /token:
