@@ -1,3 +1,10 @@
+3.2.0 / WIP
+===================
+
+Improvements and new functionality which are backwards-compatible:
+* [OLMIS-3135](https://openlmis.atlassian.net/browse/OLMIS-3135): Generating access tokens for API Keys 
+
+
 3.1.1 / 2017-11-09
 ===================
 
