@@ -33,7 +33,7 @@ import java.util.Locale;
 
 @SpringBootApplication
 @EnableScheduling
-@ImportResource("applicationContext.xml")
+@ImportResource("classpath*:/applicationContext.xml")
 public class Application {
 
   private Logger logger = LoggerFactory.getLogger(Application.class);
