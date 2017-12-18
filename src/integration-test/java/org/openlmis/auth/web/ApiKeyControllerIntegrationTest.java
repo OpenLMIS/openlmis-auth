@@ -132,7 +132,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
-  public void shouldNotAllToCreateApiKeyByUser() {
+  public void shouldNotAllowToCreateApiKeyByUser() {
     post(USER_TOKEN)
         .statusCode(HttpStatus.FORBIDDEN.value())
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
@@ -142,7 +142,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
-  public void shouldNotAllToCreateApiKeyIfAlreadyExists() {
+  public void shouldNotAllowToCreateApiKeyIfAlreadyExists() {
     given(apiKeyRepository.findOneByServiceAccountId(SERVICE_ACCOUNT_ID))
         .willReturn(Optional.of(apiKey));
 
@@ -192,7 +192,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
-  public void shouldNotAllToRemoveApiKeyByUser() {
+  public void shouldNotAllowToRemoveApiKeyByUser() {
     delete(USER_TOKEN)
         .statusCode(HttpStatus.FORBIDDEN.value())
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
