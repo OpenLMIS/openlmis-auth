@@ -43,11 +43,11 @@ public abstract class MessageKeys {
       + ".users.referenceDataUserNotFound";
 
   public static final String ACCOUNT_CREATED_EMAIL_SUBJECT = SERVICE_PREFIX
-      + "auth.email.accountCreated.subject";
+      + ".email.accountCreated.subject";
   public static final String PASSWORD_RESET_EMAIL_SUBJECT = SERVICE_PREFIX
-      + "auth.email.resetPassword.subject";
+      + ".email.resetPassword.subject";
   public static final String PASSWORD_RESET_EMAIL_BODY = SERVICE_PREFIX
-      + "auth.email.resetPassword.body";
+      + ".email.resetPassword.body";
 
   public static final String USERS_PASSWORD_RESET_CONFIRMATION = USERS
       + ".passwordReset.confirmation";
