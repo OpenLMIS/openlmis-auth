@@ -17,9 +17,6 @@ package org.openlmis.auth.web;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.mockito.BDDMockito.given;
-import static org.openlmis.auth.web.TestWebData.ClientIds.API_KEY_CLIENT_ID;
-import static org.openlmis.auth.web.TestWebData.ClientIds.SERVICE_CLIENT_ID;
-import static org.openlmis.auth.web.TestWebData.ClientIds.USER_CLIENT_ID;
 import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.BEARER;
 import static org.openlmis.auth.web.TestWebData.Tokens.SERVICE_TOKEN;
@@ -36,12 +33,12 @@ import com.jayway.restassured.specification.RequestSpecification;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.OAuth2AuthenticationDataBuilder;
 import org.openlmis.auth.i18n.MessageService;
 import org.openlmis.auth.security.AccessTokenEnhancer;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.auth.util.Message;
-import org.openlmis.auth.web.TestWebData.DummyOAuth2Authentication;
-import org.openlmis.auth.web.TestWebData.DummyUserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -194,11 +191,11 @@ public abstract class BaseWebIntegrationTest {
       public OAuth2Authentication loadAuthentication(String accessTokenValue) {
         switch (accessTokenValue) {
           case USER_TOKEN:
-            return new DummyOAuth2Authentication(USER_CLIENT_ID, "admin");
+            return new OAuth2AuthenticationDataBuilder().buildUserAuthentication();
           case SERVICE_TOKEN:
-            return new DummyOAuth2Authentication(SERVICE_CLIENT_ID);
+            return new OAuth2AuthenticationDataBuilder().buildServiceAuthentication();
           case API_KEY_TOKEN:
-            return new DummyOAuth2Authentication(API_KEY_CLIENT_ID);
+            return new OAuth2AuthenticationDataBuilder().buildApiKeyAuthentication();
           default:
             return super.loadAuthentication(accessTokenValue);
         }

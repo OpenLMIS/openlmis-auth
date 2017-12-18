@@ -15,15 +15,6 @@
 
 package org.openlmis.auth.web;
 
-import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.referencedata.UserDto;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
-
-import lombok.EqualsAndHashCode;
-
-import java.util.UUID;
-
 interface TestWebData {
 
   abstract class Fields {
@@ -66,77 +57,4 @@ interface TestWebData {
     }
   }
 
-  abstract class ClientIds {
-    static final String USER_CLIENT_ID = "user-client";
-    static final String SERVICE_CLIENT_ID = "trusted-client";
-    static final String API_KEY_CLIENT_ID = "api-key-client-20171214111354128";
-
-    private ClientIds() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  final class DummyUserDto extends UserDto {
-    static final String AUTH_ID = "51f6bdc1-4932-4bc3-9589-368646ef7ad3";
-    static final String REFERENCE_ID = "35316636-6264-6331-2d34-3933322d3462";
-    static final String USERNAME = "admin";
-    static final String PASSWORD = "password";
-    static final String EMAIL = "test@openlmis.org";
-
-    @Override
-    public UUID getId() {
-      return UUID.fromString(REFERENCE_ID);
-    }
-
-    @Override
-    public String getUsername() {
-      return USERNAME;
-    }
-
-    @Override
-    public String getFirstName() {
-      return "Admin";
-    }
-
-    @Override
-    public String getLastName() {
-      return "User";
-    }
-
-    @Override
-    public String getEmail() {
-      return EMAIL;
-    }
-
-    @Override
-    public boolean isVerified() {
-      return false;
-    }
-
-  }
-
-  @EqualsAndHashCode(callSuper = false)
-  class DummyOAuth2Authentication extends OAuth2Authentication {
-    private User user;
-
-    DummyOAuth2Authentication(String clientId) {
-      super(new OAuth2Request(null, clientId, null, true, null, null, null, null, null), null);
-    }
-
-    DummyOAuth2Authentication(String clientId, String username) {
-      super(new OAuth2Request(null, clientId, null, true, null, null, null, null, null), null);
-      this.user = new User();
-      this.user.setUsername(username);
-    }
-
-    @Override
-    public boolean isClientOnly() {
-      return null == user;
-    }
-
-    @Override
-    public Object getPrincipal() {
-      return user;
-    }
-  }
 }

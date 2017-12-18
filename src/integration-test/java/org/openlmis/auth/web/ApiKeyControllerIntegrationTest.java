@@ -37,12 +37,12 @@ import com.jayway.restassured.response.ValidatableResponse;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openlmis.auth.OAuth2AuthenticationDataBuilder;
 import org.openlmis.auth.domain.ApiKey;
 import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.repository.ApiKeyRepository;
 import org.openlmis.auth.repository.ClientRepository;
 import org.openlmis.auth.service.AccessTokenService;
-import org.openlmis.auth.web.TestWebData.DummyOAuth2Authentication;
 import org.openlmis.auth.web.TestWebData.Fields;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -98,7 +98,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     given(apiKeyRepository.save(any(ApiKey.class))).willReturn(apiKey);
 
     given(tokenStore.readAuthentication(NEW_API_KEY_TOKEN))
-        .willReturn(new DummyOAuth2Authentication(CLIENT_ID));
+        .willReturn(new OAuth2AuthenticationDataBuilder().withClientId(CLIENT_ID).build());
 
     given(accessTokenService.obtainToken(anyString(), anyString())).willReturn(NEW_API_KEY_TOKEN);
   }

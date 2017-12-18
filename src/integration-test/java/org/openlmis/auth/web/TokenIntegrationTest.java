@@ -17,13 +17,13 @@ package org.openlmis.auth.web;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.openlmis.auth.web.TestWebData.DummyUserDto;
 import static org.openlmis.auth.web.TestWebData.Fields;
 import static org.openlmis.auth.web.TestWebData.GrantTypes;
 import static org.openlmis.auth.web.TestWebData.Tokens.DURATION;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openlmis.auth.DummyUserDto;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 public class TokenIntegrationTest extends BaseWebIntegrationTest {
