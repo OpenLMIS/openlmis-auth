@@ -352,7 +352,8 @@ resourceTypes:
           description: Create API Key.
           queryParameters:
               serviceAccountId:
-                  displayName: Service Account ID
+                  displayName: serviceAccountId
+                  description: The ID of service account resource from the reference data service.
                   type: string
                   required: true
                   repeat: false
