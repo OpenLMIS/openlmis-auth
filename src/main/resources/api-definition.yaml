@@ -350,13 +350,6 @@ resourceTypes:
       post:
           is: [ secured ]
           description: Create API Key.
-          queryParameters:
-              serviceAccountId:
-                  displayName: serviceAccountId
-                  description: The ID of service account resource from the reference data service.
-                  type: string
-                  required: true
-                  repeat: false
           responses:
               201:
                   body:

@@ -15,7 +15,6 @@
 
 package org.openlmis.auth.web;
 
-import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.any;
@@ -24,8 +23,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.never;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.verifyZeroInteractions;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_FOUND;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
@@ -38,9 +35,7 @@ import com.jayway.restassured.response.ValidatableResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.auth.OAuth2AuthenticationDataBuilder;
-import org.openlmis.auth.domain.ApiKey;
 import org.openlmis.auth.domain.Client;
-import org.openlmis.auth.repository.ApiKeyRepository;
 import org.openlmis.auth.repository.ClientRepository;
 import org.openlmis.auth.service.AccessTokenService;
 import org.openlmis.auth.web.TestWebData.Fields;
@@ -53,7 +48,6 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import guru.nidi.ramltester.junit.RamlMatchers;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
@@ -65,8 +59,6 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String NEW_API_KEY_TOKEN = "api-key-token";
   private static final String CLIENT_ID = "client_id";
 
-  private static final UUID SERVICE_ACCOUNT_ID = UUID.randomUUID();
-
   @MockBean
   private TokenStore tokenStore;
 
@@ -76,11 +68,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   @MockBean
   private ClientRepository clientRepository;
 
-  @MockBean
-  private ApiKeyRepository apiKeyRepository;
-
   private Client client = new Client();
-  private ApiKey apiKey = new ApiKey(CLIENT_ID, SERVICE_ACCOUNT_ID);
 
   @Before
   @Override
@@ -90,12 +78,6 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     client = new Client();
     given(clientRepository.findOneByClientId(CLIENT_ID)).willReturn(Optional.of(client));
     given(clientRepository.save(any(Client.class))).willReturn(client);
-
-    given(apiKeyRepository.findOneByServiceAccountId(SERVICE_ACCOUNT_ID))
-        .willReturn(Optional.empty());
-    given(apiKeyRepository.findOneByClientId(CLIENT_ID))
-        .willReturn(Optional.of(apiKey));
-    given(apiKeyRepository.save(any(ApiKey.class))).willReturn(apiKey);
 
     given(tokenStore.readAuthentication(NEW_API_KEY_TOKEN))
         .willReturn(new OAuth2AuthenticationDataBuilder().withClientId(CLIENT_ID).build());
@@ -118,7 +100,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService, apiKeyRepository);
+    verifyZeroInteractions(clientRepository, accessTokenService);
   }
 
   @Test
@@ -128,7 +110,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService, apiKeyRepository);
+    verifyZeroInteractions(clientRepository, accessTokenService);
   }
 
   @Test
@@ -138,20 +120,6 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService, apiKeyRepository);
-  }
-
-  @Test
-  public void shouldNotAllowToCreateApiKeyIfAlreadyExists() {
-    given(apiKeyRepository.findOneByServiceAccountId(SERVICE_ACCOUNT_ID))
-        .willReturn(Optional.of(apiKey));
-
-    post(SERVICE_TOKEN)
-        .statusCode(HttpStatus.BAD_REQUEST.value())
-        .body(Fields.MESSAGE_KEY, equalTo(ERROR_API_KEY_FOUND));
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verify(apiKeyRepository).findOneByServiceAccountId(SERVICE_ACCOUNT_ID);
     verifyZeroInteractions(clientRepository, accessTokenService);
   }
 
@@ -167,9 +135,6 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
     verify(clientRepository).findOneByClientId(CLIENT_ID);
     verify(clientRepository).delete(client);
-
-    verify(apiKeyRepository).findOneByClientId(CLIENT_ID);
-    verify(apiKeyRepository).delete(apiKey);
   }
 
   @Test
@@ -178,7 +143,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService, apiKeyRepository);
+    verifyZeroInteractions(clientRepository, accessTokenService);
   }
 
   @Test
@@ -188,7 +153,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, tokenStore, apiKeyRepository);
+    verifyZeroInteractions(clientRepository, tokenStore);
   }
 
   @Test
@@ -198,7 +163,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, tokenStore, apiKeyRepository);
+    verifyZeroInteractions(clientRepository, tokenStore);
   }
 
   @Test
@@ -215,7 +180,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     verify(tokenStore).readAuthentication(NEW_API_KEY_TOKEN);
     verify(tokenStore, never()).removeAccessToken(any(OAuth2AccessToken.class));
 
-    verifyZeroInteractions(clientRepository, apiKeyRepository);
+    verifyZeroInteractions(clientRepository);
   }
 
   @Test
@@ -234,35 +199,10 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
     verify(clientRepository).findOneByClientId(CLIENT_ID);
     verify(clientRepository, never()).delete(any(Client.class));
-
-    verifyZeroInteractions(apiKeyRepository);
-  }
-
-  @Test
-  public void shouldNotAllowToRemoveKeyIfThereIsNoApiKey() {
-    given(apiKeyRepository.findOneByClientId(CLIENT_ID))
-        .willReturn(Optional.empty());
-
-    delete(SERVICE_TOKEN)
-        .statusCode(HttpStatus.NOT_FOUND.value())
-        .body(Fields.MESSAGE_KEY, equalTo(ERROR_API_KEY_NOT_FOUND));
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-
-    verify(tokenStore).readAuthentication(NEW_API_KEY_TOKEN);
-    verify(tokenStore, never()).removeAccessToken(any(OAuth2AccessToken.class));
-
-    verify(clientRepository).findOneByClientId(CLIENT_ID);
-    verify(clientRepository, never()).delete(any(Client.class));
-
-    verify(apiKeyRepository).findOneByClientId(CLIENT_ID);
-    verify(apiKeyRepository, never()).delete(any(ApiKey.class));
   }
 
   private ValidatableResponse post(String token) {
-    return sendPostRequest(
-        token, RESOURCE_URL, null, of(Fields.SERVICE_ACCOUNT_ID, SERVICE_ACCOUNT_ID)
-    );
+    return sendPostRequest(token, RESOURCE_URL, null, null);
   }
 
   private ValidatableResponse delete(String token) {

@@ -15,17 +15,13 @@
 
 package org.openlmis.auth.web;
 
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_FOUND;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 
 import org.apache.commons.codec.binary.Base64;
-import org.openlmis.auth.domain.ApiKey;
 import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.exception.NotFoundException;
 import org.openlmis.auth.exception.ValidationMessageException;
-import org.openlmis.auth.repository.ApiKeyRepository;
 import org.openlmis.auth.repository.ClientRepository;
 import org.openlmis.auth.service.AccessTokenService;
 import org.openlmis.auth.service.PermissionService;
@@ -43,14 +39,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
 @Controller
 @Transactional
@@ -72,9 +66,6 @@ public class ApiKeyController {
   @Autowired
   private ClientRepository clientRepository;
 
-  @Autowired
-  private ApiKeyRepository apiKeyRepository;
-
   @Value("${auth.apiKey.clientId.prefix}")
   private String clientIdPrefix;
 
@@ -84,18 +75,12 @@ public class ApiKeyController {
   @RequestMapping(value = "/apiKeys", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  public String createApiKey(@RequestParam("serviceAccountId") UUID serviceAccountId) {
+  public String createApiKey() {
     Profiler profiler = new Profiler("CREATE_API_KEY");
     profiler.setLogger(LOGGER);
 
     profiler.start("CHECK_PERMISSION");
     permissionService.canManageApiKeys();
-
-    apiKeyRepository
-        .findOneByServiceAccountId(serviceAccountId)
-        .ifPresent(element -> {
-          throw new ValidationMessageException(ERROR_API_KEY_FOUND);
-        });
 
     profiler.start("GET_CURRENT_DATE");
     LocalDateTime currentDate = LocalDateTime.now(Clock.systemUTC());
@@ -109,7 +94,6 @@ public class ApiKeyController {
         clientId, clientSecret, "TRUSTED_CLIENT", "client_credentials", "read,write", 0
     );
     clientRepository.save(client);
-    apiKeyRepository.save(new ApiKey(clientId, serviceAccountId));
 
     profiler.start("OBTAIN_TOKEN");
     String token = accessTokenService.obtainToken(client.getClientId(), client.getClientSecret());
@@ -144,19 +128,11 @@ public class ApiKeyController {
         .findOneByClientId(clientId)
         .orElseThrow(() -> new NotFoundException(ERROR_CLIENT_NOT_FOUND));
 
-    profiler.start("FIND_API_KEY");
-    final ApiKey apiKey = apiKeyRepository
-        .findOneByClientId(clientId)
-        .orElseThrow(() -> new NotFoundException(ERROR_API_KEY_NOT_FOUND));
-
-    profiler.start("REMOVE_ACCESS_TOKEN");
-    tokenStore.removeAccessToken(new DefaultOAuth2AccessToken(key));
-
     profiler.start("REMOVE_CLIENT");
     clientRepository.delete(client);
 
-    profiler.start("REMOVE_API_KEY");
-    apiKeyRepository.delete(apiKey);
+    profiler.start("REMOVE_ACCESS_TOKEN");
+    tokenStore.removeAccessToken(new DefaultOAuth2AccessToken(key));
 
     profiler.stop().log();
   }
