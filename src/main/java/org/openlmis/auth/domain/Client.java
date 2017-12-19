@@ -15,6 +15,7 @@
 
 package org.openlmis.auth.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "oauth_client_details")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Client {
 
   @Id
@@ -95,11 +97,9 @@ public class Client {
    */
   public Client(String clientId, String clientSecret, String authorities,
                 String authorizedGrantTypes, String scope, Integer accessTokenValiditySeconds) {
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
-    this.scope = scope;
-    this.authorizedGrantTypes = authorizedGrantTypes;
-    this.authorities = authorities;
-    this.accessTokenValiditySeconds = accessTokenValiditySeconds;
+    this(
+        clientId, clientSecret, scope, null, authorizedGrantTypes, null, null,authorities,
+        accessTokenValiditySeconds,null, null, null
+    );
   }
 }

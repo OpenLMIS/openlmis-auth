@@ -55,10 +55,6 @@ public abstract class BaseCommunicationService<T> {
   @Value("${auth.server.clientId}")
   private String clientId;
 
-  @Value("${auth.server.clientSecret}")
-  private String clientSecret;
-
-
   protected abstract String getServiceUrl();
 
   protected abstract String getUrl();
@@ -68,7 +64,7 @@ public abstract class BaseCommunicationService<T> {
   protected abstract Class<T[]> getArrayResultClass();
 
   protected String obtainAccessToken() {
-    return accessTokenService.obtainToken(clientId, clientSecret);
+    return accessTokenService.obtainToken(clientId);
   }
 
   /**

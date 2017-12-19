@@ -39,7 +39,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-class ConsulCommunicationService {
+public class ConsulCommunicationService {
   private static final Logger LOGGER = LoggerFactory.getLogger(ConsulCommunicationService.class);
   static final String SERVICE_SEPARATOR = ",";
 
@@ -52,6 +52,9 @@ class ConsulCommunicationService {
   @Autowired
   private ConfigurationSettingService configurationSettingService;
 
+  /**
+   * Update OAuth resources.
+   */
   @Scheduled(fixedRate = 60 * 1000)
   @Transactional
   public void updateOAuthResources() {

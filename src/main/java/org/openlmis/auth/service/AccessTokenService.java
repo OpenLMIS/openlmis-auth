@@ -15,52 +15,63 @@
 
 package org.openlmis.auth.service;
 
-import org.apache.commons.codec.binary.Base64;
-import org.openlmis.auth.util.RequestHelper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
+import static org.springframework.security.oauth2.common.util.OAuth2Utils.GRANT_TYPE;
 
-import java.net.URI;
+import com.google.common.collect.ImmutableMap;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
+import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.stereotype.Service;
+
 import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 @Service
 public class AccessTokenService {
-  static final String ACCESS_TOKEN = "access_token";
-  static final String AUTHORIZATION = "Authorization";
 
-  @Value("${auth.server.authorizationUrl}")
-  private String authorizationUrl;
+  @Autowired
+  @Qualifier("clientDetailsServiceImpl")
+  private ClientDetailsService clientDetailsService;
 
-  private RestOperations restTemplate = new RestTemplate();
+  @Autowired
+  @Qualifier("defaultTokenServices")
+  private DefaultTokenServices defaultTokenServices;
+
+  private TokenGranter tokenGranter;
+  private OAuth2RequestFactory requestFactory;
+
+  /**
+   * Initiates internal fields.
+   */
+  @PostConstruct
+  public void init() {
+    requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
+    tokenGranter = new ClientCredentialsTokenGranter(
+        defaultTokenServices, clientDetailsService, requestFactory
+    );
+  }
 
   /**
    * Obtains token based on client ID and secret.
    */
-  public String obtainToken(String clientId, String clientSecret) {
-    String plainCreds = clientId + ":" + clientSecret;
-    byte[] plainCredsBytes = plainCreds.getBytes();
-    byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-    String base64Creds = new String(base64CredsBytes);
+  public String obtainToken(String clientId) {
+    Map<String, String> parameters = ImmutableMap.of(GRANT_TYPE, "client_credentials");
+    ClientDetails authenticatedClient = clientDetailsService.loadClientByClientId(clientId);
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.add(AUTHORIZATION, "Basic " + base64Creds);
+    TokenRequest tokenRequest = requestFactory
+        .createTokenRequest(parameters, authenticatedClient);
 
-    HttpEntity<String> request = new HttpEntity<>(headers);
-
-    RequestParameters parameters = RequestParameters
-        .init()
-        .set("grant_type", "client_credentials");
-
-    URI url = RequestHelper.createUri(authorizationUrl, parameters);
-    ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
-
-    return String.valueOf(response.getBody().get(ACCESS_TOKEN));
+    return tokenGranter
+        .grant(tokenRequest.getGrantType(), tokenRequest)
+        .getValue();
   }
-
 }

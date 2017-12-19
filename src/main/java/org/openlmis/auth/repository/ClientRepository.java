@@ -16,12 +16,12 @@
 package org.openlmis.auth.repository;
 
 import org.openlmis.auth.domain.Client;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface ClientRepository extends CrudRepository<Client, String> {
+public interface ClientRepository extends JpaRepository<Client, String> {
 
   Optional<Client> findOneByClientId(@Param("clientId") String clientId);
 }

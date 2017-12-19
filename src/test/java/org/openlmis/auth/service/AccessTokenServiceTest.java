@@ -15,106 +15,75 @@
 
 package org.openlmis.auth.service;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
-import static org.openlmis.auth.service.AccessTokenService.ACCESS_TOKEN;
-import static org.openlmis.auth.service.AccessTokenService.AUTHORIZATION;
+import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
-
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestTemplate;
-
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import org.mockito.stubbing.Answer;
+import org.openlmis.auth.ClientDataBuilder;
+import org.openlmis.auth.domain.Client;
+import org.openlmis.auth.domain.ClientDetails;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccessTokenServiceTest {
-  private static final String AUTHORIZATION_URL = "http://localhost/auth/oauth/token";
-
-  private static final String CLIENT_ID = "client_id";
-  private static final String CLIENT_SECRET = "client_secret";
   private static final String TOKEN = "token";
 
-  private static final String URI_QUERY = "grant_type=client_credentials";
+  @Mock(name = "clientDetailsServiceImpl")
+  private ClientDetailsService clientDetailsService;
 
-  @Mock
-  private RestTemplate restTemplate;
+  @Mock(name = "defaultTokenServices")
+  private DefaultTokenServices defaultTokenServices;
 
-  @Captor
-  private ArgumentCaptor<URI> uriCaptor;
-
-  @Captor
-  private ArgumentCaptor<HttpEntity> entityCaptor;
-
+  @InjectMocks
   private AccessTokenService accessTokenService;
 
-  @Before
-  public void setUp() throws Exception {
-    accessTokenService = new AccessTokenService();
+  private Client client = new ClientDataBuilder().buildServiceClient();
 
-    ReflectionTestUtils.setField(accessTokenService, "restTemplate", restTemplate);
-    ReflectionTestUtils.setField(accessTokenService, "authorizationUrl", AUTHORIZATION_URL);
+  @Before
+  public void setUp() {
+    accessTokenService.init();
   }
 
   @Test
   public void shouldObtainToken() {
-    // given
-    Map<String, String> responseBody = ImmutableMap.of(ACCESS_TOKEN, TOKEN);
-    ResponseEntity<Map> response = new ResponseEntity<>(responseBody, HttpStatus.OK);
-
     // when
-    given(restTemplate
-        .exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
-        .willReturn(response);
+    when(clientDetailsService.loadClientByClientId(client.getClientId()))
+        .thenReturn(new ClientDetails(client));
+    when(defaultTokenServices.createAccessToken(any(OAuth2Authentication.class)))
+        .thenAnswer(new CreateAccessTokenAnswer());
 
-    String token = accessTokenService.obtainToken(CLIENT_ID, CLIENT_SECRET);
+    String token = accessTokenService.obtainToken(client.getClientId());
 
     // then
     assertThat(token, is(equalTo(TOKEN)));
 
-    verify(restTemplate)
-        .exchange(uriCaptor.capture(), eq(HttpMethod.POST), entityCaptor.capture(), eq(Map.class));
+    verify(clientDetailsService, atLeastOnce()).loadClientByClientId(client.getClientId());
+  }
 
-    URI uri = uriCaptor.getValue();
-    assertThat(uri.toString(), startsWith(AUTHORIZATION_URL));
-    assertThat(uri.getQuery(), containsString(URI_QUERY));
+  private final class CreateAccessTokenAnswer implements Answer<OAuth2AccessToken> {
 
-    HttpEntity entity = entityCaptor.getValue();
-    assertThat(entity.getBody(), is(nullValue()));
-    assertThat(entity.getHeaders(), hasKey(AUTHORIZATION));
-
-    String plainCreds = CLIENT_ID + ":" + CLIENT_SECRET;
-    byte[] plainCredsBytes = plainCreds.getBytes();
-    byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-    String base64Creds = new String(base64CredsBytes);
-
-    List<String> authorizations = entity.getHeaders().get(AUTHORIZATION);
-    assertThat(authorizations, hasSize(1));
-    assertThat(authorizations.get(0), equalTo("Basic " + base64Creds));
+    @Override
+    public OAuth2AccessToken answer(InvocationOnMock invocation) {
+      OAuth2Authentication arg = invocation.getArgumentAt(0, OAuth2Authentication.class);
+      assertThat(arg.getOAuth2Request().getClientId(), is(client.getClientId()));
+      return new DefaultOAuth2AccessToken(TOKEN);
+    }
 
   }
 }

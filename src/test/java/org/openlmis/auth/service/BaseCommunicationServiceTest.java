@@ -52,12 +52,12 @@ public abstract class BaseCommunicationServiceTest {
 
   @Before
   public void setUp() {
-    when(accessTokenService.obtainToken("trusted-client", "secret")).thenReturn(TOKEN);
+    when(accessTokenService.obtainToken("trusted-client")).thenReturn(TOKEN);
   }
 
   @After
   public void tearDown() {
-    verify(accessTokenService).obtainToken("trusted-client", "secret");
+    verify(accessTokenService).obtainToken("trusted-client");
   }
 
   protected abstract BaseCommunicationService getService();
@@ -68,7 +68,6 @@ public abstract class BaseCommunicationServiceTest {
     service.setAccessTokenService(accessTokenService);
 
     ReflectionTestUtils.setField(service, "clientId", "trusted-client");
-    ReflectionTestUtils.setField(service, "clientSecret", "secret");
 
     return service;
   }

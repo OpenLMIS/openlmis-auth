@@ -25,6 +25,7 @@ import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.repository.ClientRepository;
 import org.openlmis.auth.service.AccessTokenService;
 import org.openlmis.auth.service.PermissionService;
+import org.openlmis.auth.service.consul.ConsulCommunicationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
@@ -66,7 +67,10 @@ public class ApiKeyController {
   @Autowired
   private ClientRepository clientRepository;
 
-  @Value("${auth.apiKey.clientId.prefix}")
+  @Autowired
+  private ConsulCommunicationService consulCommunicationService;
+
+  @Value("${auth.server.clientId.apiKey.prefix}")
   private String clientIdPrefix;
 
   /**
@@ -93,10 +97,13 @@ public class ApiKeyController {
     Client client = new Client(
         clientId, clientSecret, "TRUSTED_CLIENT", "client_credentials", "read,write", 0
     );
-    clientRepository.save(client);
+    clientRepository.saveAndFlush(client);
+
+    profiler.start("UPDATE_OAUTH_RESOURCES");
+    consulCommunicationService.updateOAuthResources();
 
     profiler.start("OBTAIN_TOKEN");
-    String token = accessTokenService.obtainToken(client.getClientId(), client.getClientSecret());
+    String token = accessTokenService.obtainToken(client.getClientId());
 
     profiler.stop().log();
     return token;

@@ -38,6 +38,7 @@ import org.openlmis.auth.OAuth2AuthenticationDataBuilder;
 import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.repository.ClientRepository;
 import org.openlmis.auth.service.AccessTokenService;
+import org.openlmis.auth.service.consul.ConsulCommunicationService;
 import org.openlmis.auth.web.TestWebData.Fields;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -68,6 +69,9 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   @MockBean
   private ClientRepository clientRepository;
 
+  @MockBean
+  private ConsulCommunicationService consulCommunicationService;
+
   private Client client = new Client();
 
   @Before
@@ -77,12 +81,12 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
     client = new Client();
     given(clientRepository.findOneByClientId(CLIENT_ID)).willReturn(Optional.of(client));
-    given(clientRepository.save(any(Client.class))).willReturn(client);
+    given(clientRepository.saveAndFlush(any(Client.class))).willReturn(client);
 
     given(tokenStore.readAuthentication(NEW_API_KEY_TOKEN))
         .willReturn(new OAuth2AuthenticationDataBuilder().withClientId(CLIENT_ID).build());
 
-    given(accessTokenService.obtainToken(anyString(), anyString())).willReturn(NEW_API_KEY_TOKEN);
+    given(accessTokenService.obtainToken(anyString())).willReturn(NEW_API_KEY_TOKEN);
   }
 
   @Test
@@ -100,7 +104,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService);
+    verifyZeroInteractions(clientRepository, accessTokenService, consulCommunicationService);
   }
 
   @Test
@@ -110,7 +114,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService);
+    verifyZeroInteractions(clientRepository, accessTokenService, consulCommunicationService);
   }
 
   @Test
@@ -120,7 +124,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
         .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService);
+    verifyZeroInteractions(clientRepository, accessTokenService, consulCommunicationService);
   }
 
   @Test
