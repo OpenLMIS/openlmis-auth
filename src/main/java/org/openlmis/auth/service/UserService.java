@@ -83,8 +83,8 @@ public class UserService {
     user.setReferenceDataUserId(referenceDataUser.getId());
 
     User dbUser = userRepository.findOneByReferenceDataUserId(user.getReferenceDataUserId());
-
     boolean isNewUser = dbUser == null;
+
     if (!isNewUser) {
       dbUser.setUsername(user.getUsername());
       dbUser.setEnabled(user.getEnabled());

@@ -155,7 +155,7 @@ public class UserController {
 
     if (!bindingResult.hasErrors()) {
       String username = passwordResetRequest.getUsername();
-      Optional<User> user = userRepository.findOneByUsername(username);
+      Optional<User> user = userRepository.findOneByUsernameIgnoreCase(username);
 
       if (user.isPresent()) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();

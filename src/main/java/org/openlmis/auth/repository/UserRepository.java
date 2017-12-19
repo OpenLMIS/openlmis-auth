@@ -24,7 +24,7 @@ import java.util.UUID;
 
 public interface UserRepository extends CrudRepository<User, UUID> {
 
-  Optional<User> findOneByUsername(@Param("username") String username);
+  Optional<User> findOneByUsernameIgnoreCase(@Param("username") String username);
 
   User findOneByReferenceDataUserId(@Param("referenceDataUserId") UUID referenceDataUserId);
 }

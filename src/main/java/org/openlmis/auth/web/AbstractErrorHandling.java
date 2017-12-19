@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 abstract class AbstractErrorHandling {
 
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Autowired
   private MessageService messageService;

@@ -102,6 +102,7 @@ public class UserServiceTest extends BaseServiceTest {
     when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
     User oldUser = mock(User.class);
     UUID oldUserId = UUID.randomUUID();
+    when(oldUser.getUsername()).thenReturn("user");
     when(oldUser.getId()).thenReturn(oldUserId);
 
     when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(oldUser);
@@ -124,6 +125,7 @@ public class UserServiceTest extends BaseServiceTest {
     String oldUserPassword = "oldPassword";
 
     oldUser.setId(oldUserId);
+    oldUser.setUsername("user");
     oldUser.setPassword(oldUserPassword);
 
     User newUser = mock(User.class);
@@ -149,6 +151,7 @@ public class UserServiceTest extends BaseServiceTest {
     // given
     when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
     User oldUser = new User();
+    oldUser.setUsername("username");
     UUID oldUserId = UUID.randomUUID();
     String oldUserPassword = "oldPassword";
 

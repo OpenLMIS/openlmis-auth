@@ -59,6 +59,8 @@ public abstract class MessageKeys {
 
   public static final String USERS_LOGOUT_CONFIRMATION = USERS + ".logout.confirmation";
 
+  public static final String ERROR_CONSTRAINT = ERROR_PREFIX + ".constraint";
+
 
   private MessageKeys() {
     throw new UnsupportedOperationException();

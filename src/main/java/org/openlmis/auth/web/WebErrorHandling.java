@@ -21,6 +21,7 @@ import org.openlmis.auth.exception.BindingResultException;
 import org.openlmis.auth.exception.NotFoundException;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.exception.ValidationMessageException;
+import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.util.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -30,6 +31,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import java.util.Map;
+
+import javax.persistence.PersistenceException;
 
 /**
  * Controller advice responsible for handling errors from web layer.
@@ -95,6 +98,19 @@ public class WebErrorHandling extends AbstractErrorHandling {
   @ResponseBody
   public Message.LocalizedMessage handleNotFoundException(NotFoundException ex) {
     return getLocalizedMessage(ex.asMessage());
+  }
+
+  /**
+   * Handles persistence exception.
+   * @param ex the persistence exception
+   * @return the user-oriented error message.
+   */
+  @ExceptionHandler(PersistenceException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public Message.LocalizedMessage handlePersistenceException(PersistenceException ex) {
+    logger.error(ex.getMessage());
+    return getLocalizedMessage(new Message(MessageKeys.ERROR_CONSTRAINT));
   }
 
 }
