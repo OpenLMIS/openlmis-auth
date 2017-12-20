@@ -5,7 +5,7 @@ Improvements and new functionality which are backwards-compatible:
 * [OLMIS-3135](https://openlmis.atlassian.net/browse/OLMIS-3135): Generating access tokens for API Keys 
 
 Bug fixes that are backwards-compatible:
-* [OLMIS-3537](https://openlmis.atlassian.net/browse/OLMIS-3537): Usernames are now case-insensitive.
+* [OLMIS-3537](https://openlmis.atlassian.net/browse/OLMIS-3537): Usernames are now case-insensitive. (Note: Implementations need to handle this before upgrading this component, if they use usernames that differ by letter casing only)
 
 
 3.1.1 / 2017-11-09
