@@ -17,6 +17,7 @@ package org.openlmis.auth.service;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.openlmis.auth.OAuth2AuthenticationDataBuilder.API_KEY_PREFIX;
 import static org.openlmis.auth.OAuth2AuthenticationDataBuilder.SERVICE_CLIENT_ID;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 
@@ -76,6 +77,7 @@ public class PermissionServiceTest {
         .thenReturn(new ResultDto<>(true));
 
     ReflectionTestUtils.setField(permissionService, "serviceTokenClientId", SERVICE_CLIENT_ID);
+    ReflectionTestUtils.setField(permissionService, "apiKeyPrefix", API_KEY_PREFIX);
   }
 
   @Test

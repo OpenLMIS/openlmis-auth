@@ -15,6 +15,7 @@
 
 package org.openlmis.auth.service;
 
+import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 
 import org.openlmis.auth.dto.ResultDto;
@@ -45,6 +46,9 @@ public class PermissionService {
 
   @Value("${auth.server.clientId}")
   private String serviceTokenClientId;
+
+  @Value("${auth.server.clientId.apiKey.prefix}")
+  private String apiKeyPrefix;
 
   public void canManageUsers() {
     checkPermission(USERS_MANAGE, null, null, null, true, false, false);
@@ -93,9 +97,16 @@ public class PermissionService {
   private boolean checkServiceToken(boolean allowServiceTokens, boolean allowApiKey,
                                     OAuth2Authentication authentication) {
     String clientId = authentication.getOAuth2Request().getClientId();
-    boolean isServiceToken = serviceTokenClientId.equals(clientId);
 
-    return isServiceToken ? allowServiceTokens : allowApiKey;
+    if (serviceTokenClientId.equals(clientId)) {
+      return allowServiceTokens;
+    }
+
+    if (startsWith(clientId, apiKeyPrefix)) {
+      return allowApiKey;
+    }
+
+    return false;
   }
 
 
