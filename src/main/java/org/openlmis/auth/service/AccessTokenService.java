@@ -15,10 +15,13 @@
 
 package org.openlmis.auth.service;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_REQUIRED;
 import static org.springframework.security.oauth2.common.util.OAuth2Utils.GRANT_TYPE;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.openlmis.auth.exception.ValidationMessageException;
+import org.openlmis.auth.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -32,6 +35,7 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
@@ -63,15 +67,19 @@ public class AccessTokenService {
   /**
    * Obtains token based on client ID and secret.
    */
-  public String obtainToken(String clientId) {
+  public UUID obtainToken(String clientId) {
     Map<String, String> parameters = ImmutableMap.of(GRANT_TYPE, "client_credentials");
     ClientDetails authenticatedClient = clientDetailsService.loadClientByClientId(clientId);
 
     TokenRequest tokenRequest = requestFactory
         .createTokenRequest(parameters, authenticatedClient);
 
-    return tokenGranter
+    String token = tokenGranter
         .grant(tokenRequest.getGrantType(), tokenRequest)
         .getValue();
+
+    return UuidUtil
+        .fromString(token)
+        .orElseThrow(() -> new ValidationMessageException(ERROR_TOKEN_REQUIRED));
   }
 }

@@ -64,7 +64,7 @@ public abstract class BaseCommunicationService<T> {
   protected abstract Class<T[]> getArrayResultClass();
 
   protected String obtainAccessToken() {
-    return accessTokenService.obtainToken(clientId);
+    return accessTokenService.obtainToken(clientId).toString();
   }
 
   /**

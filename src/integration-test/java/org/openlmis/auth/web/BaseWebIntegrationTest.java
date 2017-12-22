@@ -16,6 +16,7 @@
 package org.openlmis.auth.web;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.BEARER;
@@ -78,6 +79,8 @@ public abstract class BaseWebIntegrationTest {
 
   private static final RamlDefinition ramlDefinition =
       RamlLoaders.fromClasspath().load("api-definition-raml.yaml").ignoringXheaders();
+
+  static final String ID = "id";
 
   @Autowired
   private MessageService messageService;
@@ -154,6 +157,17 @@ public abstract class BaseWebIntegrationTest {
     }
 
     return request;
+  }
+
+  void checkPageBody(ValidatableResponse response, int page, int size, int numberOfElements,
+                     int totalElements, int totalPages) {
+    response
+        .body("number", is(page))
+        .body("size", is(size))
+        .body("numberOfElements", is(numberOfElements))
+        .body("content.size()", is(numberOfElements))
+        .body("totalElements", is(totalElements))
+        .body("totalPages", is(totalPages));
   }
 
   @TestConfiguration

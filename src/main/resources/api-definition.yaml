@@ -104,6 +104,9 @@ schemas:
         ]
       }
 
+  - apiKey: !include schemas/apiKey.json
+  - apiKeyPage: !include schemas/apiKeyPage.json
+
 traits:
     - secured:
           queryParameters:
@@ -118,6 +121,18 @@ traits:
                   displayName: Authorization
                   description: OAuth2 authorization token header. Takes the form of 'Bearer <token>'.
                   type: string
+                  required: false
+                  repeat: false
+    - paginated:
+          queryParameters:
+              page:
+                  description: The page number which should be displayed. Note that the first page is numbered zero rather than one. Additionally, negative and undefined valued are interpreted as zero.
+                  type: integer
+                  required: false
+                  repeat: false
+              size:
+                  description: The desired size of each page. This specifies the maximum number of values that should be returned by the server. Zero, undefined, and negative values should result in all possible values being returned.
+                  type: integer
                   required: false
                   repeat: false
 
@@ -347,13 +362,29 @@ resourceTypes:
 
   /apiKeys:
       displayName: API Keys
+      get:
+          is: [ secured, paginated ]
+          description: Returns all API Keys.
+          responses:
+              200:
+                  body:
+                      application/json:
+                          schema: apiKeyPage
+              401:
+                  body:
+                    application/json:
+              403:
+                  body:
+                      application/json:
+                          schema: localizedMessage
       post:
           is: [ secured ]
           description: Create API Key.
           responses:
               201:
                   body:
-                      text/plain:
+                      application/json:
+                        schema: apiKey
               400:
                   body:
                       application/json:
@@ -365,10 +396,10 @@ resourceTypes:
                   body:
                       application/json:
                           schema: localizedMessage
-      /{key}:
+      /{token}:
           uriParameters:
-              key:
-                  displayName: key
+              token:
+                  displayName: token
                   type: string
                   required: true
                   repeat: false

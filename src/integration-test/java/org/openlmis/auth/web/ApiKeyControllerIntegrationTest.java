@@ -15,49 +15,60 @@
 
 package org.openlmis.auth.web;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.never;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.verifyZeroInteractions;
+import static org.mockito.Matchers.anyString;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
+import static org.openlmis.auth.service.PermissionService.SERVICE_ACCOUNTS_MANAGE;
+import static org.openlmis.auth.web.TestWebData.Fields.MESSAGE_KEY;
 import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.SERVICE_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
 
 import com.jayway.restassured.response.ValidatableResponse;
 
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
+import org.openlmis.auth.ApiKeyDataBuilder;
+import org.openlmis.auth.ClientDataBuilder;
+import org.openlmis.auth.DummyRightDto;
+import org.openlmis.auth.DummyUserDto;
 import org.openlmis.auth.OAuth2AuthenticationDataBuilder;
+import org.openlmis.auth.domain.ApiKey;
 import org.openlmis.auth.domain.Client;
+import org.openlmis.auth.dto.ApiKeyDto;
+import org.openlmis.auth.dto.ResultDto;
+import org.openlmis.auth.dto.RightDto;
+import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.repository.ApiKeyRepository;
 import org.openlmis.auth.repository.ClientRepository;
 import org.openlmis.auth.service.AccessTokenService;
 import org.openlmis.auth.service.consul.ConsulCommunicationService;
-import org.openlmis.auth.web.TestWebData.Fields;
+import org.openlmis.auth.util.AuthenticationHelper;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 import guru.nidi.ramltester.junit.RamlMatchers;
 
 import java.util.Optional;
 
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.UnusedPrivateField"})
 public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String RESOURCE_URL = "/api/apiKeys";
-  private static final String KEY_URL = RESOURCE_URL + "/{key}";
+  private static final String TOKEN_URL = RESOURCE_URL + "/{token}";
 
-  private static final String KEY = "key";
-
-  private static final String NEW_API_KEY_TOKEN = "api-key-token";
+  private static final String TOKEN = "token";
   private static final String CLIENT_ID = "client_id";
 
   @MockBean
@@ -72,7 +83,18 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   @MockBean
   private ConsulCommunicationService consulCommunicationService;
 
-  private Client client = new Client();
+  @MockBean
+  private ApiKeyRepository apiKeyRepository;
+
+  @MockBean
+  private AuthenticationHelper authenticationHelper;
+
+  private Client client = new ClientDataBuilder().buildUserClient();
+
+  private ApiKey key;
+
+  private UserDto user = new DummyUserDto();
+  private RightDto right = new DummyRightDto();
 
   @Before
   @Override
@@ -80,111 +102,198 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     super.setUp();
 
     client = new Client();
+    key = new ApiKeyDataBuilder().build();
+
     given(clientRepository.findOneByClientId(CLIENT_ID)).willReturn(Optional.of(client));
     given(clientRepository.saveAndFlush(any(Client.class))).willReturn(client);
 
-    given(tokenStore.readAuthentication(NEW_API_KEY_TOKEN))
+    given(tokenStore.readAuthentication(key.getToken().toString()))
         .willReturn(new OAuth2AuthenticationDataBuilder().withClientId(CLIENT_ID).build());
 
-    given(accessTokenService.obtainToken(anyString())).willReturn(NEW_API_KEY_TOKEN);
+    given(accessTokenService.obtainToken(anyString()))
+        .willReturn(key.getToken());
+
+    given(apiKeyRepository.findOne(key.getToken())).willReturn(key);
+    given(apiKeyRepository.save(any(ApiKey.class)))
+        .willAnswer(invocation -> invocation.getArguments()[0]);
+
+    given(authenticationHelper.getCurrentUser()).willReturn(user);
+    given(authenticationHelper.getRight(SERVICE_ACCOUNTS_MANAGE)).willReturn(right);
+
+    given(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null,null))
+        .willReturn(new ResultDto<>(true));
+
   }
 
   @Test
   public void shouldCreateApiKey() {
-    post(SERVICE_TOKEN)
+    ApiKeyDto response = post(USER_TOKEN)
         .statusCode(HttpStatus.CREATED.value())
-        .body(equalTo(NEW_API_KEY_TOKEN));
+        .extract()
+        .as(ApiKeyDto.class);
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+
+    assertThat(response.getToken(), is(equalTo(key.getToken())));
+    assertThat(response.getCreatedBy(), is(equalTo(user.getId())));
+    assertThat(response.getCreatedDate(), is(notNullValue()));
   }
 
   @Test
-  public void shouldNotAllowToCreateApiKeyIfUnauthorized() {
-    post(null)
+  public void shouldReturnForbiddenForCreateApiKeyEndpointWhenUserHasNoRight() {
+    given(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null,null))
+        .willReturn(new ResultDto<>(false));
+
+    String response = post(USER_TOKEN)
+        .statusCode(HttpStatus.FORBIDDEN.value())
+        .extract()
+        .path(MESSAGE_KEY);
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+    assertThat(response, is(equalTo(ERROR_NO_FOLLOWING_PERMISSION)));
+  }
+
+  @Test
+  public void shouldReturnUnauthorizedWithoutAuthorizationForCreateApiKeyEndpoint() {
+    restAssured
+        .given()
+        .when()
+        .post(RESOURCE_URL)
+        .then()
         .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService, consulCommunicationService);
   }
 
   @Test
   public void shouldNotAllowToCreateApiKeyByAnotherApiKey() {
     post(API_KEY_TOKEN)
         .statusCode(HttpStatus.FORBIDDEN.value())
-        .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
+        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService, consulCommunicationService);
   }
 
   @Test
-  public void shouldNotAllowToCreateApiKeyByUser() {
-    post(USER_TOKEN)
+  public void shouldNotAllowToCreateApiKeyByService() {
+    post(SERVICE_TOKEN)
         .statusCode(HttpStatus.FORBIDDEN.value())
-        .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
+        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService, consulCommunicationService);
   }
 
   @Test
-  public void shouldRemoveApiKey() {
-    delete(SERVICE_TOKEN)
-        .statusCode(HttpStatus.NO_CONTENT.value());
+  public void shouldRetrieveApiKeys() {
+    given(apiKeyRepository.findAll(any(Pageable.class)))
+        .willReturn(new PageImpl<>(Lists.newArrayList(key, key, key)));
+
+    ValidatableResponse response = get(10, USER_TOKEN).statusCode(HttpStatus.OK.value());
+    checkPageBody(response, 0, 10, 3, 3, 1);
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-
-    verify(tokenStore).readAuthentication(NEW_API_KEY_TOKEN);
-    verify(tokenStore).removeAccessToken(new DefaultOAuth2AccessToken(NEW_API_KEY_TOKEN));
-
-    verify(clientRepository).findOneByClientId(CLIENT_ID);
-    verify(clientRepository).delete(client);
   }
 
   @Test
-  public void shouldNotAllowToRemoveApiKeyIfUnauthorized() {
-    delete(null)
+  public void shouldRetrieveOnePageOfApiKeys() {
+    given(apiKeyRepository.findAll(any(Pageable.class)))
+        .willReturn(new PageImpl<>(Lists.newArrayList(key, key, key)));
+
+    ValidatableResponse response = get(1, USER_TOKEN).statusCode(HttpStatus.OK.value());
+    checkPageBody(response, 0, 1, 1, 3, 3);
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldReturnForbiddenForGetApiKeysEndpointWhenUserHasNoRight() {
+    given(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null,null))
+        .willReturn(new ResultDto<>(false));
+
+    String response = get(10, USER_TOKEN)
+        .statusCode(HttpStatus.FORBIDDEN.value())
+        .extract()
+        .path(MESSAGE_KEY);
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+    assertThat(response, is(equalTo(ERROR_NO_FOLLOWING_PERMISSION)));
+  }
+
+  @Test
+  public void shouldReturnUnauthorizedWithoutAuthorizationForGetApiKeysEndpoint() {
+    restAssured
+        .given()
+        .when()
+        .get(RESOURCE_URL)
+        .then()
         .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, accessTokenService);
   }
 
   @Test
-  public void shouldNotAllowToRemoveApiKeyByAnotherApiKey() {
-    delete(API_KEY_TOKEN)
+  public void shouldNotAllowToRetrieveApiKeysByAnotherApiKey() {
+    get(10, API_KEY_TOKEN)
         .statusCode(HttpStatus.FORBIDDEN.value())
-        .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
+        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, tokenStore);
   }
 
   @Test
-  public void shouldNotAllowToRemoveApiKeyByUser() {
-    delete(USER_TOKEN)
+  public void shouldNotAllowToRetrieveApiKeysKeyByService() {
+    get(10, SERVICE_TOKEN)
         .statusCode(HttpStatus.FORBIDDEN.value())
-        .body(Fields.MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
+        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(clientRepository, tokenStore);
+  }
+
+  @Test
+  public void shouldDeleteApiKey() {
+    delete(USER_TOKEN).statusCode(HttpStatus.NO_CONTENT.value());
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldReturnForbiddenForDeleteApiKeyEndpointWhenUserHasNoRight() {
+    given(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null,null))
+        .willReturn(new ResultDto<>(false));
+
+    String response = delete(USER_TOKEN)
+        .statusCode(HttpStatus.FORBIDDEN.value())
+        .extract()
+        .path(MESSAGE_KEY);
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+    assertThat(response, is(equalTo(ERROR_NO_FOLLOWING_PERMISSION)));
+  }
+
+  @Test
+  public void shouldReturnNotFoundIfKeyNotExistForDeleteApiKeyEndpoint() {
+    given(apiKeyRepository.findOne(key.getToken()))
+        .willReturn(null);
+
+    String response = delete(USER_TOKEN)
+        .statusCode(HttpStatus.NOT_FOUND.value())
+        .extract()
+        .path(MESSAGE_KEY);
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+    assertThat(response, is(equalTo(ERROR_API_KEY_NOT_FOUND)));
   }
 
   @Test
   public void shouldNotAllowToRemoveKeyIfThereIsNoAuthentication() {
-    given(tokenStore.readAuthentication(NEW_API_KEY_TOKEN))
+    given(tokenStore.readAuthentication(key.getToken().toString()))
         .willReturn(null);
 
-    delete(SERVICE_TOKEN)
+    delete(USER_TOKEN)
         .statusCode(HttpStatus.BAD_REQUEST.value())
-        .body(Fields.MESSAGE_KEY, equalTo(ERROR_TOKEN_INVALID));
+        .body(MESSAGE_KEY, equalTo(ERROR_TOKEN_INVALID));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-
-    verify(tokenStore).readAuthentication(NEW_API_KEY_TOKEN);
-    verify(tokenStore, never()).removeAccessToken(any(OAuth2AccessToken.class));
-
-    verifyZeroInteractions(clientRepository);
   }
 
   @Test
@@ -192,29 +301,62 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     given(clientRepository.findOneByClientId(CLIENT_ID))
         .willReturn(Optional.empty());
 
-    delete(SERVICE_TOKEN)
+    delete(USER_TOKEN)
         .statusCode(HttpStatus.NOT_FOUND.value())
-        .body(Fields.MESSAGE_KEY, equalTo(ERROR_CLIENT_NOT_FOUND));
+        .body(MESSAGE_KEY, equalTo(ERROR_CLIENT_NOT_FOUND));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
 
-    verify(tokenStore).readAuthentication(NEW_API_KEY_TOKEN);
-    verify(tokenStore, never()).removeAccessToken(any(OAuth2AccessToken.class));
+  @Test
+  public void shouldNotAllowToRemoveApiKeyByAnotherApiKey() {
+    delete(API_KEY_TOKEN)
+        .statusCode(HttpStatus.FORBIDDEN.value())
+        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
-    verify(clientRepository).findOneByClientId(CLIENT_ID);
-    verify(clientRepository, never()).delete(any(Client.class));
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldNotAllowToRemoveApiKeyByService() {
+    delete(SERVICE_TOKEN)
+        .statusCode(HttpStatus.FORBIDDEN.value())
+        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldReturnUnauthorizedWithoutAuthorizationForDeleteApiKeyEndpoint() {
+    restAssured
+        .given()
+        .pathParam(TOKEN, key.getToken())
+        .when()
+        .delete(TOKEN_URL)
+        .then()
+        .statusCode(HttpStatus.UNAUTHORIZED.value());
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   private ValidatableResponse post(String token) {
     return sendPostRequest(token, RESOURCE_URL, null, null);
   }
 
-  private ValidatableResponse delete(String token) {
+  private ValidatableResponse get(int pageSize, String token) {
     return startRequest(token)
-        .pathParam(KEY, NEW_API_KEY_TOKEN)
+        .queryParam("page", 0)
+        .queryParam("size", pageSize)
         .when()
-        .delete(KEY_URL)
+        .get(RESOURCE_URL)
         .then();
   }
 
+  private ValidatableResponse delete(String token) {
+    return startRequest(token)
+        .pathParam(TOKEN, key.getToken())
+        .when()
+        .delete(TOKEN_URL)
+        .then();
+  }
 }

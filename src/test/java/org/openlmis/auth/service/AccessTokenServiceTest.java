@@ -15,9 +15,9 @@
 
 package org.openlmis.auth.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -40,9 +40,11 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
+import java.util.UUID;
+
 @RunWith(MockitoJUnitRunner.class)
 public class AccessTokenServiceTest {
-  private static final String TOKEN = "token";
+  private static final UUID TOKEN = UUID.randomUUID();
 
   @Mock(name = "clientDetailsServiceImpl")
   private ClientDetailsService clientDetailsService;
@@ -68,7 +70,7 @@ public class AccessTokenServiceTest {
     when(defaultTokenServices.createAccessToken(any(OAuth2Authentication.class)))
         .thenAnswer(new CreateAccessTokenAnswer());
 
-    String token = accessTokenService.obtainToken(client.getClientId());
+    UUID token = accessTokenService.obtainToken(client.getClientId());
 
     // then
     assertThat(token, is(equalTo(TOKEN)));
@@ -82,7 +84,7 @@ public class AccessTokenServiceTest {
     public OAuth2AccessToken answer(InvocationOnMock invocation) {
       OAuth2Authentication arg = invocation.getArgumentAt(0, OAuth2Authentication.class);
       assertThat(arg.getOAuth2Request().getClientId(), is(client.getClientId()));
-      return new DefaultOAuth2AccessToken(TOKEN);
+      return new DefaultOAuth2AccessToken(TOKEN.toString());
     }
 
   }

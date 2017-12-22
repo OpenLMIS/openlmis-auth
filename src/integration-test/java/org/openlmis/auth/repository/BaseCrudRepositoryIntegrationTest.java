@@ -18,7 +18,7 @@ package org.openlmis.auth.repository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openlmis.auth.domain.BaseEntity;
+import org.openlmis.auth.domain.Identifiable;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-public abstract class BaseCrudRepositoryIntegrationTest<T extends BaseEntity> {
+public abstract class BaseCrudRepositoryIntegrationTest<T extends Identifiable> {
 
   abstract CrudRepository<T, UUID> getRepository();
 
@@ -49,6 +49,10 @@ public abstract class BaseCrudRepositoryIntegrationTest<T extends BaseEntity> {
     return this.instanceNumber.incrementAndGet();
   }
 
+  protected void assertBefore(T instance) {
+    Assert.assertNull(instance.getId());
+  }
+
   protected void assertInstance(T instance) {
     Assert.assertNotNull(instance.getId());
   }
@@ -58,7 +62,7 @@ public abstract class BaseCrudRepositoryIntegrationTest<T extends BaseEntity> {
     CrudRepository<T, UUID> repository = this.getRepository();
 
     T instance = this.generateInstance();
-    Assert.assertNull(instance.getId());
+    assertBefore(instance);
 
     instance = repository.save(instance);
     assertInstance(instance);

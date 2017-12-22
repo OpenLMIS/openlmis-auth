@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.openlmis.auth.i18n.MessageKeys.ACCOUNT_CREATED_EMAIL_SUBJECT;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
@@ -28,6 +27,7 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_RIGHT_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_SEND_REQUEST;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_REQUIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
@@ -46,10 +46,10 @@ public class MessageKeysTest {
 
     verifyValue(ERROR_TOKEN_INVALID, "auth.error.token.invalid");
     verifyValue(ERROR_TOKEN_EXPIRED, "auth.error.token.expired");
+    verifyValue(ERROR_TOKEN_REQUIRED, "auth.error.token.required");
 
     verifyValue(ERROR_CLIENT_NOT_FOUND, "auth.error.client.notFound");
 
-    verifyValue(ERROR_API_KEY_FOUND, "auth.error.apiKey.found");
     verifyValue(ERROR_API_KEY_NOT_FOUND, "auth.error.apiKey.notFound");
 
     verifyValue(ERROR_USER_NOT_FOUND, "auth.error.authentication.userCanNotBeFound");

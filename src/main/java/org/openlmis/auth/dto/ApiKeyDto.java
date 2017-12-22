@@ -13,31 +13,34 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.domain;
+package org.openlmis.auth.dto;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import org.openlmis.auth.domain.ApiKey;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-
-@MappedSuperclass
+@Getter
+@Setter
 @EqualsAndHashCode
-public abstract class BaseEntity implements Identifiable {
-  static final String UUID_TYPE = "pg-uuid";
+@ToString
+public final class ApiKeyDto implements ApiKey.Importer, ApiKey.Exporter {
+  private UUID token;
+  private UUID createdBy;
+  private ZonedDateTime createdDate;
 
-  @Id
-  @GeneratedValue(generator = "uuid-gen")
-  @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
-  @Type(type = UUID_TYPE)
-  @Getter
-  @Setter
-  private UUID id;
+  /**
+   * Creates new instance of {@link ApiKeyDto} based on passed service account.
+   */
+  public static ApiKeyDto newInstance(ApiKey apiKey) {
+    ApiKeyDto dto = new ApiKeyDto();
+    apiKey.export(dto);
+
+    return dto;
+  }
 }

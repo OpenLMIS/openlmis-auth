@@ -31,6 +31,16 @@ public class ClientDataBuilder {
   private String additionalInformation = null;
   private String webServerRedirectUri = null;
 
+  /**
+   * Creates a new instance of {@link Client} as service client.
+   */
+  public Client buildUserClient() {
+    this.clientId = "user-client";
+    this.authorizedGrantTypes = "password";
+    this.accessTokenValiditySeconds = null;
+
+    return build();
+  }
 
   /**
    * Creates a new instance of {@link Client} as service client.

@@ -15,29 +15,39 @@
 
 package org.openlmis.auth.domain;
 
-import org.hibernate.annotations.GenericGenerator;
+import static org.openlmis.auth.domain.BaseEntity.UUID_TYPE;
+
 import org.hibernate.annotations.Type;
 
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
-@MappedSuperclass
+@Embeddable
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode
-public abstract class BaseEntity implements Identifiable {
-  static final String UUID_TYPE = "pg-uuid";
+@ToString
+@Getter
+public final class CreationDetails {
 
-  @Id
-  @GeneratedValue(generator = "uuid-gen")
-  @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
+  @Column(nullable = false)
   @Type(type = UUID_TYPE)
-  @Getter
-  @Setter
-  private UUID id;
+  private UUID createdBy;
+
+  @Column(columnDefinition = "timestamp with time zone", nullable = false)
+  private ZonedDateTime createdDate;
+
+  public CreationDetails(UUID createdBy) {
+    this(createdBy, ZonedDateTime.now());
+  }
+
 }

@@ -13,31 +13,13 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.domain;
+package org.openlmis.auth.repository;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import org.openlmis.auth.domain.ApiKey;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+public interface ApiKeyRepository extends JpaRepository<ApiKey, UUID> {
 
-@MappedSuperclass
-@EqualsAndHashCode
-public abstract class BaseEntity implements Identifiable {
-  static final String UUID_TYPE = "pg-uuid";
-
-  @Id
-  @GeneratedValue(generator = "uuid-gen")
-  @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
-  @Type(type = UUID_TYPE)
-  @Getter
-  @Setter
-  private UUID id;
 }

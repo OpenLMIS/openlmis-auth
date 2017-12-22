@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.OAuth2AuthenticationDataBuilder.API_KEY_PREFIX;
 import static org.openlmis.auth.OAuth2AuthenticationDataBuilder.SERVICE_CLIENT_ID;
+import static org.openlmis.auth.service.PermissionService.SERVICE_ACCOUNTS_MANAGE;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 
 import org.junit.Before;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.auth.DummyRightDto;
 import org.openlmis.auth.DummyUserDto;
@@ -50,6 +52,9 @@ public class PermissionServiceTest {
   @Mock
   private UserReferenceDataService userReferenceDataService;
 
+  @Spy
+  private ApiKeySettings apiKeySettings;
+
   @InjectMocks
   private PermissionService permissionService;
 
@@ -73,11 +78,12 @@ public class PermissionServiceTest {
 
     when(authenticationHelper.getCurrentUser()).thenReturn(user);
     when(authenticationHelper.getRight(USERS_MANAGE)).thenReturn(right);
+    when(authenticationHelper.getRight(SERVICE_ACCOUNTS_MANAGE)).thenReturn(right);
     when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
         .thenReturn(new ResultDto<>(true));
 
     ReflectionTestUtils.setField(permissionService, "serviceTokenClientId", SERVICE_CLIENT_ID);
-    ReflectionTestUtils.setField(permissionService, "apiKeyPrefix", API_KEY_PREFIX);
+    ReflectionTestUtils.setField(apiKeySettings, "prefix", API_KEY_PREFIX);
   }
 
   @Test
@@ -107,14 +113,14 @@ public class PermissionServiceTest {
     permissionService.canManageUsers();
   }
 
-  @Test(expected = PermissionMessageException.class)
-  public void userShouldNotBeAbleToManageApiKeys() {
+  @Test
+  public void userShouldBeAbleToManageApiKeys() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
     permissionService.canManageApiKeys();
   }
 
-  @Test
-  public void serviceShouldBeAbleToManageApiKeys() {
+  @Test(expected = PermissionMessageException.class)
+  public void serviceShouldNotBeAbleToManageApiKeys() {
     when(securityContext.getAuthentication()).thenReturn(trustedClient);
     permissionService.canManageApiKeys();
   }

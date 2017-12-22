@@ -13,31 +13,34 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.domain;
+package org.openlmis.auth.util;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-
+import java.util.Optional;
 import java.util.UUID;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+/**
+ * Generic utility functions for {@link UUID}.
+ */
+public final class UuidUtil {
 
-@MappedSuperclass
-@EqualsAndHashCode
-public abstract class BaseEntity implements Identifiable {
-  static final String UUID_TYPE = "pg-uuid";
+  private UuidUtil() {
+    throw new UnsupportedOperationException();
+  }
 
-  @Id
-  @GeneratedValue(generator = "uuid-gen")
-  @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
-  @Type(type = UUID_TYPE)
-  @Getter
-  @Setter
-  private UUID id;
+  /**
+   * Parses a String into a UUID safely.  Unlike {@link UUID#fromString(String)} however, this
+   * method will either return an Optional with the UUID, or it will return an empty Optional
+   * in case the String can't be parsed into a UUID.
+   *
+   * @param uuid see {@link UUID#fromString(String)}.
+   * @return An {@link Optional} with either the UUID as parsed from the paramater, or an empty
+   *     Optional should it be un-parseable.
+   */
+  public static Optional<UUID> fromString(String uuid) {
+    try {
+      return Optional.of(UUID.fromString(uuid));
+    } catch (IllegalArgumentException iae) {
+      return Optional.empty();
+    }
+  }
 }

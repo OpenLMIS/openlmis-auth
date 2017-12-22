@@ -38,7 +38,7 @@ import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseCommunicationServiceTest {
-  private static final String TOKEN = UUID.randomUUID().toString();
+  private static final UUID TOKEN = UUID.randomUUID();
   private static final String TOKEN_HEADER = "Bearer " + TOKEN;
 
   @Mock

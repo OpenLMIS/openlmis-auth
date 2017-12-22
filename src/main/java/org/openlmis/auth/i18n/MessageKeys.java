@@ -26,10 +26,10 @@ public abstract class MessageKeys {
 
   public static final String ERROR_TOKEN_INVALID = ERROR_PREFIX + ".token.invalid";
   public static final String ERROR_TOKEN_EXPIRED = ERROR_PREFIX + ".token.expired";
+  public static final String ERROR_TOKEN_REQUIRED = ERROR_PREFIX + ".token.required";
 
   public static final String ERROR_CLIENT_NOT_FOUND = ERROR_PREFIX + ".client.notFound";
 
-  public static final String ERROR_API_KEY_FOUND = ERROR_PREFIX + ".apiKey.found";
   public static final String ERROR_API_KEY_NOT_FOUND = ERROR_PREFIX + ".apiKey.notFound";
 
   public static final String ERROR_USER_NOT_FOUND = ERROR_PREFIX

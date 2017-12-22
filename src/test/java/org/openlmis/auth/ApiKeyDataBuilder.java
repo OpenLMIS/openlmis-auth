@@ -13,31 +13,23 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.domain;
+package org.openlmis.auth;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import org.openlmis.auth.domain.ApiKey;
+import org.openlmis.auth.domain.CreationDetails;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+public class ApiKeyDataBuilder {
+  private UUID token = UUID.randomUUID();
+  private UUID createdBy = UUID.randomUUID();
+  private ZonedDateTime createdDate = ZonedDateTime.now();
 
-@MappedSuperclass
-@EqualsAndHashCode
-public abstract class BaseEntity implements Identifiable {
-  static final String UUID_TYPE = "pg-uuid";
-
-  @Id
-  @GeneratedValue(generator = "uuid-gen")
-  @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
-  @Type(type = UUID_TYPE)
-  @Getter
-  @Setter
-  private UUID id;
+  /**
+   * Builds instance of {@link ApiKey} without id.
+   */
+  public ApiKey build() {
+    return new ApiKey(token, new CreationDetails(createdBy, createdDate));
+  }
 }
