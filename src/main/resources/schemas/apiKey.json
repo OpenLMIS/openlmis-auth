@@ -4,10 +4,6 @@
   "title": "API Key",
   "description": "A single API key",
   "properties": {
-    "id": {
-      "type": "string",
-      "title": "id"
-    },
     "token": {
       "type": "string",
       "title": "token"

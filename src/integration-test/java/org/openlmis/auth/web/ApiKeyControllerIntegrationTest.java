@@ -199,10 +199,10 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldRetrieveOnePageOfApiKeys() {
     given(apiKeyRepository.findAll(any(Pageable.class)))
-        .willReturn(new PageImpl<>(Lists.newArrayList(key, key, key)));
+        .willReturn(new PageImpl<>(Collections.singletonList(key), null, 3));
 
-    ValidatableResponse response = get(1, USER_TOKEN).statusCode(HttpStatus.OK.value());
-    checkPageBody(response, 0, 1, 1, 3, 3);
+    ValidatableResponse response = get(1, 1, USER_TOKEN).statusCode(HttpStatus.OK.value());
+    checkPageBody(response, 1, 1, 1, 3, 3);
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
@@ -346,8 +346,12 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   private ValidatableResponse get(int pageSize, String token) {
+    return get(pageSize, 0, token);
+  }
+
+  private ValidatableResponse get(int pageSize, int page, String token) {
     return startRequest(token)
-        .queryParam("page", 0)
+        .queryParam("page", page)
         .queryParam("size", pageSize)
         .when()
         .get(RESOURCE_URL)

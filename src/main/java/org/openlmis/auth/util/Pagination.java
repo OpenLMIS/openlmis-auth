@@ -97,7 +97,7 @@ public class Pagination {
     //Validate fromIndex
     int maxPossibleFromIndex = originalList.size() - 1;
     if (fromIndex > maxPossibleFromIndex) {
-      // If the fronIndex is out of bounds, set it and toIndex to the same value.
+      // If the fromIndex is out of bounds, set it and toIndex to the same value.
       // This will cause us to return an empty list.
       fromIndex = toIndex = 0;
     }

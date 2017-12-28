@@ -163,8 +163,7 @@ public class ApiKeyController {
         .collect(Collectors.toList());
 
     profiler.start("CREATE_PAGE");
-    List<ApiKeyDto> subList = Pagination.getPage(dtos, pageable).getContent();
-    Page<ApiKeyDto> page = Pagination.getPage(subList, pageable, result.getTotalElements());
+    Page<ApiKeyDto> page = Pagination.getPage(dtos, pageable, result.getTotalElements());
 
     profiler.stop().log();
 
