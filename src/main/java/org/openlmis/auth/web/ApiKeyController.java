@@ -17,6 +17,7 @@ package org.openlmis.auth.web;
 
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_SUPPORTED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 
 import org.apache.commons.codec.binary.Base64;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -97,6 +99,13 @@ public class ApiKeyController {
     Profiler profiler = new Profiler("CREATE_API_KEY");
     profiler.setLogger(LOGGER);
 
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
+        .getContext()
+        .getAuthentication();
+
+    if (authentication.isClientOnly()) {
+      throw new ValidationMessageException(ERROR_CLIENT_NOT_SUPPORTED);
+    }
     canManageApiKeys(profiler);
 
     profiler.start("GET_CURRENT_USER");

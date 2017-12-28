@@ -101,8 +101,8 @@ public class PermissionServiceTest {
     permissionService.canManageUsers();
   }
 
-  @Test(expected = PermissionMessageException.class)
-  public void serviceShouldNotBeAbleToManageUsers() {
+  @Test
+  public void serviceShouldBeAbleToManageUsers() {
     when(securityContext.getAuthentication()).thenReturn(trustedClient);
     permissionService.canManageUsers();
   }
@@ -119,8 +119,8 @@ public class PermissionServiceTest {
     permissionService.canManageApiKeys();
   }
 
-  @Test(expected = PermissionMessageException.class)
-  public void serviceShouldNotBeAbleToManageApiKeys() {
+  @Test
+  public void serviceShouldBeAbleToManageApiKeys() {
     when(securityContext.getAuthentication()).thenReturn(trustedClient);
     permissionService.canManageApiKeys();
   }

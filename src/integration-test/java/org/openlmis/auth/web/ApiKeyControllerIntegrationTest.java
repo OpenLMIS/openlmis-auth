@@ -24,6 +24,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyString;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_SUPPORTED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 import static org.openlmis.auth.service.PermissionService.SERVICE_ACCOUNTS_MANAGE;
@@ -61,6 +62,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 
 import guru.nidi.ramltester.junit.RamlMatchers;
 
+import java.util.Collections;
 import java.util.Optional;
 
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.UnusedPrivateField"})
@@ -168,8 +170,8 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldNotAllowToCreateApiKeyByAnotherApiKey() {
     post(API_KEY_TOKEN)
-        .statusCode(HttpStatus.FORBIDDEN.value())
-        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .body(MESSAGE_KEY, equalTo(ERROR_CLIENT_NOT_SUPPORTED));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
@@ -177,8 +179,8 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldNotAllowToCreateApiKeyByService() {
     post(SERVICE_TOKEN)
-        .statusCode(HttpStatus.FORBIDDEN.value())
-        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .body(MESSAGE_KEY, equalTo(ERROR_CLIENT_NOT_SUPPORTED));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
@@ -241,10 +243,11 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
-  public void shouldNotAllowToRetrieveApiKeysKeyByService() {
-    get(10, SERVICE_TOKEN)
-        .statusCode(HttpStatus.FORBIDDEN.value())
-        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
+  public void shouldAllowToRetrieveApiKeysKeyByService() {
+    given(apiKeyRepository.findAll(any(Pageable.class)))
+        .willReturn(new PageImpl<>(Collections.emptyList()));
+
+    get(10, SERVICE_TOKEN).statusCode(HttpStatus.OK.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
@@ -318,10 +321,9 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
-  public void shouldNotAllowToRemoveApiKeyByService() {
+  public void shouldAllowToRemoveApiKeyByService() {
     delete(SERVICE_TOKEN)
-        .statusCode(HttpStatus.FORBIDDEN.value())
-        .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
+        .statusCode(HttpStatus.NO_CONTENT.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }

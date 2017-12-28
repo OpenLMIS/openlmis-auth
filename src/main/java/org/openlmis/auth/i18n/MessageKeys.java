@@ -61,6 +61,8 @@ public abstract class MessageKeys {
 
   public static final String ERROR_CONSTRAINT = ERROR_PREFIX + ".constraint";
 
+  public static final String ERROR_CLIENT_NOT_SUPPORTED =
+      ERROR_PREFIX + ".apiKey.create.clientUserNotSupported";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();

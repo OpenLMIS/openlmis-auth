@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-@SuppressWarnings("PMD.TooManyMethods")
 @Service
 public class PermissionService {
   static final String USERS_MANAGE = "USERS_MANAGE";
@@ -51,22 +50,21 @@ public class PermissionService {
   private String serviceTokenClientId;
 
   public void canManageUsers() {
-    checkPermission(USERS_MANAGE, null, null, null, true, false, false);
+    checkPermission(USERS_MANAGE, null, null, null, true, false);
   }
 
   public void canManageApiKeys() {
-    checkPermission(SERVICE_ACCOUNTS_MANAGE, null, null, null, true, false, false);
+    checkPermission(SERVICE_ACCOUNTS_MANAGE, null, null, null, true, false);
   }
 
   private void checkPermission(String rightName, UUID program, UUID facility, UUID warehouse,
-                               boolean allowUserTokens, boolean allowServiceTokens,
-                               boolean allowApiKey) {
+                               boolean allowUserTokens, boolean allowApiKey) {
     OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
         .getContext()
         .getAuthentication();
 
     if (authentication.isClientOnly()) {
-      if (checkServiceToken(allowServiceTokens, allowApiKey, authentication)) {
+      if (checkServiceToken(allowApiKey, authentication)) {
         return;
       }
     } else {
@@ -94,15 +92,12 @@ public class PermissionService {
     return null != result && result.getResult();
   }
 
-  private boolean checkServiceToken(boolean allowServiceTokens, boolean allowApiKey,
-                                    OAuth2Authentication authentication) {
+  private boolean checkServiceToken(boolean allowApiKey, OAuth2Authentication authentication) {
     String clientId = authentication.getOAuth2Request().getClientId();
 
     if (serviceTokenClientId.equals(clientId)) {
-      return allowServiceTokens;
-    }
-
-    if (apiKeySettings.isApiKey(clientId)) {
+      return true;
+    } else if (apiKeySettings.isApiKey(clientId)) {
       return allowApiKey;
     }
 
