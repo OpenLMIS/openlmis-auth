@@ -130,4 +130,11 @@ public class PermissionServiceTest {
     when(securityContext.getAuthentication()).thenReturn(apiKeyClient);
     permissionService.canManageApiKeys();
   }
+
+  @Test(expected = PermissionMessageException.class)
+  public void serviceShouldNotBeAbleToManageApiKeysWhenIdsDoesNotMatch() {
+    when(securityContext.getAuthentication()).thenReturn(trustedClient);
+    ReflectionTestUtils.setField(permissionService, "serviceTokenClientId", "untrusted-client");
+    permissionService.canManageApiKeys();
+  }
 }
