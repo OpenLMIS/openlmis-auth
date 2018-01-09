@@ -18,3 +18,12 @@ services:
     image: openlmis/rsyslog:1
     volumes:
       - '../logs/auth:/var/log'
+
+  consul:
+    command: -server -bootstrap
+    image: gliderlabs/consul-server
+    ports:
+      - "8300"
+      - "8400"
+      - "8500"
+      - "53"
