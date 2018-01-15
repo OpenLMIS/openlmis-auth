@@ -6,7 +6,7 @@ Improvements and new functionality which are backwards-compatible:
 
 Bug fixes that are backwards-compatible:
 * [OLMIS-3537](https://openlmis.atlassian.net/browse/OLMIS-3537): Usernames are now case-insensitive. (Note: Implementations need to handle this before upgrading this component, if they use usernames that differ by letter casing only)
-
+* [OLMIS-3778](https://openlmis.atlassian.net/browse/OLMIS-3778): Fixed service checks the rights of a wrong user
 
 3.1.1 / 2017-11-09
 ===================

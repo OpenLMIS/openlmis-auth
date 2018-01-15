@@ -16,10 +16,12 @@
 package org.openlmis.auth;
 
 import org.openlmis.auth.domain.User;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import lombok.EqualsAndHashCode;
+import java.util.UUID;
 
 public class OAuth2AuthenticationDataBuilder {
   public static final String API_KEY_PREFIX = "api-key-client-";
@@ -30,6 +32,7 @@ public class OAuth2AuthenticationDataBuilder {
 
   private String clientId = CLIENT_CLIENT_ID;
   private String username = "admin";
+  private UUID referenceDataUserId = UUID.randomUUID();
 
   public OAuth2AuthenticationDataBuilder withClientId(String clientId) {
     this.clientId = clientId;
@@ -41,12 +44,24 @@ public class OAuth2AuthenticationDataBuilder {
     return this;
   }
 
+  public OAuth2AuthenticationDataBuilder withReferenceDataUserId(UUID referenceDataUserId) {
+    this.referenceDataUserId = referenceDataUserId;
+    return this;
+  }
+
   public OAuth2Authentication build() {
     return new DummyOAuth2Authentication(clientId, username);
   }
 
+  /**
+   * Builds user authentication.
+   */
   public OAuth2Authentication buildUserAuthentication() {
-    return new DummyOAuth2Authentication(CLIENT_CLIENT_ID, "admin");
+    User user = new User();
+    user.setUsername(username);
+    user.setReferenceDataUserId(referenceDataUserId);
+
+    return new DummyOAuth2Authentication(CLIENT_CLIENT_ID, user);
   }
 
   public OAuth2Authentication buildServiceAuthentication() {
@@ -69,6 +84,12 @@ public class OAuth2AuthenticationDataBuilder {
       super(new OAuth2Request(null, clientId, null, true, null, null, null, null, null), null);
       this.user = new User();
       this.user.setUsername(username);
+    }
+
+    DummyOAuth2Authentication(String clientId, User user) {
+      super(new OAuth2Request(null, clientId, null, true, null, null, null, null, null),
+          new UsernamePasswordAuthenticationToken(user, null, null));
+      this.user = user;
     }
 
     @Override
