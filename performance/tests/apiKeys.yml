@@ -36,7 +36,7 @@ scenarios:
           Authorization: Bearer ${access_token}
           Content-Type: application/json
         extract-jsonpath:
-          api_key_id: $.id
+          api_key_id: $.token
   api-key-delete-one:
     requests:
       - include-scenario: api-key-create
