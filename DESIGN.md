@@ -49,8 +49,8 @@ The function of the Auth Service is to:
 
 Few endpoints in the Auth Service implement OAuth 2:
 
-* `/api/oauth/token` - endpoint to generate an access token
-* `/api/oauth/check_token` - endpoint to check an access token (Note: this endpoint is not included in the [Auth Service API documentation](http://docs.openlmis.org/en/latest/components/index.html#auth).)
+* `/api/oauth/token` - endpoint to generate an access token.
+* `/api/oauth/check_token` - endpoint to check an access token.
 * `/api/oauth/error` - endpoint used to render errors from the authorization server.
 * `/api/oauth/confirm_access` - endpoint used to render approval form in the authorization server.
 * `/api/oauth/authorize` - GET endpoint is used to display user approval page or performs redirection if the user allowed it previously. POST is used to submit the authorization form and perform redirection to the client.
