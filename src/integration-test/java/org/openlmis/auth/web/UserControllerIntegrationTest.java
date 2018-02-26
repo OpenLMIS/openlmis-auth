@@ -43,7 +43,6 @@ import org.openlmis.auth.DummyUserDto;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.exception.PermissionMessageException;
-import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
@@ -73,9 +72,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String LOGOUT_URL = RESOURCE_URL + "/logout";
 
   private static final String TOKEN_URL = "/api/oauth/token";
-
-  @Autowired
-  private ExposedMessageSource messageSource;
 
   @Autowired
   private UserRepository userRepository;
