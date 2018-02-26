@@ -49,8 +49,6 @@ public abstract class MessageKeys {
   public static final String PASSWORD_RESET_EMAIL_BODY = SERVICE_PREFIX
       + ".email.resetPassword.body";
 
-  public static final String USERS_PASSWORD_RESET_CONFIRMATION = USERS
-      + ".passwordReset.confirmation";
   public static final String USERS_PASSWORD_RESET_USER_NOT_FOUND = USERS
       + ".passwordReset.userNotFound";
 

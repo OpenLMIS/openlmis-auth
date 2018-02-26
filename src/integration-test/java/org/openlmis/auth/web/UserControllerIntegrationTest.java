@@ -31,12 +31,11 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
-import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_CONFIRMATION;
 import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
 
 import com.jayway.restassured.response.ValidatableResponse;
-
+import guru.nidi.ramltester.junit.RamlMatchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,13 +57,9 @@ import org.openlmis.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.HttpServerErrorException;
-
-import guru.nidi.ramltester.junit.RamlMatchers;
-
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -136,11 +131,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .getPassword();
     assertNotNull(password);
 
-    String[] msgArgs = {DummyUserDto.USERNAME};
-    String expectedMessage = messageSource.getMessage(USERS_PASSWORD_RESET_CONFIRMATION,
-        msgArgs, LocaleContextHolder.getLocale());
-
-    testChangePassword("test1234", expectedMessage, 200);
+    passwordReset("test1234", USER_TOKEN).statusCode(200);
 
     String newPassword = userRepository
         .findOne(UUID.fromString(DummyUserDto.AUTH_ID))

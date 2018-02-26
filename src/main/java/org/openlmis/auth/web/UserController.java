@@ -20,7 +20,6 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_FORGOT_PASSWORD_USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
-import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_CONFIRMATION;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
 
 import org.openlmis.auth.domain.PasswordResetToken;
@@ -60,13 +59,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import javax.validation.Valid;
 
 @Controller
@@ -141,15 +138,13 @@ public class UserController {
   }
 
   /**
-   * Resets a user's password.
-   *
-   * @return confirmation message or map with field errors.
+   * Resets a user's password. If request fails returns map with field errors.
    */
   @RequestMapping(value = "/users/auth/passwordReset", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public String passwordReset(
-      @RequestBody @Valid PasswordResetRequest passwordResetRequest, BindingResult bindingResult) {
+  public void passwordReset(@RequestBody @Valid PasswordResetRequest passwordResetRequest,
+                               BindingResult bindingResult) {
     permissionService.canManageUsers();
     Map<String, String> errors = new HashMap<>();
 
@@ -161,19 +156,16 @@ public class UserController {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         user.get().setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
         userRepository.save(user.get());
-
-        String[] msgArgs = {username};
-        return messageSource.getMessage(
-            USERS_PASSWORD_RESET_CONFIRMATION, msgArgs, LocaleContextHolder.getLocale());
       } else {
         String[] msgArgs = {};
         errors.put("username", messageSource.getMessage(USERS_PASSWORD_RESET_USER_NOT_FOUND,
             msgArgs, LocaleContextHolder.getLocale()));
+        throw new BindingResultException(errors);
       }
     } else {
       errors.putAll(getErrors(bindingResult));
+      throw new BindingResultException(errors);
     }
-    throw new BindingResultException(errors);
   }
 
   /**
