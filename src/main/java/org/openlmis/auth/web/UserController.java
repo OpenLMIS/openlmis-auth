@@ -156,16 +156,17 @@ public class UserController {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         user.get().setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
         userRepository.save(user.get());
+        LOGGER.debug(String.format("Password updated for user %s", username));
+        return;
       } else {
         String[] msgArgs = {};
         errors.put("username", messageSource.getMessage(USERS_PASSWORD_RESET_USER_NOT_FOUND,
             msgArgs, LocaleContextHolder.getLocale()));
-        throw new BindingResultException(errors);
       }
     } else {
       errors.putAll(getErrors(bindingResult));
-      throw new BindingResultException(errors);
     }
+    throw new BindingResultException(errors);
   }
 
   /**
