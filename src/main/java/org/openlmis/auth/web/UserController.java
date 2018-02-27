@@ -156,7 +156,7 @@ public class UserController {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         user.get().setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
         userRepository.save(user.get());
-        LOGGER.debug("Password updated for user ", username);
+        LOGGER.debug("Password updated for user %s", username);
         return;
       } else {
         String[] msgArgs = {};
