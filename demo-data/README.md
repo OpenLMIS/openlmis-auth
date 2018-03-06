@@ -32,5 +32,9 @@ There are 20 user accounts:
 The [Reference Data service's demo data](https://github.com/OpenLMIS/openlmis-referencedata/tree/master/demo-data)
 connects these users to specific rights at facilities and programs.
 
-These credentials are public knowledge. They are not secure. Do not use any of these accounts or
+### Service Accounts
+
+1. 04b32c34-c2c5-4e64-9eda-1fdee4cf2cfd
+
+These credentials are public knowledge. **They are not secure**. Do not use any of these accounts or
 passwords in any production OpenLMIS environment.
