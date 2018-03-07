@@ -28,6 +28,7 @@ There are 20 user accounts:
 18. vsrmanager1 (password=password)
 19. vsrmanager2 (password=password)
 20. vwclerk1 (password=password)
+21. vnurse1 (password=password)
 
 The [Reference Data service's demo data](https://github.com/OpenLMIS/openlmis-referencedata/tree/master/demo-data)
 connects these users to specific rights at facilities and programs.

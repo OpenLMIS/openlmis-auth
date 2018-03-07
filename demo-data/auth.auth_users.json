@@ -138,5 +138,12 @@
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
     "username": "vwclerk1",
     "referenceDataUserId": "ce962fad-c872-4244-92fe-2f70995d311a"
+  },
+  {
+    "id": "4396388f-18da-417b-8d71-977ca12f09a7",
+    "enabled": "t",
+    "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
+    "username": "vnurse1",
+    "referenceDataUserId": "9cc9a0a4-e434-4582-9efc-2a1de44bc1f1"
   }
 ]
