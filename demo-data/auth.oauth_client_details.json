@@ -6,5 +6,14 @@
     "authorizedgranttypes": "implicit",
     "resourceids": "",
     "scope": "read,write"
+  },
+  {
+    "clientid": "api-key-client-20180307060858052",
+    "accesstokenvalidity": 0,
+    "clientsecret": "YXBpLWtleS1jbGllbnQtMjAxODAzMDcwNjA4NTgwNTI=",
+    "authorities": "TRUSTED_CLIENT",
+    "authorizedgranttypes": "client_credentials",
+    "resourceids": "",
+    "scope": "read,write"
   }
 ]
