@@ -18,8 +18,6 @@ package org.openlmis.auth.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
 import java.util.Date;
@@ -30,7 +28,7 @@ public class CustomTokenServices extends DefaultTokenServices {
   private Integer validitySeconds;
 
   @Override
-  public synchronized OAuth2AccessToken readAccessToken(String accessToken) {
+  public OAuth2AccessToken readAccessToken(String accessToken) {
     DefaultOAuth2AccessToken token = (DefaultOAuth2AccessToken)
         super.readAccessToken(accessToken);
     if (null != token && !token.isExpired()) {
@@ -39,17 +37,4 @@ public class CustomTokenServices extends DefaultTokenServices {
     return token;
   }
 
-  @Override
-  public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) {
-    synchronized (this) {
-      return super.createAccessToken(authentication);
-    }
-  }
-
-  @Override
-  public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, TokenRequest tokenRequest) {
-    synchronized (this) {
-      return super.refreshAccessToken(refreshTokenValue, tokenRequest);
-    }
-  }
 }
