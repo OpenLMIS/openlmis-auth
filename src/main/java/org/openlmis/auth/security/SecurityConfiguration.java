@@ -33,8 +33,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-
-import javax.sql.DataSource;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
 @Configuration
 @EnableWebSecurity
@@ -45,8 +44,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   private UserDetailsService userDetailsService;
 
   @Bean
-  public TokenStore tokenStore(DataSource dataSource) {
-    return new CustomTokenStore(dataSource);
+  public TokenStore tokenStore() {
+    return new InMemoryTokenStore();
   }
 
   @Override
