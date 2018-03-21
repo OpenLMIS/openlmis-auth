@@ -8,6 +8,7 @@ Bug fixes that are backwards-compatible:
 * [OLMIS-3537](https://openlmis.atlassian.net/browse/OLMIS-3537): Usernames are now case-insensitive. (Note: Implementations need to handle this before upgrading this component, if they use usernames that differ by letter casing only)
 * [OLMIS-3778](https://openlmis.atlassian.net/browse/OLMIS-3778): Fixed service checks the rights of a wrong user
 * [OLMIS-4176](https://openlmis.atlassian.net/browse/OLMIS-4176): Removed string response message from reset password response.
+* [OLMIS-4257](https://openlmis.atlassian.net/browse/OLMIS-4257): Fixed bug with proper work of the API keys after restart
 
 3.1.1 / 2017-11-09
 ===================

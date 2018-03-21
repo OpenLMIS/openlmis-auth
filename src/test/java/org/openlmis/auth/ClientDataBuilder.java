@@ -53,6 +53,17 @@ public class ClientDataBuilder {
     return build();
   }
 
+  /**
+   * Creates a new instance of {@link Client} as API Key client.
+   */
+  public Client buildApiKeyClient() {
+    this.clientId = "api-key-client-20180307060858052";
+    this.accessTokenValiditySeconds = 0;
+    this.authorizedGrantTypes = "client_credentials";
+
+    return build();
+  }
+
   private Client build() {
     return new Client(
         clientId, clientSecret, scope, resourceIds, authorizedGrantTypes, registeredRedirectUris,

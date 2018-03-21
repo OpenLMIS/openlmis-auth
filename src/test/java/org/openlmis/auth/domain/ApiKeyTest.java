@@ -15,9 +15,7 @@
 
 package org.openlmis.auth.domain;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Maps;
@@ -33,31 +31,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ApiKeyTest {
-
-  @Test
-  public void shouldCreateInstanceBasedOnImporter() {
-    ApiKey expected = new ApiKeyDataBuilder().build();
-    ApiKey.Importer importer = new ApiKey.Importer() {
-
-      @Override
-      public UUID getToken() {
-        return expected.getToken();
-      }
-
-      @Override
-      public UUID getCreatedBy() {
-        return expected.getCreationDetails().getCreatedBy();
-      }
-
-      @Override
-      public ZonedDateTime getCreatedDate() {
-        return expected.getCreationDetails().getCreatedDate();
-      }
-    };
-
-    ApiKey actual = ApiKey.newApiKey(importer);
-    assertThat(actual, is(equalTo(expected)));
-  }
 
   @Test
   public void shouldExportValues() {

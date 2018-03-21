@@ -16,6 +16,7 @@
 package org.openlmis.auth;
 
 import org.openlmis.auth.domain.ApiKey;
+import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.domain.CreationDetails;
 
 import java.time.ZonedDateTime;
@@ -24,12 +25,13 @@ import java.util.UUID;
 public class ApiKeyDataBuilder {
   private UUID token = UUID.randomUUID();
   private UUID createdBy = UUID.randomUUID();
+  private Client client = new ClientDataBuilder().buildApiKeyClient();
   private ZonedDateTime createdDate = ZonedDateTime.now();
 
   /**
    * Builds instance of {@link ApiKey} without id.
    */
   public ApiKey build() {
-    return new ApiKey(token, new CreationDetails(createdBy, createdDate));
+    return new ApiKey(token, client, new CreationDetails(createdBy, createdDate));
   }
 }

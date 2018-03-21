@@ -31,6 +31,9 @@ public class ApiKeyRepositoryIntegrationTest extends BaseCrudRepositoryIntegrati
   @Autowired
   private ApiKeyRepository repository;
 
+  @Autowired
+  private ClientRepository clientRepository;
+
   @Override
   CrudRepository<ApiKey, UUID> getRepository() {
     return repository;
@@ -38,7 +41,10 @@ public class ApiKeyRepositoryIntegrationTest extends BaseCrudRepositoryIntegrati
 
   @Override
   ApiKey generateInstance() {
-    return new ApiKeyDataBuilder().build();
+    ApiKey key = new ApiKeyDataBuilder().build();
+    clientRepository.saveAndFlush(key.getClient());
+
+    return key;
   }
 
   @Override

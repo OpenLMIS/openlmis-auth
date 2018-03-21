@@ -128,7 +128,7 @@ public class ApiKeyController {
     UUID token = accessTokenService.obtainToken(client.getClientId());
 
     profiler.start("CREATE_NEW_INSTANCE");
-    ApiKey key = new ApiKey(token, new CreationDetails(user.getId()));
+    ApiKey key = new ApiKey(token, client, new CreationDetails(user.getId()));
     apiKeyRepository.save(key);
 
     profiler.start("EXPORT_API_KEY_TO_DTO");
@@ -205,11 +205,11 @@ public class ApiKeyController {
     profiler.start("REMOVE_ACCESS_TOKEN");
     tokenStore.removeAccessToken(new DefaultOAuth2AccessToken(token.toString()));
 
+    profiler.start("REMOVE_API_KEY");
+    apiKeyRepository.delete(token);
+
     profiler.start("REMOVE_CLIENT");
     clientRepository.delete(client);
-
-    profiler.start("REMOVE_API_KEY");
-    apiKeyRepository.delete(apiKey);
 
     profiler.stop().log();
   }

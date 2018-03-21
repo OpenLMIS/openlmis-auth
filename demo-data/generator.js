@@ -10,14 +10,16 @@ var query = "INSERT INTO %s (SELECT * FROM json_populate_recordset(NULL::%s, '%s
 // This presents the order that must be kept for proper data insertion.
 // Tables not included here are populated in random order
 var filesOrdered = [
-    "auth.auth_users.json"
-]
+    "auth.auth_users",
+    "auth.oauth_client_details",
+    "auth.api_keys"
+];
 
 // Detects if the given key/value pair represents a foreign key.
 var isForeign = function(obj, key) {
     var val = obj[key];
     return val !== null && typeof val === 'object' && val.hasOwnProperty("id");
-}
+};
 
 // Refractors the key/value pair to match database format.
 var adjustForeign = function(obj, key) {
@@ -28,7 +30,7 @@ var adjustForeign = function(obj, key) {
     if (newKey !== key) {
         delete obj[key];
     }
-}
+};
 
 // Transforms object's key to lowercase
 var keyToLower = function(obj, key) {
@@ -41,7 +43,7 @@ var keyToLower = function(obj, key) {
     }
 
     return key;
-}
+};
 
 // Takes the input file and transforms it into sql query, inserted into output file
 var parseInput = function(input, output) {
@@ -63,7 +65,7 @@ var parseInput = function(input, output) {
     // Filename should match schema and table name
     var insert = util.format(query, filename, filename, JSON.stringify(array));
     fs.writeSync(output, insert + "\n");
-}
+};
 
 // Start processing
 var fd = fs.openSync('input.sql', 'w');
@@ -85,8 +87,10 @@ filesOrdered.forEach(function(key) {
 });
 
 // Enqueue remaining files
-for (key in filesPending) {
-    filesQueue.push(filesPending[key]);
+for (var key in filesPending) {
+    if (filesPending.hasOwnProperty(key)) {
+        filesQueue.push(filesPending[key]);
+    }
 };
 
 // Process the files

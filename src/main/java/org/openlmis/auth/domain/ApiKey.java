@@ -28,6 +28,8 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -43,26 +45,16 @@ public final class ApiKey implements Identifiable {
   @Column(nullable = false, unique = true)
   private UUID token;
 
+  @OneToOne
+  @JoinColumn(name = "clientid", nullable = false)
+  private Client client;
+
   @Embedded
   private CreationDetails creationDetails;
 
   @Override
   public UUID getId() {
     return token;
-  }
-
-  /**
-   * Creates new service account object based on data from {@link Importer}
-   *
-   * @param importer instance of {@link Importer}
-   * @return new instance of service account.
-   */
-  public static ApiKey newApiKey(Importer importer) {
-    CreationDetails creationDetails = new CreationDetails(
-        importer.getCreatedBy(), importer.getCreatedDate()
-    );
-
-    return new ApiKey(importer.getToken(), creationDetails);
   }
 
   /**
