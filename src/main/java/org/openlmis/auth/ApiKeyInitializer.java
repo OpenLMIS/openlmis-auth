@@ -16,7 +16,6 @@
 package org.openlmis.auth;
 
 import org.openlmis.auth.domain.ApiKey;
-import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.domain.ClientDetails;
 import org.openlmis.auth.repository.ApiKeyRepository;
 import org.openlmis.auth.util.Pagination;
@@ -53,20 +52,25 @@ public class ApiKeyInitializer implements CommandLineRunner {
   }
 
   private void fixApiKey(ApiKey apiKey) {
-    String tokenValue = apiKey.getToken().toString();
-
-    Client client = apiKey.getClient();
-    ClientDetails clientDetails = new ClientDetails(client);
-
-    OAuth2AccessToken token = new DefaultOAuth2AccessToken(tokenValue);
-    OAuth2Request storedRequest = new OAuth2Request(
-        null, clientDetails.getClientId(), clientDetails.getAuthorities(),
-        true, clientDetails.getScope(), clientDetails.getResourceIds(),
-        null, null, null
-    );
-    OAuth2Authentication authentication = new OAuth2Authentication(storedRequest, null);
+    OAuth2AccessToken token = createAccessToken(apiKey);
+    OAuth2Authentication authentication = createAuthentication(apiKey);
 
     tokenStore.storeAccessToken(token, authentication);
+  }
+
+  private OAuth2AccessToken createAccessToken(ApiKey apiKey) {
+    return new DefaultOAuth2AccessToken(apiKey.getToken().toString());
+  }
+
+  private OAuth2Authentication createAuthentication(ApiKey apiKey) {
+    ClientDetails client = new ClientDetails(apiKey.getClient());
+
+    OAuth2Request storedRequest = new OAuth2Request(
+        null, client.getClientId(), client.getAuthorities(), true, client.getScope(),
+        client.getResourceIds(), null, null, null
+    );
+
+    return new OAuth2Authentication(storedRequest, null);
   }
 
 }
