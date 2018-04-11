@@ -15,7 +15,13 @@
 
 package org.openlmis.auth.exception;
 
+import org.openlmis.auth.util.Message;
+
 public class ValidationMessageException extends BaseMessageException {
+
+  public ValidationMessageException(Message message) {
+    super(message);
+  }
 
   public ValidationMessageException(String messageKey) {
     super(messageKey);

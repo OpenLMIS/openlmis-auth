@@ -52,6 +52,9 @@ public abstract class MessageKeys {
   public static final String USERS_PASSWORD_RESET_USER_NOT_FOUND = USERS
       + ".passwordReset.userNotFound";
 
+  public static final String USERS_PASSWORD_RESET_INVALID_VALUE = USERS
+      + ".passwordReset.invalidValue";
+
   public static final String USERS_FORGOT_PASSWORD_USER_NOT_FOUND = USERS
       + ".forgotPassword.userNotFound";
 

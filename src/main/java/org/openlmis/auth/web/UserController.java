@@ -5,12 +5,12 @@
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details. You should have received a copy of
  * the GNU Affero General Public License along with this program. If not, see
- * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
+ * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
 
@@ -20,6 +20,7 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_FORGOT_PASSWORD_USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
 
 import org.openlmis.auth.domain.PasswordResetToken;
@@ -33,6 +34,7 @@ import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
+import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.util.PasswordResetRequest;
 import org.slf4j.Logger;
@@ -70,6 +72,7 @@ import javax.validation.Valid;
 @Transactional
 @RequestMapping("/api")
 public class UserController {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
   @Autowired
@@ -144,29 +147,26 @@ public class UserController {
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public void passwordReset(@RequestBody @Valid PasswordResetRequest passwordResetRequest,
-                               BindingResult bindingResult) {
+      BindingResult bindingResult) {
     permissionService.canManageUsers();
-    Map<String, String> errors = new HashMap<>();
 
-    if (!bindingResult.hasErrors()) {
-      String username = passwordResetRequest.getUsername();
-      Optional<User> user = userRepository.findOneByUsernameIgnoreCase(username);
-
-      if (user.isPresent()) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        user.get().setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
-        userRepository.save(user.get());
-        LOGGER.debug("Password updated for user %s", username);
-        return;
-      } else {
-        String[] msgArgs = {};
-        errors.put("username", messageSource.getMessage(USERS_PASSWORD_RESET_USER_NOT_FOUND,
-            msgArgs, LocaleContextHolder.getLocale()));
-      }
-    } else {
-      errors.putAll(getErrors(bindingResult));
+    if (bindingResult.hasErrors()) {
+      FieldError fieldError = bindingResult.getFieldError();
+      throw new ValidationMessageException(
+          new Message(USERS_PASSWORD_RESET_INVALID_VALUE,
+              fieldError.getField(), fieldError.getDefaultMessage()));
     }
-    throw new BindingResultException(errors);
+
+    String username = passwordResetRequest.getUsername();
+    Optional<User> userOptional = userRepository.findOneByUsernameIgnoreCase(username);
+
+    User user = userOptional
+        .orElseThrow(() -> new ValidationMessageException(USERS_PASSWORD_RESET_USER_NOT_FOUND));
+
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    user.setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
+    userRepository.save(user);
+    LOGGER.debug("Password updated for user %s", username);
   }
 
   /**

@@ -5,12 +5,12 @@
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details. You should have received a copy of
  * the GNU Affero General Public License along with this program. If not, see
- * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
+ * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
 package org.openlmis.auth.web;
@@ -31,6 +31,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
 
@@ -64,6 +65,7 @@ import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
+
   private static final String RESOURCE_URL = "/api/users/auth";
   private static final String RESET_PASS_URL = RESOURCE_URL + "/passwordReset";
   private static final String FORGOT_PASS_URL = RESOURCE_URL + "/forgotPassword";
@@ -135,10 +137,11 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     assertNotNull(newPassword);
     assertNotEquals(password, newPassword);
 
-    testChangePassword("1234567", "size must be between 8 and 16", 400);
-    testChangePassword("sdokfsodpfjsaidjasj2akdsjk", "size must be between 8 and 16", 400);
-    testChangePassword("vvvvvvvvvvv", "must contain at least 1 number", 400);
-    testChangePassword("1sample text", "must not contain spaces", 400);
+    checkErrorResponseForPasswordReset("1234567", "size must be between 8 and 16");
+    checkErrorResponseForPasswordReset("sdokfsodpfjsaidjasj2akdsjk",
+        "size must be between 8 and 16");
+    checkErrorResponseForPasswordReset("vvvvvvvvvvv", "must contain at least 1 number");
+    checkErrorResponseForPasswordReset("1sample text", "must not contain spaces");
   }
 
   @Test
@@ -236,13 +239,11 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
   }
 
-  private void testChangePassword(String password, String expectedMessage, int expectedCode) {
-    String response = passwordReset(password, USER_TOKEN)
-        .statusCode(expectedCode)
-        .extract()
-        .asString();
-
-    assertThat(response, containsString(expectedMessage));
+  private void checkErrorResponseForPasswordReset(String password, String expectedMessage) {
+    passwordReset(password, USER_TOKEN)
+        .statusCode(400)
+        .body("messageKey", equalTo(USERS_PASSWORD_RESET_INVALID_VALUE))
+        .body("message", containsString(expectedMessage));
   }
 
   private ValidatableResponse passwordReset(String password, String token) {
