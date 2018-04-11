@@ -32,6 +32,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
 import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
 
@@ -151,6 +152,19 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     passwordReset("newpassword", USER_TOKEN)
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
+  }
+
+  @Test
+  public void shouldReturnBadRequestWhenUserNotFound() {
+    doNothing().when(permissionService).canManageUsers();
+
+    PasswordResetRequest passwordResetRequest = new PasswordResetRequest(
+        "wrongUser", "newpassword1"
+    );
+
+    sendPostRequest(USER_TOKEN, RESET_PASS_URL, passwordResetRequest, null)
+        .statusCode(400)
+        .body(Fields.MESSAGE_KEY, equalTo(USERS_PASSWORD_RESET_USER_NOT_FOUND));
   }
 
   @Test
