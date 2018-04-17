@@ -9,6 +9,7 @@ Bug fixes that are backwards-compatible:
 * [OLMIS-3778](https://openlmis.atlassian.net/browse/OLMIS-3778): Fixed service checks the rights of a wrong user
 * [OLMIS-4176](https://openlmis.atlassian.net/browse/OLMIS-4176): Removed string response message from reset password response.
 * [OLMIS-4257](https://openlmis.atlassian.net/browse/OLMIS-4257): Fixed bug with proper work of the API keys after restart
+* [OLMIS-4273](https://openlmis.atlassian.net/browse/OLMIS-4273): Fixed format of error response to follow style guide
 
 3.1.1 / 2017-11-09
 ===================
