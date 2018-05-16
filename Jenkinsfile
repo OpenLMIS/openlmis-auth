@@ -34,7 +34,7 @@ pipeline {
                         error("serviceVersion property not found")
                     }
                     VERSION = properties.serviceVersion
-                    VERSION_WITH_BUILD_NUMBER = properties.serviceVersion + "-build" + env.BUILD_NUMBER
+                    STAGING_VERSION = properties.serviceVersion + "-STAGING"
                     currentBuild.displayName += " - " + VERSION
                 }
             }
@@ -54,7 +54,7 @@ pipeline {
                     sh 'docker-compose -f docker-compose.builder.yml run -e BUILD_NUMBER=$BUILD_NUMBER -e GIT_BRANCH=$GIT_BRANCH builder'
                     sh 'docker-compose -f docker-compose.builder.yml build image'
                     sh 'docker-compose -f docker-compose.builder.yml down --volumes'
-                    sh "docker tag openlmis/auth:latest openlmis/auth:${VERSION_WITH_BUILD_NUMBER}"
+                    sh "docker tag openlmis/auth:latest openlmis/auth:${STAGING_VERSION}"
                 }
             }
             post {
@@ -186,7 +186,7 @@ pipeline {
                 }
             }
             steps {
-                sh "docker tag openlmis/auth:${VERSION_WITH_BUILD_NUMBER} openlmis/auth:${VERSION}"
+                sh "docker tag openlmis/auth:${STAGING_VERSION} openlmis/auth:${VERSION}"
                 sh "docker push openlmis/auth:${VERSION}"
             }
             post {
