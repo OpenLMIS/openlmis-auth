@@ -49,6 +49,7 @@ import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.notification.NotificationService;
+import org.openlmis.auth.util.AuthenticationHelper;
 import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.auth.web.TestWebData.Fields;
@@ -88,6 +89,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @MockBean
   private NotificationService notificationService;
 
+  @MockBean
+  private AuthenticationHelper authenticationHelper;
+
   @Override
   @Before
   public void setUp() {
@@ -98,6 +102,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     given(userReferenceDataService.findUserByEmail(admin.getEmail()))
         .willReturn(admin);
     given(userReferenceDataService.findOne(admin.getId()))
+        .willReturn(admin);
+    given(authenticationHelper.getCurrentUser())
         .willReturn(admin);
 
     willDoNothing().given(notificationService).send(any(NotificationRequest.class));
@@ -146,12 +152,18 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
-  public void shouldNotResetPasswordWhenUserHasNoPermission() {
+  public void shouldNotResetPasswordForOtherUserWithoutPermissions() {
     PermissionMessageException ex = mockUserManagePermissionError();
 
-    passwordReset("newpassword", USER_TOKEN)
+    passwordReset("differentUser", "newpassword123", USER_TOKEN)
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
+  }
+
+  @Test
+  public void shouldResetPasswordForCurrentUser() {
+    passwordReset("newpassword123", USER_TOKEN)
+        .statusCode(200);
   }
 
   @Test
@@ -261,8 +273,12 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   private ValidatableResponse passwordReset(String password, String token) {
+    return passwordReset(DummyUserDto.USERNAME, password, token);
+  }
+
+  private ValidatableResponse passwordReset(String username, String password, String token) {
     PasswordResetRequest passwordResetRequest = new PasswordResetRequest(
-        DummyUserDto.USERNAME, password
+        username, password
     );
 
     return sendPostRequest(

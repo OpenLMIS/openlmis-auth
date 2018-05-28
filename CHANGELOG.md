@@ -1,9 +1,10 @@
 3.2.1 / WIP
 ==================
 
-Improvements:
+Improvements and new functionality which are backwards-compatible:
 * [OLMIS-4644](https://openlmis.atlassian.net/browse/OLMIS-4644): Added Jenkinsfile
 * [OLMIS-2923](https://openlmis.atlassian.net/browse/OLMIS-2923): Updated demo data loading approach
+* [OLMIS-4731](https://openlmis.atlassian.net/browse/OLMIS-4731): Enabled current user to change its password
 
 3.2.0 / 2018-04-24
 ==================

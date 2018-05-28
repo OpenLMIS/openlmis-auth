@@ -148,7 +148,7 @@ public class UserController {
   @ResponseBody
   public void passwordReset(@RequestBody @Valid PasswordResetRequest passwordResetRequest,
       BindingResult bindingResult) {
-    permissionService.canManageUsers();
+    permissionService.canEditUserPassword(passwordResetRequest.getUsername());
 
     if (bindingResult.hasErrors()) {
       FieldError fieldError = bindingResult.getFieldError();

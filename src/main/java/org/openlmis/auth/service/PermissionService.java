@@ -49,6 +49,18 @@ public class PermissionService {
   @Value("${auth.server.clientId}")
   private String serviceTokenClientId;
 
+  /**
+   * Checks whether user can edit password of the user with the given username.
+   *
+   * @param username  the username of the user
+   */
+  public void canEditUserPassword(String username) {
+    if (username.equals(authenticationHelper.getCurrentUser().getUsername())) {
+      return;
+    }
+    canManageUsers();
+  }
+
   public void canManageUsers() {
     checkPermission(USERS_MANAGE, null, null, null, true, false);
   }
