@@ -51,7 +51,6 @@ import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.notification.NotificationService;
-import org.openlmis.auth.util.AuthenticationHelper;
 import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.auth.web.TestWebData.Fields;
@@ -89,9 +88,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @MockBean
   private NotificationService notificationService;
 
-  @MockBean
-  private AuthenticationHelper authenticationHelper;
-
   @Override
   @Before
   public void setUp() {
@@ -102,8 +98,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     given(userReferenceDataService.findUserByEmail(admin.getEmail()))
         .willReturn(admin);
     given(userReferenceDataService.findOne(admin.getId()))
-        .willReturn(admin);
-    given(authenticationHelper.getCurrentUser())
         .willReturn(admin);
 
     willDoNothing().given(notificationService).send(any(NotificationRequest.class));
@@ -129,7 +123,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void testPasswordReset() {
-    doNothing().when(permissionService).canManageUsers();
+    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
 
     String password = userRepository
         .findOne(UUID.fromString(DummyUserDto.AUTH_ID))
@@ -173,7 +167,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnBadRequestWhenUserNotFound() {
-    doNothing().when(permissionService).canManageUsers();
+    doNothing().when(permissionService).canEditUserPassword("wrongUser");
 
     PasswordResetRequest passwordResetRequest = new PasswordResetRequest(
         "wrongUser", "newpassword1"
