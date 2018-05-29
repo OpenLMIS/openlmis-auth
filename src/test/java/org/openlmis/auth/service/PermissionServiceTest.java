@@ -19,11 +19,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.OAuth2AuthenticationDataBuilder.API_KEY_PREFIX;
 import static org.openlmis.auth.OAuth2AuthenticationDataBuilder.SERVICE_CLIENT_ID;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.service.PermissionService.SERVICE_ACCOUNTS_MANAGE;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -38,6 +41,7 @@ import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.auth.util.AuthenticationHelper;
+import org.openlmis.auth.util.Message;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -45,6 +49,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PermissionServiceTest {
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
 
   @Mock
   private AuthenticationHelper authenticationHelper;
@@ -142,11 +149,13 @@ public class PermissionServiceTest {
     permissionService.canEditUserPassword(user.getUsername());
   }
 
-  @Test(expected = PermissionMessageException.class)
   public void userShouldBeUnableToEditOtherUsersPassword() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
     when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
         .thenReturn(new ResultDto<>(false));
+
+    exception.expect(PermissionMessageException.class);
+    exception.expectMessage(new Message(ERROR_NO_FOLLOWING_PERMISSION, right.getName()).toString());
 
     permissionService.canEditUserPassword("OtherUser");
   }
