@@ -145,7 +145,6 @@ public class UserController {
    */
   @RequestMapping(value = "/users/auth/passwordReset", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
   public void passwordReset(@RequestBody @Valid PasswordResetRequest passwordResetRequest,
       BindingResult bindingResult) {
     permissionService.canEditUserPassword(passwordResetRequest.getUsername());
@@ -174,7 +173,6 @@ public class UserController {
    */
   @RequestMapping(value = "/users/auth/forgotPassword", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
   public void forgotPassword(@RequestParam(value = "email") String email) {
     UserDto refDataUser = userReferenceDataService.findUserByEmail(email);
 
