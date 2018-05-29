@@ -149,6 +149,7 @@ public class PermissionServiceTest {
     permissionService.canEditUserPassword(user.getUsername());
   }
 
+  @Test
   public void userShouldBeUnableToEditOtherUsersPassword() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
     when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
