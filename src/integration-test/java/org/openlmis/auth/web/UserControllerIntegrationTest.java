@@ -38,6 +38,8 @@ import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
 
 import com.jayway.restassured.response.ValidatableResponse;
 import guru.nidi.ramltester.junit.RamlMatchers;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,8 +64,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.HttpServerErrorException;
-import java.time.ZonedDateTime;
-import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
@@ -153,15 +153,20 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotResetPasswordForOtherUserWithoutPermissions() {
-    PermissionMessageException ex = mockUserManagePermissionError();
+    PermissionMessageException ex = buildUserManagerPermissionError();
+    String differentUsername = "differentUser";
 
-    passwordReset("differentUser", "newpassword123", USER_TOKEN)
+    doThrow(ex).when(permissionService).canEditUserPassword(differentUsername);
+
+    passwordReset(differentUsername, "newpassword123", USER_TOKEN)
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
   }
 
   @Test
   public void shouldResetPasswordForCurrentUser() {
+    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
+
     passwordReset("newpassword123", USER_TOKEN)
         .statusCode(200);
   }
@@ -332,11 +337,16 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   private PermissionMessageException mockUserManagePermissionError() {
-    Message exMessage = new Message(ERROR_NO_FOLLOWING_PERMISSION, "USERS_MANAGE");
+    PermissionMessageException ex = buildUserManagerPermissionError();
 
-    PermissionMessageException ex = new PermissionMessageException(exMessage);
     doThrow(ex).when(permissionService).canManageUsers();
 
     return ex;
+  }
+
+  private PermissionMessageException buildUserManagerPermissionError() {
+    Message exMessage = new Message(ERROR_NO_FOLLOWING_PERMISSION, "USERS_MANAGE");
+
+    return new PermissionMessageException(exMessage);
   }
 }

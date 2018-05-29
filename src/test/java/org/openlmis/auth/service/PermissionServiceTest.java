@@ -136,4 +136,18 @@ public class PermissionServiceTest {
     when(securityContext.getAuthentication()).thenReturn(apiKeyClient);
     permissionService.canManageApiKeys();
   }
+
+  @Test
+  public void userShouldBeAbleToEditOwnPassword() {
+    permissionService.canEditUserPassword(user.getUsername());
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void userShouldBeUnableToEditOtherUsersPassword() {
+    when(securityContext.getAuthentication()).thenReturn(userClient);
+    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+        .thenReturn(new ResultDto<>(false));
+
+    permissionService.canEditUserPassword("OtherUser");
+  }
 }
