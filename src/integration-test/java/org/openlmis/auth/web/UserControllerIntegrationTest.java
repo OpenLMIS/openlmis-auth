@@ -18,7 +18,6 @@ package org.openlmis.auth.web;
 import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -62,7 +61,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.HttpServerErrorException;
 
@@ -132,9 +130,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .getPassword();
     assertNotNull(password);
 
-    passwordReset("test1234", USER_TOKEN)
-        .statusCode(200)
-        .contentType(is(MediaType.APPLICATION_JSON_UTF8_VALUE));
+    passwordReset("test1234", USER_TOKEN).statusCode(200);
 
     String newPassword = userRepository
         .findOne(UUID.fromString(DummyUserDto.AUTH_ID))
