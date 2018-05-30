@@ -18,6 +18,7 @@ package org.openlmis.auth.web;
 import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -61,6 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.HttpServerErrorException;
 
@@ -130,7 +132,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .getPassword();
     assertNotNull(password);
 
-    passwordReset("test1234", USER_TOKEN).statusCode(200);
+    passwordReset("test1234", USER_TOKEN)
+        .statusCode(200)
+        .contentType(is(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
     String newPassword = userRepository
         .findOne(UUID.fromString(DummyUserDto.AUTH_ID))
@@ -155,14 +159,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     passwordReset(differentUsername, "newpassword123", USER_TOKEN)
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
-  }
-
-  @Test
-  public void shouldResetPasswordForCurrentUser() {
-    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
-
-    passwordReset("newpassword123", USER_TOKEN)
-        .statusCode(200);
   }
 
   @Test
@@ -280,9 +276,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         username, password
     );
 
-    return sendPostRequest(
-        token, RESET_PASS_URL, passwordResetRequest, null
-    );
+    return sendPostRequest(token, RESET_PASS_URL, passwordResetRequest, null);
   }
 
   private ValidatableResponse forgotPassword() {

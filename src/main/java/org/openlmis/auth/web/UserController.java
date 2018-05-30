@@ -23,6 +23,12 @@ import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
 
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import javax.validation.Valid;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.referencedata.UserDto;
@@ -42,6 +48,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
@@ -61,12 +69,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import javax.validation.Valid;
 
 @Controller
 @Transactional
@@ -144,8 +146,8 @@ public class UserController {
    * Resets a user's password. If request fails returns map with field errors.
    */
   @RequestMapping(value = "/users/auth/passwordReset", method = RequestMethod.POST)
-  @ResponseStatus(HttpStatus.OK)
-  public void passwordReset(@RequestBody @Valid PasswordResetRequest passwordResetRequest,
+  public ResponseEntity<Void> passwordReset(
+      @RequestBody @Valid PasswordResetRequest passwordResetRequest,
       BindingResult bindingResult) {
     permissionService.canEditUserPassword(passwordResetRequest.getUsername());
 
@@ -166,6 +168,11 @@ public class UserController {
     user.setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
     userRepository.save(user);
     LOGGER.debug("Password updated for user %s", username);
+
+    return ResponseEntity
+        .ok()
+        .contentType(MediaType.APPLICATION_JSON_UTF8)
+        .build();
   }
 
   /**

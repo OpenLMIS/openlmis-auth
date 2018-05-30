@@ -6,6 +6,9 @@ Improvements and new functionality which are backwards-compatible:
 * [OLMIS-2923](https://openlmis.atlassian.net/browse/OLMIS-2923): Updated demo data loading approach
 * [OLMIS-4731](https://openlmis.atlassian.net/browse/OLMIS-4731): Enabled current user to change its password
 
+Bug fixes that are backwards-compatible:
+* [OLMIS-4550](https://openlmis.atlassian.net/browse/OLMIS-4550): Added content type to password reset response
+
 3.2.0 / 2018-04-24
 ==================
 
