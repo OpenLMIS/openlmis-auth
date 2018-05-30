@@ -124,7 +124,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
-  public void testPasswordReset() {
+  public void shouldResetPassword() {
     doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
 
     String password = userRepository
@@ -141,11 +141,30 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .getPassword();
     assertNotNull(newPassword);
     assertNotEquals(password, newPassword);
+  }
 
+  @Test
+  public void shouldReturnErrorMessageIfPasswordIsTooShort() {
+    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
     checkErrorResponseForPasswordReset("1234567", "size must be between 8 and 16");
+  }
+
+  @Test
+  public void shouldReturnErrorMessageIfPasswordIsTooLong() {
+    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
     checkErrorResponseForPasswordReset("sdokfsodpfjsaidjasj2akdsjk",
         "size must be between 8 and 16");
+  }
+
+  @Test
+  public void shouldReturnErrorMessageIfPasswordDoesNotConstainNumber() {
+    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
     checkErrorResponseForPasswordReset("vvvvvvvvvvv", "must contain at least 1 number");
+  }
+
+  @Test
+  public void shouldReturnErrorMessageIfPasswordContainsSpaces() {
+    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
     checkErrorResponseForPasswordReset("1sample text", "must not contain spaces");
   }
 
