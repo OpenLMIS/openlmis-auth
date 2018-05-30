@@ -5,17 +5,21 @@
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details. You should have received a copy of
  * the GNU Affero General Public License along with this program. If not, see
- * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
+ * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
 package org.openlmis.auth.service;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.OAuth2AuthenticationDataBuilder.API_KEY_PREFIX;
 import static org.openlmis.auth.OAuth2AuthenticationDataBuilder.SERVICE_CLIENT_ID;
@@ -48,6 +52,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("PMD.TooManyMethods")
 public class PermissionServiceTest {
 
   @Rule
@@ -147,16 +152,29 @@ public class PermissionServiceTest {
   @Test
   public void userShouldBeAbleToEditOwnPassword() {
     permissionService.canEditUserPassword(user.getUsername());
+
+    verify(authenticationHelper).getCurrentUser();
+    verify(authenticationHelper, never()).getRight(anyString());
+    verifyZeroInteractions(userReferenceDataService, apiKeySettings);
   }
 
   @Test
-  public void userShouldBeUnableToEditOtherUsersPassword() {
+  public void userWithoutRightShouldBeUnableToEditOtherUsersPassword() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
     when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
         .thenReturn(new ResultDto<>(false));
 
     exception.expect(PermissionMessageException.class);
     exception.expectMessage(new Message(ERROR_NO_FOLLOWING_PERMISSION, right.getName()).toString());
+
+    permissionService.canEditUserPassword("OtherUser");
+  }
+
+  @Test
+  public void userWithRightShouldBeUnableToEditOtherUsersPassword() {
+    when(securityContext.getAuthentication()).thenReturn(userClient);
+    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+        .thenReturn(new ResultDto<>(true));
 
     permissionService.canEditUserPassword("OtherUser");
   }
