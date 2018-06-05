@@ -32,6 +32,7 @@ import static org.openlmis.auth.web.TestWebData.Fields.MESSAGE_KEY;
 import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.SERVICE_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 import com.jayway.restassured.response.ValidatableResponse;
 
@@ -342,7 +343,8 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   private ValidatableResponse post(String token) {
-    return sendPostRequest(token, RESOURCE_URL, null, null);
+    return sendPostRequest(token, RESOURCE_URL, null, null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
   private ValidatableResponse get(int pageSize, String token) {

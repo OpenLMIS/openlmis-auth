@@ -18,6 +18,7 @@ package org.openlmis.auth.web;
 import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -35,6 +36,7 @@ import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VA
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
 import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 import com.jayway.restassured.response.ValidatableResponse;
 import guru.nidi.ramltester.junit.RamlMatchers;
@@ -117,6 +119,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     PermissionMessageException ex = mockUserManagePermissionError();
 
     sendPostRequest(USER_TOKEN, RESOURCE_URL, new User(), null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
   }
@@ -185,6 +188,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     );
 
     sendPostRequest(USER_TOKEN, RESET_PASS_URL, passwordResetRequest, null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(400)
         .body(Fields.MESSAGE_KEY, equalTo(USERS_PASSWORD_RESET_USER_NOT_FOUND));
   }
@@ -291,26 +295,26 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         username, password
     );
 
-    return sendPostRequest(token, RESET_PASS_URL, passwordResetRequest, null);
+    return sendPostRequest(token, RESET_PASS_URL, passwordResetRequest, null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
   private ValidatableResponse forgotPassword() {
-    return sendPostRequest(
-        null, FORGOT_PASS_URL, null, of(Fields.EMAIL, DummyUserDto.EMAIL)
-    );
+    return sendPostRequest(null, FORGOT_PASS_URL, null, of(Fields.EMAIL, DummyUserDto.EMAIL))
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
   private ValidatableResponse changePassword(PasswordChangeRequest request) {
-    return sendPostRequest(null, CHANGE_PASS_URL, request, null);
+    return sendPostRequest(null, CHANGE_PASS_URL, request, null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
   private ValidatableResponse passwordResetToken() {
     return sendPostRequest(
         USER_TOKEN, RESET_TOKEN_PASS_URL, null,
-        of(Fields.USER_ID, DummyUserDto.REFERENCE_ID)
-    );
+        of(Fields.USER_ID, DummyUserDto.REFERENCE_ID))
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
-
 
   private String login(String username, String password) {
     String token = startRequest()

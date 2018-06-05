@@ -22,7 +22,7 @@ import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.BEARER;
 import static org.openlmis.auth.web.TestWebData.Tokens.SERVICE_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.RestAssured;
@@ -31,7 +31,11 @@ import com.jayway.restassured.config.RestAssuredConfig;
 import com.jayway.restassured.filter.log.LogDetail;
 import com.jayway.restassured.response.ValidatableResponse;
 import com.jayway.restassured.specification.RequestSpecification;
-
+import guru.nidi.ramltester.RamlDefinition;
+import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.restassured.RestAssuredClient;
+import java.util.Map;
+import javax.annotation.PostConstruct;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.openlmis.auth.DummyUserDto;
@@ -57,14 +61,6 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import guru.nidi.ramltester.RamlDefinition;
-import guru.nidi.ramltester.RamlLoaders;
-import guru.nidi.ramltester.restassured.RestAssuredClient;
-
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -139,7 +135,7 @@ public abstract class BaseWebIntegrationTest {
     }
 
     return request
-        .contentType(APPLICATION_JSON_VALUE)
+        .contentType(APPLICATION_JSON_UTF8_VALUE)
         .when()
         .post(url)
         .then();
