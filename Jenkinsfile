@@ -50,15 +50,20 @@ pipeline {
         stage('Build') {
             steps {
                 withCredentials([file(credentialsId: '8da5ba56-8ebb-4a6a-bdb5-43c9d0efb120', variable: 'ENV_FILE')]) {
-                    sh 'set +x'
-                    sh 'sudo rm -f .env'
-                    sh 'cp $ENV_FILE .env'
+                    sh """
+                        set +x
+                        sudo rm -f .env'
+                        cp $ENV_FILE .env'
+                        if [ "$GIT_BRANCH" != "master" ]; then
+                            sed -i '' -e "s#^TRANSIFEX_PUSH=.*#TRANSIFEX_PUSH=false#" .env  2>/dev/null || true
+                        fi
 
-                    sh 'docker-compose -f docker-compose.builder.yml run -e BUILD_NUMBER=$BUILD_NUMBER -e GIT_BRANCH=$GIT_BRANCH builder'
-                    sh 'docker-compose -f docker-compose.builder.yml build image'
-                    sh 'docker-compose -f docker-compose.builder.yml down --volumes'
-                    sh "docker tag openlmis/auth:latest openlmis/auth:${STAGING_VERSION}"
-                    sh "docker push openlmis/auth:${STAGING_VERSION}"
+                        docker-compose -f docker-compose.builder.yml run -e BUILD_NUMBER=$BUILD_NUMBER -e GIT_BRANCH=$GIT_BRANCH builder
+                        docker-compose -f docker-compose.builder.yml build image
+                        docker-compose -f docker-compose.builder.yml down --volumes
+                        docker tag openlmis/auth:latest openlmis/auth:${STAGING_VERSION}
+                        docker push openlmis/auth:${STAGING_VERSION}
+                    """
                 }
             }
             post {
