@@ -151,6 +151,7 @@ pipeline {
             steps {
                 dir('erd') {
                     sh '''#!/bin/bash -xe
+                        unset COMPOSE_PROJECT_NAME
                         # prepare ERD folder on CI server
                         sudo mkdir -p /var/www/html/erd-auth
                         sudo chown -R $USER:$USER /var/www/html/erd-auth
