@@ -61,6 +61,18 @@ public class PermissionService {
     canManageUsers();
   }
 
+  /**
+   * Checks whether user can resend verification email of the user with the given id.
+   *
+   */
+  public void canResendVerificationEmail(UUID referenceDataUserId) {
+    if (referenceDataUserId.equals(authenticationHelper.getCurrentUser().getId())) {
+      return;
+    }
+
+    canManageUsers();
+  }
+
   public void canManageUsers() {
     checkPermission(USERS_MANAGE, null, null, null, true, false);
   }

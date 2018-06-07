@@ -18,10 +18,12 @@ package org.openlmis.auth.web;
 
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
-import static org.openlmis.auth.i18n.MessageKeys.USERS_FORGOT_PASSWORD_USER_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_VERIFIED;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
-import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -166,7 +168,7 @@ public class UserController {
     Optional<User> userOptional = userRepository.findOneByUsernameIgnoreCase(username);
 
     User user = userOptional
-        .orElseThrow(() -> new ValidationMessageException(USERS_PASSWORD_RESET_USER_NOT_FOUND));
+        .orElseThrow(() -> new ValidationMessageException(USER_NOT_FOUND));
 
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     user.setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
@@ -183,7 +185,7 @@ public class UserController {
     UserDto refDataUser = userReferenceDataService.findUserByEmail(email);
 
     if (refDataUser == null) {
-      throw new ValidationMessageException(USERS_FORGOT_PASSWORD_USER_NOT_FOUND);
+      throw new ValidationMessageException(USER_NOT_FOUND_BY_EMAIL);
     }
 
     User user = userRepository.findOneByReferenceDataUserId(refDataUser.getId());
@@ -241,6 +243,31 @@ public class UserController {
 
     userReferenceDataService.putUser(user);
     emailVerificationTokenRepository.delete(token);
+  }
+
+  /**
+   * Generates token which can be used to verify user's email.
+   */
+  @RequestMapping(value = "/users/auth/verifyEmail", method = RequestMethod.POST)
+  @ResponseStatus(HttpStatus.OK)
+  public void sendVerificationEmail(@RequestParam(value = "userId") UUID referenceDataUserId) {
+    permissionService.canResendVerificationEmail(referenceDataUserId);
+    UserDto referenceUser = userReferenceDataService.findOne(referenceDataUserId);
+
+    if (referenceUser == null) {
+      throw new ValidationMessageException(USER_NOT_FOUND);
+    }
+
+    if (!referenceUser.hasEmail()) {
+      throw new ValidationMessageException(ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL);
+    }
+
+    if (referenceUser.isVerified()) {
+      throw new ValidationMessageException(ERROR_VERIFY_EMAIL_USER_VERIFIED);
+    }
+
+    User user = userRepository.findOneByReferenceDataUserId(referenceUser.getId());
+    userService.sendEmailVerificationEmail(user, referenceUser.getEmail());
   }
 
   private void verifyToken(ExpirationToken token) {

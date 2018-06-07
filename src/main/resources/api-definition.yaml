@@ -313,6 +313,29 @@ resourceTypes:
                            X-Content-Type-Options:
                            X-XSS-Protection:
           /verifyEmail:
+              post:
+                  is: [ secured ]
+                  description: Resend verification email for the current user.
+                  queryParameters:
+                      userId:
+                          displayName: ReferenceDataUserId
+                          description: Reference Data User Id
+                          type: string
+                          required: true
+                          repeat: false
+                  responses:
+                      200:
+                          description: Verification email has been sent
+                      400:
+                          description: There were issues with sending verification email.
+                          body:
+                              application/json:
+                                  schema: localizedMessage
+                      403:
+                          description: The current logged user has no permission to perform action.
+                          body:
+                              application/json:
+                                  schema: localizedMessage
               /{token}:
                   get:
                       description: Verifies the given email address

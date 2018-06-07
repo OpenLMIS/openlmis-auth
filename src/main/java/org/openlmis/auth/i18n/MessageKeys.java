@@ -42,6 +42,12 @@ public abstract class MessageKeys {
   public static final String ERROR_REFERENCE_DATA_USER_NOT_FOUND = ERROR_PREFIX
       + ".users.referenceDataUserNotFound";
 
+  public static final String ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL = ERROR_PREFIX
+      + ".users.verifyEmail.missingEmail";
+
+  public static final String ERROR_VERIFY_EMAIL_USER_VERIFIED = ERROR_PREFIX
+      + ".users.verifyEmail.userVerified";
+
   public static final String ACCOUNT_CREATED_EMAIL_SUBJECT = SERVICE_PREFIX
       + ".email.accountCreated.subject";
   public static final String PASSWORD_RESET_EMAIL_SUBJECT = SERVICE_PREFIX
@@ -54,14 +60,12 @@ public abstract class MessageKeys {
   public static final String EMAIL_VERIFICATION_EMAIL_BODY = SERVICE_PREFIX
       + ".email.verifyEmail.body";
 
-  public static final String USERS_PASSWORD_RESET_USER_NOT_FOUND = USERS
-      + ".passwordReset.userNotFound";
-
   public static final String USERS_PASSWORD_RESET_INVALID_VALUE = USERS
       + ".passwordReset.invalidValue";
 
-  public static final String USERS_FORGOT_PASSWORD_USER_NOT_FOUND = USERS
-      + ".forgotPassword.userNotFound";
+  public static final String USER_NOT_FOUND = USERS + ".notFound";
+
+  public static final String USER_NOT_FOUND_BY_EMAIL = USERS + ".notFoundByEmail";
 
   public static final String USERS_LOGOUT_CONFIRMATION = USERS + ".logout.confirmation";
 

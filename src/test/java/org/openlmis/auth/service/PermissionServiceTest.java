@@ -27,6 +27,7 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.service.PermissionService.SERVICE_ACCOUNTS_MANAGE;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -178,4 +179,35 @@ public class PermissionServiceTest {
 
     permissionService.canEditUserPassword("OtherUser");
   }
+
+  @Test
+  public void userShouldBeAbleToResendVerificationEmail() {
+    permissionService.canResendVerificationEmail(user.getId());
+
+    verify(authenticationHelper).getCurrentUser();
+    verify(authenticationHelper, never()).getRight(anyString());
+    verifyZeroInteractions(userReferenceDataService, apiKeySettings);
+  }
+
+  @Test
+  public void userWithoutRightShouldBeUnableToResendVerificationEmail() {
+    when(securityContext.getAuthentication()).thenReturn(userClient);
+    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+        .thenReturn(new ResultDto<>(false));
+
+    exception.expect(PermissionMessageException.class);
+    exception.expectMessage(new Message(ERROR_NO_FOLLOWING_PERMISSION, right.getName()).toString());
+
+    permissionService.canResendVerificationEmail(UUID.randomUUID());
+  }
+
+  @Test
+  public void userWithRightShouldBeUnableToResendVerificationEmail() {
+    when(securityContext.getAuthentication()).thenReturn(userClient);
+    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+        .thenReturn(new ResultDto<>(true));
+
+    permissionService.canResendVerificationEmail(UUID.randomUUID());
+  }
+
 }

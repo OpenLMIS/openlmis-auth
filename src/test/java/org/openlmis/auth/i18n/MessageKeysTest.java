@@ -31,9 +31,9 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_REQUIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
-import static org.openlmis.auth.i18n.MessageKeys.USERS_FORGOT_PASSWORD_USER_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
-import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 
 import org.junit.Test;
 
@@ -61,9 +61,9 @@ public class MessageKeysTest {
     verifyValue(PASSWORD_RESET_EMAIL_SUBJECT, "auth.email.resetPassword.subject");
     verifyValue(PASSWORD_RESET_EMAIL_BODY, "auth.email.resetPassword.body");
 
-    verifyValue(USERS_PASSWORD_RESET_USER_NOT_FOUND, "users.passwordReset.userNotFound");
+    verifyValue(USER_NOT_FOUND, "users.notFound");
 
-    verifyValue(USERS_FORGOT_PASSWORD_USER_NOT_FOUND, "users.forgotPassword.userNotFound");
+    verifyValue(USER_NOT_FOUND_BY_EMAIL, "users.notFoundByEmail");
 
     verifyValue(USERS_LOGOUT_CONFIRMATION, "users.logout.confirmation");
   }

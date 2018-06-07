@@ -187,7 +187,7 @@ public class UserService {
    * @param user      the user whose email is being verify
    * @param email     recipient's email address
    */
-  private void sendEmailVerificationEmail(User user, String email) {
+  public void sendEmailVerificationEmail(User user, String email) {
     EmailVerificationToken token = createEmailVerificationToken(user);
     sendEmail(
         user, email, token,

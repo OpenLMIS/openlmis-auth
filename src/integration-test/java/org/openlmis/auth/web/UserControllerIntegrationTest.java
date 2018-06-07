@@ -29,14 +29,19 @@ import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_VERIFIED;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
-import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.service.UserService.TOKEN_VALIDITY_HOURS;
 import static org.openlmis.auth.web.TestWebData.Fields.MESSAGE_KEY;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
@@ -60,6 +65,7 @@ import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
+import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
@@ -83,9 +89,14 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String CHANGE_PASS_URL = RESOURCE_URL + "/changePassword";
   private static final String RESET_TOKEN_PASS_URL = RESOURCE_URL + "/passwordResetToken";
   private static final String LOGOUT_URL = RESOURCE_URL + "/logout";
-  private static final String VERIFY_EMAIL_URL = RESOURCE_URL + "/verifyEmail/{token}";
+  private static final String SEND_VERIFICATION_EMAIL_URL = RESOURCE_URL + "/verifyEmail";
+  private static final String VERIFY_EMAIL_URL = SEND_VERIFICATION_EMAIL_URL + "/{token}";
 
   private static final String TOKEN_URL = "/api/oauth/token";
+
+  private static final String PATH_PARAM_TOKEN = "token";
+
+  private static final String QUERY_PARAM_USER_ID = "userId";
 
   @Autowired
   private UserRepository userRepository;
@@ -96,8 +107,11 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @MockBean
   private EmailVerificationTokenRepository emailVerificationTokenRepository;
 
-  @SpyBean
+  @MockBean
   private PermissionService permissionService;
+
+  @SpyBean
+  private UserService userService;
 
   @MockBean
   private NotificationService notificationService;
@@ -138,8 +152,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldResetPassword() {
-    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
-
     String password = userRepository
         .findOne(UUID.fromString(DummyUserDto.AUTH_ID))
         .getPassword();
@@ -156,26 +168,22 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnErrorMessageIfPasswordIsTooShort() {
-    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
     checkErrorResponseForPasswordReset("1234567", "size must be between 8 and 16");
   }
 
   @Test
   public void shouldReturnErrorMessageIfPasswordIsTooLong() {
-    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
     checkErrorResponseForPasswordReset("sdokfsodpfjsaidjasj2akdsjk",
         "size must be between 8 and 16");
   }
 
   @Test
   public void shouldReturnErrorMessageIfPasswordDoesNotConstainNumber() {
-    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
     checkErrorResponseForPasswordReset("vvvvvvvvvvv", "must contain at least 1 number");
   }
 
   @Test
   public void shouldReturnErrorMessageIfPasswordContainsSpaces() {
-    doNothing().when(permissionService).canEditUserPassword(DummyUserDto.USERNAME);
     checkErrorResponseForPasswordReset("1sample text", "must not contain spaces");
   }
 
@@ -193,8 +201,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnBadRequestWhenUserNotFound() {
-    doNothing().when(permissionService).canEditUserPassword("wrongUser");
-
     PasswordResetRequest passwordResetRequest = new PasswordResetRequest(
         "wrongUser", "newpassword1"
     );
@@ -202,7 +208,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     sendPostRequest(USER_TOKEN, RESET_PASS_URL, passwordResetRequest, null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(400)
-        .body(Fields.MESSAGE_KEY, equalTo(USERS_PASSWORD_RESET_USER_NOT_FOUND));
+        .body(Fields.MESSAGE_KEY, equalTo(USER_NOT_FOUND));
   }
 
   @Test
@@ -272,8 +278,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void testCreatePasswordResetToken() {
-    doNothing().when(permissionService).canManageUsers();
-
     UUID tokenId = passwordResetToken()
         .statusCode(200)
         .extract().as(UUID.class);
@@ -301,7 +305,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .willReturn(token);
 
     startRequest(USER_TOKEN)
-        .pathParam("token", token.getId())
+        .pathParam(PATH_PARAM_TOKEN, token.getId())
         .when()
         .get(VERIFY_EMAIL_URL)
         .then()
@@ -319,7 +323,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .willReturn(null);
 
     startRequest(USER_TOKEN)
-        .pathParam("token", UUID.randomUUID())
+        .pathParam(PATH_PARAM_TOKEN, UUID.randomUUID())
         .when()
         .get(VERIFY_EMAIL_URL)
         .then()
@@ -339,7 +343,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .willReturn(token);
 
     startRequest(USER_TOKEN)
-        .pathParam("token", token.getId())
+        .pathParam(PATH_PARAM_TOKEN, token.getId())
         .when()
         .get(VERIFY_EMAIL_URL)
         .then()
@@ -347,6 +351,85 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .body(MESSAGE_KEY, equalTo(ERROR_TOKEN_EXPIRED));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldResendVerificationEmail() {
+    doNothing().when(userService).sendEmailVerificationEmail(any(User.class), anyString());
+
+    startRequest(USER_TOKEN)
+        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
+        .when()
+        .post(SEND_VERIFICATION_EMAIL_URL)
+        .then()
+        .statusCode(HttpStatus.OK.value());
+
+    verify(userService).sendEmailVerificationEmail(any(User.class), eq(admin.getEmail()));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldNotResendVerificationEmailIfUserHasNoPermissions() {
+    PermissionMessageException ex = buildUserManagerPermissionError();
+    doThrow(ex).when(permissionService).canResendVerificationEmail(admin.getId());
+
+    startRequest(USER_TOKEN)
+        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
+        .when()
+        .post(SEND_VERIFICATION_EMAIL_URL)
+        .then()
+        .statusCode(HttpStatus.FORBIDDEN.value())
+        .body(MESSAGE_KEY, is(ERROR_NO_FOLLOWING_PERMISSION));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+    verifyZeroInteractions(userService);
+  }
+
+  @Test
+  public void shouldNotResendVerificationEmailIfUserNotFound() {
+    startRequest(USER_TOKEN)
+        .queryParam(QUERY_PARAM_USER_ID, UUID.randomUUID())
+        .when()
+        .post(SEND_VERIFICATION_EMAIL_URL)
+        .then()
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .body(MESSAGE_KEY, equalTo(USER_NOT_FOUND));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+    verifyZeroInteractions(userService);
+  }
+
+  @Test
+  public void shouldNotResendVerificationEmailIfUserHasNoEmail() {
+    admin.setEmail(null);
+
+    startRequest(USER_TOKEN)
+        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
+        .when()
+        .post(SEND_VERIFICATION_EMAIL_URL)
+        .then()
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .body(MESSAGE_KEY, equalTo(ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+    verifyZeroInteractions(userService);
+  }
+
+  @Test
+  public void shouldNotResendVerificationEmailIfUserEmailHasBeenVerified() {
+    admin.setVerified(true);
+
+    startRequest(USER_TOKEN)
+        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
+        .when()
+        .post(SEND_VERIFICATION_EMAIL_URL)
+        .then()
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .body(MESSAGE_KEY, equalTo(ERROR_VERIFY_EMAIL_USER_VERIFIED));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+    verifyZeroInteractions(userService);
   }
 
   private void checkErrorResponseForPasswordReset(String password, String expectedMessage) {
