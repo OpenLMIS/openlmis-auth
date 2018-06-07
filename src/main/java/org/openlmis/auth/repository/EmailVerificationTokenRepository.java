@@ -13,13 +13,11 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.domain;
+package org.openlmis.auth.repository;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import org.openlmis.auth.domain.EmailVerificationToken;
 
-@Entity
-@Table(name = "password_reset_tokens")
-public class PasswordResetToken extends ExpirationToken {
+public interface EmailVerificationTokenRepository
+    extends ExpirationTokenRepository<EmailVerificationToken> {
 
 }

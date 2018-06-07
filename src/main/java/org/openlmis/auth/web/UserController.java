@@ -23,18 +23,20 @@ import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
 
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.validation.Valid;
+import org.openlmis.auth.domain.EmailVerificationToken;
+import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.exception.BindingResultException;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
+import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
@@ -61,6 +63,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -89,6 +92,9 @@ public class UserController {
 
   @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
+
+  @Autowired
+  private EmailVerificationTokenRepository emailVerificationTokenRepository;
 
   @Autowired
   private UserReferenceDataService userReferenceDataService;
@@ -195,13 +201,7 @@ public class UserController {
     PasswordResetToken token =
         passwordResetTokenRepository.findOne(passwordChangeRequest.getToken());
 
-    if (token == null) {
-      throw new ValidationMessageException(ERROR_TOKEN_INVALID);
-    }
-
-    if (token.getExpiryDate().isBefore(ZonedDateTime.now())) {
-      throw new ValidationMessageException(ERROR_TOKEN_EXPIRED);
-    }
+    verifyToken(token);
 
     User user = token.getUser();
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -225,6 +225,32 @@ public class UserController {
     PasswordResetToken token = userService.createPasswordResetToken(user);
 
     return token.getId();
+  }
+
+  /**
+   * Verify user email address.
+   */
+  @RequestMapping(value = "/users/auth/verifyEmail/{token}", method = RequestMethod.GET)
+  @ResponseStatus(HttpStatus.OK)
+  public void verifyEmail(@PathVariable("token") UUID token) {
+    EmailVerificationToken details = emailVerificationTokenRepository.findOne(token);
+    verifyToken(details);
+
+    UserDto user = userReferenceDataService.findOne(details.getUser().getReferenceDataUserId());
+    user.setVerified(true);
+
+    userReferenceDataService.putUser(user);
+    emailVerificationTokenRepository.delete(token);
+  }
+
+  private void verifyToken(ExpirationToken token) {
+    if (token == null) {
+      throw new ValidationMessageException(ERROR_TOKEN_INVALID);
+    }
+
+    if (token.isExpired()) {
+      throw new ValidationMessageException(ERROR_TOKEN_EXPIRED);
+    }
   }
 
   private Map<String, String> getErrors(final BindingResult bindingResult) {

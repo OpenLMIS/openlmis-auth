@@ -15,9 +15,8 @@
 
 package org.openlmis.auth;
 
-import org.openlmis.auth.dto.referencedata.UserDto;
-
 import java.util.UUID;
+import org.openlmis.auth.dto.referencedata.UserDto;
 
 public final class DummyUserDto extends UserDto {
   public static final String AUTH_ID = "51f6bdc1-4932-4bc3-9589-368646ef7ad3";
@@ -26,34 +25,9 @@ public final class DummyUserDto extends UserDto {
   public static final String PASSWORD = "password";
   public static final String EMAIL = "test@openlmis.org";
 
-  @Override
-  public UUID getId() {
-    return UUID.fromString(REFERENCE_ID);
-  }
-
-  @Override
-  public String getUsername() {
-    return USERNAME;
-  }
-
-  @Override
-  public String getFirstName() {
-    return "Admin";
-  }
-
-  @Override
-  public String getLastName() {
-    return "User";
-  }
-
-  @Override
-  public String getEmail() {
-    return EMAIL;
-  }
-
-  @Override
-  public boolean isVerified() {
-    return false;
+  public DummyUserDto() {
+    super(USERNAME, "Admin", "User", EMAIL, null, null, false, false, false, null, null, null);
+    setId(UUID.fromString(REFERENCE_ID));
   }
 
 }

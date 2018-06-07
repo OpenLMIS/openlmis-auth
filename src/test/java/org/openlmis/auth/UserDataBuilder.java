@@ -13,13 +13,34 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.domain;
+package org.openlmis.auth;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.openlmis.auth.domain.User;
 
-@Entity
-@Table(name = "password_reset_tokens")
-public class PasswordResetToken extends ExpirationToken {
+public class UserDataBuilder {
+  private static final AtomicInteger instanceNumber = new AtomicInteger();
+
+  private UUID referenceDataUserId = UUID.randomUUID();
+  private String username = "user" + instanceNumber.incrementAndGet();
+  private boolean enabled = true;
+
+  public UserDataBuilder withReferenceDataUserId(UUID referenceDataUserId) {
+    this.referenceDataUserId = referenceDataUserId;
+    return this;
+  }
+
+  /**
+   * Builds instance of {@link User} without id.
+   */
+  public User build() {
+    User user = new User();
+    user.setReferenceDataUserId(referenceDataUserId);
+    user.setUsername(username);
+    user.setEnabled(enabled);
+
+    return user;
+  }
 
 }

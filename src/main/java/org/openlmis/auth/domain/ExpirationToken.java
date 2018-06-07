@@ -15,11 +15,32 @@
 
 package org.openlmis.auth.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import java.time.ZonedDateTime;
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToOne;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity
-@Table(name = "password_reset_tokens")
-public class PasswordResetToken extends ExpirationToken {
+@MappedSuperclass
+@EqualsAndHashCode(callSuper = true)
+public abstract class ExpirationToken extends BaseEntity {
+
+  @Getter
+  @Setter
+  @Column(nullable = false, columnDefinition = "timestamp with time zone")
+  private ZonedDateTime expiryDate;
+
+  @Getter
+  @Setter
+  @OneToOne
+  @JoinColumn(name = "userId", nullable = false, unique = true)
+  private User user;
+
+  public boolean isExpired() {
+    return expiryDate.isBefore(ZonedDateTime.now());
+  }
 
 }

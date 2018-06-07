@@ -19,7 +19,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "password_reset_tokens")
-public class PasswordResetToken extends ExpirationToken {
+@Table(name = "email_verification_tokens")
+public class EmailVerificationToken extends ExpirationToken {
 
 }

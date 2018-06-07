@@ -15,8 +15,7 @@
 
 package org.openlmis.auth.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -25,26 +24,32 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_EMAIL_BODY;
+import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_EMAIL_SUBJECT;
 
+import java.util.Locale;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
+import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
-
-import java.util.Locale;
-import java.util.UUID;
+import org.openlmis.util.NotificationRequest;
 
 @SuppressWarnings({"PMD.UnusedPrivateField"})
 @RunWith(MockitoJUnitRunner.class)
@@ -63,6 +68,9 @@ public class UserServiceTest extends BaseServiceTest {
   private PasswordResetTokenRepository passwordResetTokenRepository;
 
   @Mock
+  private EmailVerificationTokenRepository emailVerificationTokenRepository;
+
+  @Mock
   private ExposedMessageSource messageSource;
 
   @Mock
@@ -71,20 +79,28 @@ public class UserServiceTest extends BaseServiceTest {
   @InjectMocks
   private UserService userService;
 
+  @Captor
+  private ArgumentCaptor<NotificationRequest> notificationRequestCaptor;
+
   @Before
   public void setUp() {
     when(passwordResetTokenRepository.findOneByUser(any(User.class))).thenReturn(null);
-    given(passwordResetTokenRepository.save(any(PasswordResetToken.class)))
-        .willAnswer(new SaveAnswer<PasswordResetToken>());
+    when(emailVerificationTokenRepository.findOneByUser(any(User.class))).thenReturn(null);
+
+    when(passwordResetTokenRepository.save(any(PasswordResetToken.class)))
+        .thenAnswer(new SaveAnswer<PasswordResetToken>());
+    when(emailVerificationTokenRepository.save(any(EmailVerificationToken.class)))
+        .thenAnswer(new SaveAnswer<EmailVerificationToken>());
 
     when(messageSource.getMessage(anyString(), any(String[].class), any(Locale.class)))
-        .thenReturn(null);
+        .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
   }
 
   @Test
   public void shouldCreateNewUser() {
     // given
-    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
+    DummyUserDto userDto = new DummyUserDto();
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(userDto);
     when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(null);
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
@@ -93,7 +109,12 @@ public class UserServiceTest extends BaseServiceTest {
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
-    verifyZeroInteractions(notificationService);
+    verify(notificationService).send(notificationRequestCaptor.capture());
+
+    NotificationRequest notificationRequest = notificationRequestCaptor.getValue();
+    assertThat(notificationRequest.getTo()).isEqualTo(userDto.getEmail());
+    assertThat(notificationRequest.getSubject()).isEqualTo(EMAIL_VERIFICATION_EMAIL_SUBJECT);
+    assertThat(notificationRequest.getContent()).isEqualTo(EMAIL_VERIFICATION_EMAIL_BODY);
   }
 
   @Test
@@ -143,7 +164,7 @@ public class UserServiceTest extends BaseServiceTest {
     verifyZeroInteractions(notificationService);
 
     User result = argumentCaptor.getValue();
-    assertNotEquals(oldUserPassword, result.getPassword());
+    assertThat(result.getPassword()).isNotEqualTo(oldUserPassword);
   }
 
   @Test
@@ -170,7 +191,7 @@ public class UserServiceTest extends BaseServiceTest {
     verifyZeroInteractions(notificationService);
 
     User result = argumentCaptor.getValue();
-    assertEquals(oldUserPassword, result.getPassword());
+    assertThat(result.getPassword()).isEqualTo(oldUserPassword);
   }
 
   @Test(expected = ValidationMessageException.class)

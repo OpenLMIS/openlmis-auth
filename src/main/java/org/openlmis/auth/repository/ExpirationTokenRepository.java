@@ -13,13 +13,19 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.domain;
+package org.openlmis.auth.repository;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import java.util.UUID;
+import org.openlmis.auth.domain.ExpirationToken;
+import org.openlmis.auth.domain.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.query.Param;
 
-@Entity
-@Table(name = "password_reset_tokens")
-public class PasswordResetToken extends ExpirationToken {
+@NoRepositoryBean
+public interface ExpirationTokenRepository<T extends ExpirationToken>
+    extends JpaRepository<T, UUID> {
+
+  T findOneByUser(@Param("user") User user);
 
 }

@@ -15,6 +15,8 @@
 
 package org.openlmis.auth.dto.referencedata;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -73,4 +75,8 @@ public class UserDto extends BaseDto {
   @Getter
   @Setter
   private Set<RoleAssignmentDto> roleAssignments;
+
+  public boolean hasEmail() {
+    return isNotBlank(email);
+  }
 }

@@ -15,11 +15,29 @@
 
 package org.openlmis.auth.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@Entity
-@Table(name = "password_reset_tokens")
-public class PasswordResetToken extends ExpirationToken {
+import java.time.ZonedDateTime;
+import org.junit.Test;
+
+public abstract class ExpirationTokenTest {
+
+  @Test
+  public void shouldExpired() {
+    ExpirationToken token = generateInstance();
+    token.setExpiryDate(ZonedDateTime.now().minusDays(5));
+
+    assertThat(token.isExpired()).isTrue();
+  }
+
+  @Test
+  public void shouldNotExpired() {
+    ExpirationToken token = generateInstance();
+    token.setExpiryDate(ZonedDateTime.now().plusDays(5));
+
+    assertThat(token.isExpired()).isFalse();
+  }
+
+  abstract ExpirationToken generateInstance();
 
 }

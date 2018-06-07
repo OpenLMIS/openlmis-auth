@@ -31,10 +31,14 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_USER_NOT_FOUND;
-import static org.openlmis.auth.service.UserService.RESET_PASSWORD_TOKEN_VALIDITY_HOURS;
+import static org.openlmis.auth.service.UserService.TOKEN_VALIDITY_HOURS;
+import static org.openlmis.auth.web.TestWebData.Fields.MESSAGE_KEY;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
@@ -46,9 +50,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.EmailVerificationTokenDataBuilder;
+import org.openlmis.auth.UserDataBuilder;
+import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.exception.PermissionMessageException;
+import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
@@ -75,6 +83,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String CHANGE_PASS_URL = RESOURCE_URL + "/changePassword";
   private static final String RESET_TOKEN_PASS_URL = RESOURCE_URL + "/passwordResetToken";
   private static final String LOGOUT_URL = RESOURCE_URL + "/logout";
+  private static final String VERIFY_EMAIL_URL = RESOURCE_URL + "/verifyEmail/{token}";
 
   private static final String TOKEN_URL = "/api/oauth/token";
 
@@ -84,18 +93,21 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
 
+  @MockBean
+  private EmailVerificationTokenRepository emailVerificationTokenRepository;
+
   @SpyBean
   private PermissionService permissionService;
 
   @MockBean
   private NotificationService notificationService;
 
+  private DummyUserDto admin = new DummyUserDto();
+
   @Override
   @Before
   public void setUp() {
     super.setUp();
-
-    DummyUserDto admin = new DummyUserDto();
 
     given(userReferenceDataService.findUserByEmail(admin.getEmail()))
         .willReturn(admin);
@@ -228,7 +240,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
     PasswordResetToken token1 = new PasswordResetToken();
     token1.setUser(user1);
-    token1.setExpiryDate(ZonedDateTime.now().plusHours(RESET_PASSWORD_TOKEN_VALIDITY_HOURS));
+    token1.setExpiryDate(ZonedDateTime.now().plusHours(TOKEN_VALIDITY_HOURS));
 
     passwordResetTokenRepository.save(token1);
 
@@ -277,6 +289,64 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     passwordResetToken()
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
+  }
+
+  @Test
+  public void shouldVerifyEmail() {
+    EmailVerificationToken token = new EmailVerificationTokenDataBuilder()
+        .withUser(new UserDataBuilder().withReferenceDataUserId(admin.getId()).build())
+        .build();
+
+    given(emailVerificationTokenRepository.findOne(token.getId()))
+        .willReturn(token);
+
+    startRequest(USER_TOKEN)
+        .pathParam("token", token.getId())
+        .when()
+        .get(VERIFY_EMAIL_URL)
+        .then()
+        .statusCode(HttpStatus.OK.value());
+
+    verify(userReferenceDataService).putUser(admin);
+    verify(emailVerificationTokenRepository).delete(token.getId());
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldReturnBadRequestIfTokenDoesNotExist() {
+    given(emailVerificationTokenRepository.findOne(any(UUID.class)))
+        .willReturn(null);
+
+    startRequest(USER_TOKEN)
+        .pathParam("token", UUID.randomUUID())
+        .when()
+        .get(VERIFY_EMAIL_URL)
+        .then()
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .body(MESSAGE_KEY, equalTo(ERROR_TOKEN_INVALID));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldReturnBadRequestIfTokenExpired() {
+    EmailVerificationToken token = new EmailVerificationTokenDataBuilder()
+        .withExpiredDate()
+        .build();
+
+    given(emailVerificationTokenRepository.findOne(token.getId()))
+        .willReturn(token);
+
+    startRequest(USER_TOKEN)
+        .pathParam("token", token.getId())
+        .when()
+        .get(VERIFY_EMAIL_URL)
+        .then()
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .body(MESSAGE_KEY, equalTo(ERROR_TOKEN_EXPIRED));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   private void checkErrorResponseForPasswordReset(String password, String expectedMessage) {

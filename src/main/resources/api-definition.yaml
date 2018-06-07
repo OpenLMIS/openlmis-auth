@@ -312,6 +312,18 @@ resourceTypes:
                          headers:
                            X-Content-Type-Options:
                            X-XSS-Protection:
+          /verifyEmail:
+              /{token}:
+                  get:
+                      description: Verifies the given email address
+                      responses:
+                         200:
+                             description: Email verified successfully
+                         400:
+                             description: There were issues with email verification.
+                             body:
+                                 application/json:
+                                    schema: localizedMessage
       /search/findOneByUsername:
           get:
               is: [ secured ]

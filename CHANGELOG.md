@@ -5,6 +5,8 @@ Improvements and new functionality which are backwards-compatible:
 * [OLMIS-4644](https://openlmis.atlassian.net/browse/OLMIS-4644): Added Jenkinsfile
 * [OLMIS-2923](https://openlmis.atlassian.net/browse/OLMIS-2923): Updated demo data loading approach
 * [OLMIS-4731](https://openlmis.atlassian.net/browse/OLMIS-4731): Enabled current user to change its password
+* [OLMIS-4833](https://openlmis.atlassian.net/browse/OLMIS-4833): Added Email verification functionality
+  * the verification email will be sent for a new created users with email address
 
 Bug fixes that are backwards-compatible:
 * [OLMIS-4550](https://openlmis.atlassian.net/browse/OLMIS-4550): Set default content type to responses without it
