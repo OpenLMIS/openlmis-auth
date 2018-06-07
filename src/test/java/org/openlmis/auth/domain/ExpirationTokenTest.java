@@ -18,6 +18,7 @@ package org.openlmis.auth.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZonedDateTime;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
 public abstract class ExpirationTokenTest {
@@ -36,6 +37,14 @@ public abstract class ExpirationTokenTest {
     token.setExpiryDate(ZonedDateTime.now().plusDays(5));
 
     assertThat(token.isExpired()).isFalse();
+  }
+
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(ExpirationToken.class)
+        .withRedefinedSuperclass()
+        .verify();
   }
 
   abstract ExpirationToken generateInstance();

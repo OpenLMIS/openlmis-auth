@@ -16,11 +16,13 @@
 package org.openlmis.auth.repository;
 
 import java.util.UUID;
+import org.junit.Test;
 import org.openlmis.auth.EmailVerificationTokenDataBuilder;
 import org.openlmis.auth.UserDataBuilder;
 import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.repository.CrudRepository;
 
 public class EmailVerificationTokenRepositoryIntegrationTest
@@ -47,4 +49,17 @@ public class EmailVerificationTokenRepositoryIntegrationTest
         .withUser(user)
         .build();
   }
+
+  @Test(expected = DataIntegrityViolationException.class)
+  public void shouldBePossibleToHaveOnlyOneTokenPerUser() {
+    EmailVerificationToken token = generateInstance();
+    repository.save(token);
+
+    EmailVerificationToken newToken = new EmailVerificationTokenDataBuilder()
+        .withoutId()
+        .withUser(token.getUser())
+        .build();
+    repository.saveAndFlush(newToken);
+  }
+
 }
