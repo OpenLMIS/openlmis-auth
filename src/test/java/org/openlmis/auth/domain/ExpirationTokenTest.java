@@ -24,7 +24,7 @@ import org.junit.Test;
 public abstract class ExpirationTokenTest {
 
   @Test
-  public void shouldExpired() {
+  public void shouldBeExpired() {
     ExpirationToken token = generateInstance();
     token.setExpiryDate(ZonedDateTime.now().minusDays(5));
 
@@ -32,7 +32,7 @@ public abstract class ExpirationTokenTest {
   }
 
   @Test
-  public void shouldNotExpired() {
+  public void shouldNotBeExpired() {
     ExpirationToken token = generateInstance();
     token.setExpiryDate(ZonedDateTime.now().plusDays(5));
 
