@@ -64,6 +64,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -232,7 +233,7 @@ public class UserController {
   /**
    * Verify user email address.
    */
-  @RequestMapping(value = "/users/auth/verifyEmail/{token}", method = RequestMethod.GET)
+  @GetMapping(value = "/users/auth/verifyEmail/{token}")
   @ResponseStatus(HttpStatus.OK)
   public void verifyEmail(@PathVariable("token") UUID token) {
     EmailVerificationToken details = emailVerificationTokenRepository.findOne(token);
