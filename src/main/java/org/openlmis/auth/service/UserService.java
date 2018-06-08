@@ -50,7 +50,7 @@ public class UserService {
   public static final long TOKEN_VALIDITY_HOURS = 12;
 
   static final String RESET_PASSWORD_URL = System.getenv("BASE_URL") + "/#!/resetPassword/";
-  static final String VERIFY_EMAIL_URL = System.getenv("BASE_URL") + "/verifyEmail/";
+  static final String VERIFY_EMAIL_URL = System.getenv("BASE_URL") + "/api/users/auth/verifyEmail/";
 
   private static final String MAIL_ADDRESS = System.getenv("MAIL_ADDRESS");
 
