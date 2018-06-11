@@ -20,10 +20,12 @@ import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserSaveRequest;
 import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.i18n.MessageKeys;
+import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,9 @@ public class UserSaveRequestValidator implements BaseValidator {
   private PermissionService permissionService;
 
   @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
   private UserReferenceDataService userReferenceDataService;
 
   // User fields
@@ -55,6 +60,7 @@ public class UserSaveRequestValidator implements BaseValidator {
   static final String ALLOW_NOTIFY = "allowNotify";
   static final String EXTRA_DATA = "extraData";
   static final String ROLE_ASSIGNMENTS = "roleAssignments";
+  static final String ENABLED = "enabled";
 
   /**
    * Checks if the given class definition is supported.
@@ -99,6 +105,10 @@ public class UserSaveRequestValidator implements BaseValidator {
   }
 
   private void validateInvariants(UserSaveRequest dto, Errors errors) {
+    User db = userRepository.findOneByReferenceDataUserId(dto.getId());
+
+    rejectIfInvariantWasChanged(errors, ENABLED, db.getEnabled(), dto.getEnabled());
+
     UserDto reference = userReferenceDataService.findOne(dto.getId());
 
     rejectIfInvariantWasChanged(errors, USERNAME, reference.getUsername(), dto.getUsername());

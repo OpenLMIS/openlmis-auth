@@ -87,7 +87,9 @@ public class PermissionServiceTest {
     SecurityContextHolder.setContext(securityContext);
 
     trustedClient = new OAuth2AuthenticationDataBuilder().buildServiceAuthentication();
-    userClient = new OAuth2AuthenticationDataBuilder().buildUserAuthentication();
+    userClient = new OAuth2AuthenticationDataBuilder()
+        .withReferenceDataUserId(UUID.fromString(DummyUserDto.REFERENCE_ID))
+        .buildUserAuthentication();
     apiKeyClient = new OAuth2AuthenticationDataBuilder().buildApiKeyAuthentication();
 
     when(authenticationHelper.getCurrentUser()).thenReturn(user);
@@ -103,7 +105,13 @@ public class PermissionServiceTest {
   @Test
   public void userShouldBeAbleToManageUsers() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
-    permissionService.canManageUsers();
+    permissionService.canManageUsers(null);
+  }
+
+  @Test
+  public void userShouldBeAbleToManageOwnData() {
+    when(securityContext.getAuthentication()).thenReturn(userClient);
+    permissionService.canManageUsers(UUID.fromString(DummyUserDto.REFERENCE_ID));
   }
 
   @Test(expected = PermissionMessageException.class)
@@ -112,19 +120,19 @@ public class PermissionServiceTest {
     when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
         .thenReturn(new ResultDto<>(false));
 
-    permissionService.canManageUsers();
+    permissionService.canManageUsers(null);
   }
 
   @Test
   public void serviceShouldBeAbleToManageUsers() {
     when(securityContext.getAuthentication()).thenReturn(trustedClient);
-    permissionService.canManageUsers();
+    permissionService.canManageUsers(null);
   }
 
   @Test(expected = PermissionMessageException.class)
   public void apiKeyShouldNotBeAbleToManageUsers() {
     when(securityContext.getAuthentication()).thenReturn(apiKeyClient);
-    permissionService.canManageUsers();
+    permissionService.canManageUsers(null);
   }
 
   @Test

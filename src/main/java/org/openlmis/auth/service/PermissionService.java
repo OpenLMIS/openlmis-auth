@@ -58,7 +58,7 @@ public class PermissionService {
     if (username.equals(authenticationHelper.getCurrentUser().getUsername())) {
       return;
     }
-    canManageUsers();
+    canManageUsers(null);
   }
 
   /**
@@ -70,29 +70,29 @@ public class PermissionService {
       return;
     }
 
-    canManageUsers();
+    canManageUsers(null);
   }
 
-  public void canManageUsers() {
-    checkPermission(USERS_MANAGE, false);
+  public void canManageUsers(UUID referenceDataId) {
+    checkPermission(USERS_MANAGE, false, referenceDataId);
   }
 
   public void canManageApiKeys() {
-    checkPermission(SERVICE_ACCOUNTS_MANAGE, false);
+    checkPermission(SERVICE_ACCOUNTS_MANAGE, false, null);
   }
 
-  private void checkPermission(String rightName, boolean allowApiKey) {
-    if (!hasRight(rightName, allowApiKey)) {
+  private void checkPermission(String rightName, boolean allowApiKey, UUID expectedUserId) {
+    if (!hasRight(rightName, allowApiKey, expectedUserId)) {
       // at this point, token is unauthorized
       throw new PermissionMessageException(new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName));
     }
   }
 
   public boolean hasRight(String rightName) {
-    return hasRight(rightName, false);
+    return hasRight(rightName, false, null);
   }
 
-  private boolean hasRight(String rightName, boolean allowApiKey) {
+  private boolean hasRight(String rightName, boolean allowApiKey, UUID expectedUserId) {
     OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
         .getContext()
         .getAuthentication();
@@ -100,12 +100,17 @@ public class PermissionService {
     if (authentication.isClientOnly()) {
       return checkServiceToken(allowApiKey, authentication);
     } else {
-      return checkUserToken(rightName);
+      return checkUserToken(rightName, expectedUserId);
     }
   }
 
-  private boolean checkUserToken(String rightName) {
+  private boolean checkUserToken(String rightName, UUID expectedUserId) {
     UserDto user = authenticationHelper.getCurrentUser();
+
+    if (user.getId().equals(expectedUserId)) {
+      return true;
+    }
+
     RightDto right = authenticationHelper.getRight(rightName);
     ResultDto<Boolean> result = userReferenceDataService.hasRight(
         user.getId(), right.getId(), null, null, null

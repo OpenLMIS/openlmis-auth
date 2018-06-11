@@ -521,7 +521,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private PermissionMessageException mockUserManagePermissionError() {
     PermissionMessageException ex = buildUserManagerPermissionError();
 
-    doThrow(ex).when(permissionService).canManageUsers();
+    doThrow(ex).when(permissionService).canManageUsers(any(UUID.class));
 
     return ex;
   }

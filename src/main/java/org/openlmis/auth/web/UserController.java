@@ -124,7 +124,7 @@ public class UserController {
   @ResponseBody
   public UserSaveRequest saveUser(@RequestBody UserSaveRequest request,
       BindingResult bindingResult) {
-    permissionService.canManageUsers();
+    permissionService.canManageUsers(request.getId());
     LOGGER.debug("Creating or updating user");
 
     userSaveRequestValidator.validate(request, bindingResult);
@@ -226,7 +226,7 @@ public class UserController {
   @ResponseBody
   public UUID generatePasswordResetToken(
       @RequestParam(value = "userId") UUID referenceDataUserId) {
-    permissionService.canManageUsers();
+    permissionService.canManageUsers(null);
     User user = userRepository.findOneByReferenceDataUserId(referenceDataUserId);
 
     PasswordResetToken token = userService.createPasswordResetToken(user);

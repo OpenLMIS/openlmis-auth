@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 import static org.openlmis.auth.web.UserSaveRequestValidator.ACTIVE;
 import static org.openlmis.auth.web.UserSaveRequestValidator.ALLOW_NOTIFY;
+import static org.openlmis.auth.web.UserSaveRequestValidator.ENABLED;
 import static org.openlmis.auth.web.UserSaveRequestValidator.EXTRA_DATA;
 import static org.openlmis.auth.web.UserSaveRequestValidator.HOME_FACILITY_ID;
 import static org.openlmis.auth.web.UserSaveRequestValidator.JOB_TITLE;
@@ -45,6 +46,7 @@ import org.openlmis.auth.dto.UserSaveRequest;
 import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.i18n.MessageKeys;
+import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -57,6 +59,9 @@ public class UserSaveRequestValidatorTest {
 
   @Mock
   private PermissionService permissionService;
+
+  @Mock
+  private UserRepository userRepository;
 
   @Mock
   private UserReferenceDataService userReferenceDataService;
@@ -75,6 +80,7 @@ public class UserSaveRequestValidatorTest {
 
     user = new User();
     user.setUsername(userDto.getUsername());
+    user.setEnabled(true);
 
     request = new UserSaveRequest(user, userDto);
 
@@ -153,9 +159,11 @@ public class UserSaveRequestValidatorTest {
     request.setAllowNotify(!userDto.getAllowNotify());
     request.setExtraData(ImmutableMap.of("a", "b"));
     request.setRoleAssignments(Sets.newHashSet(new RoleAssignmentDto()));
+    request.setEnabled(!user.getEnabled());
     validator.validate(request, errors);
 
-    assertThat(errors.getErrorCount()).isGreaterThanOrEqualTo(9);
+    assertThat(errors.getErrorCount()).isGreaterThanOrEqualTo(10);
+    assertErrorMessage(errors, ENABLED, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, USERNAME, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, JOB_TITLE, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, TIMEZONE, MessageKeys.ERROR_FIELD_IS_INVARIANT);
@@ -170,8 +178,10 @@ public class UserSaveRequestValidatorTest {
 
   private void prepareForValidateInvariants() {
     when(permissionService.hasRight(USERS_MANAGE)).thenReturn(false);
+    when(userRepository.findOneByReferenceDataUserId(request.getId()))
+        .thenReturn(user);
     when(userReferenceDataService.findOne(request.getId()))
-        .thenReturn(request.getReferenceDataUser());
+        .thenReturn(userDto);
   }
 
   private void assertErrorMessage(Errors errors, String field, String expectedMessage) {
