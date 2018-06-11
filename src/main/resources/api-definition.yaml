@@ -15,21 +15,6 @@ documentation:
       content: Welcome to the OpenLMIS auth-service documentation. This minimal API is intended for illustrative purposes.
 
 schemas:
-  - user: |
-      {
-          "type": "object",
-          "$schema": "http://json-schema.org/draft-03/schema",
-          "title": "User",
-          "properties": {
-              "id": { "type": "string", "required": false, "title": "id" },
-              "referenceDataUserId": { "type": "string", "required": true, "title": "referenceDataUserId" },
-              "username": { "type": "string", "required": true, "title": "username" },
-              "password": { "type": "string", "required": false, "title": "password" },
-              "role": { "type": "string", "required": true, "title": "role" },
-              "enabled": { "type": "boolean", "required": false, "title": "enabled" }
-          }
-      }
-
   - client: |
       {   "type": "object",
           "$schema": "http://json-schema.org/draft-03/schema",
@@ -103,6 +88,9 @@ schemas:
           "message", "messageKey"
         ]
       }
+
+  - roleAssignment: !include schemas/roleAssignment.json
+  - user: !include schemas/user.json
 
   - apiKey: !include schemas/apiKey.json
   - apiKeyPage: !include schemas/apiKeyPage.json
@@ -203,17 +191,20 @@ resourceTypes:
                   schema: user
               responses:
                  200:
-                     description: User saved successfully
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
+                     description: User has been saved successfully
                      body:
                          application/json:
                             schema: user
                  400:
-                     headers:
-                       X-Content-Type-Options:
-                       X-XSS-Protection:
+                     description: There were issues with creating/updating the user.
+                     body:
+                         application/json:
+                             schema: localizedMessage
+                 403:
+                     description: The current logged user has no permission to perform the action.
+                     body:
+                         application/json:
+                             schema: localizedMessage
           /passwordReset:
               post:
                   is: [ secured ]

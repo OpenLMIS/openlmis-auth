@@ -1,5 +1,9 @@
-3.2.1 / WIP
+4.0.0 / WIP
 ==================
+
+Breaking changes:
+* [OLMIS-4896](https://openlmis.atlassian.net/browse/OLMIS-4896): Modified the user save endpoint to handle reference data user creation/update
+  * the request body contains more required fields
 
 Improvements and new functionality which are backwards-compatible:
 * [OLMIS-4644](https://openlmis.atlassian.net/browse/OLMIS-4644): Added Jenkinsfile

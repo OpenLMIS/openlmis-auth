@@ -51,7 +51,6 @@ import com.jayway.restassured.response.ValidatableResponse;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.auth.DummyUserDto;
@@ -60,6 +59,10 @@ import org.openlmis.auth.UserDataBuilder;
 import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.LocalizedMessageDto;
+import org.openlmis.auth.dto.UserSaveRequest;
+import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
@@ -116,38 +119,57 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @MockBean
   private NotificationService notificationService;
 
+  private User user;
   private DummyUserDto admin = new DummyUserDto();
 
-  @Override
   @Before
   public void setUp() {
-    super.setUp();
-
     given(userReferenceDataService.findUserByEmail(admin.getEmail()))
         .willReturn(admin);
     given(userReferenceDataService.findOne(admin.getId()))
         .willReturn(admin);
+    given(userReferenceDataService.putUser(any(UserDto.class)))
+        .willReturn(admin);
 
     willDoNothing().given(notificationService).send(any(NotificationRequest.class));
-  }
 
-  @After
-  public void cleanUp() {
     passwordResetTokenRepository.deleteAll();
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    User user = userRepository.findOne(UUID.fromString(DummyUserDto.AUTH_ID));
+
+    user = userRepository.findOne(UUID.fromString(DummyUserDto.AUTH_ID));
     user.setPassword(encoder.encode(DummyUserDto.PASSWORD));
     userRepository.save(user);
+  }
+
+  @Test
+  public void shouldSaveUser() {
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserSaveRequest(user, admin), null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
+        .statusCode(200);
   }
 
   @Test
   public void shouldNotSaveUserWhenUserHasNoPermission() {
     PermissionMessageException ex = mockUserManagePermissionError();
 
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new User(), null)
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserSaveRequest(user, admin), null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
+  }
+
+  @Test
+  public void shouldPassErrorMessageFromExternalServiceIfThereWereProblemsWithUserSave() {
+    LocalizedMessageDto localizedMessage = new LocalizedMessageDto("test.key", "test.message");
+    doThrow(new ExternalApiException(null, localizedMessage))
+        .when(userReferenceDataService)
+        .putUser(any(UserDto.class));
+
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserSaveRequest(user, admin), null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
+        .statusCode(400)
+        .body(Fields.MESSAGE_KEY, is("test.key"))
+        .body(Fields.MESSAGE, is("test.message"));
   }
 
   @Test

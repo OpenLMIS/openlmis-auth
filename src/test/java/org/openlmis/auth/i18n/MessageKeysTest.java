@@ -22,7 +22,6 @@ import static org.openlmis.auth.i18n.MessageKeys.ACCOUNT_CREATED_EMAIL_SUBJECT;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_REFERENCE_DATA_USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_RIGHT_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_SEND_REQUEST;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
@@ -54,8 +53,6 @@ public class MessageKeysTest {
     verifyValue(ERROR_USER_NOT_FOUND, "auth.error.authentication.userCanNotBeFound");
     verifyValue(ERROR_RIGHT_NOT_FOUND, "auth.error.authentication.rightCanNotBeFound");
     verifyValue(ERROR_NO_FOLLOWING_PERMISSION, "auth.error.authorization.noFollowingPermission");
-
-    verifyValue(ERROR_REFERENCE_DATA_USER_NOT_FOUND, "auth.error.users.referenceDataUserNotFound");
 
     verifyValue(ACCOUNT_CREATED_EMAIL_SUBJECT, "auth.email.accountCreated.subject");
     verifyValue(PASSWORD_RESET_EMAIL_SUBJECT, "auth.email.resetPassword.subject");

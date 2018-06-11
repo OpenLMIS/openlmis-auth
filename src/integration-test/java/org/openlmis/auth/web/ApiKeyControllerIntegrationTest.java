@@ -100,10 +100,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   private RightDto right = new DummyRightDto();
 
   @Before
-  @Override
   public void setUp() {
-    super.setUp();
-
     client = new Client();
     key = new ApiKeyDataBuilder().build();
 

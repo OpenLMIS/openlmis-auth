@@ -13,73 +13,22 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.dto.referencedata;
+package org.openlmis.auth.dto;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class UserDto extends BaseDto {
-
-  @Getter
-  @Setter
-  private String username;
-
-  @Getter
-  @Setter
-  private String firstName;
-
-  @Getter
-  @Setter
-  private String lastName;
-
-  @Getter
-  @Setter
-  private String email;
-
-  @Getter
-  @Setter
-  private String timezone;
-
-  @Getter
-  @Setter
-  private UUID homeFacilityId;
-
-  @Getter
-  @Setter
-  private boolean verified;
-
-  @Getter
-  @Setter
-  private boolean active;
-
-  @Getter
-  @Setter
-  private boolean loginRestricted;
-
-  @Getter
-  @Setter
-  private Boolean allowNotify;
-
-  @Getter
-  @Setter
-  private Map<String, String> extraData;
-
-  @Getter
-  @Setter
-  private Set<RoleAssignmentDto> roleAssignments;
-
-  public boolean hasEmail() {
-    return isNotBlank(email);
-  }
+@EqualsAndHashCode
+@ToString
+public final class LocalizedMessageDto {
+  private String messageKey;
+  private String message;
 }

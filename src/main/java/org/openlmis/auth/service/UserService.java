@@ -19,7 +19,6 @@ package org.openlmis.auth.service;
 import static org.openlmis.auth.i18n.MessageKeys.ACCOUNT_CREATED_EMAIL_SUBJECT;
 import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_EMAIL_SUBJECT;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_REFERENCE_DATA_USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
 
@@ -29,8 +28,8 @@ import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.UserSaveRequest;
 import org.openlmis.auth.dto.referencedata.UserDto;
-import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.ExpirationTokenRepository;
@@ -61,9 +60,6 @@ public class UserService {
   private UserReferenceDataService userReferenceDataService;
 
   @Autowired
-  private PermissionService permissionService;
-
-  @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
 
   @Autowired
@@ -75,43 +71,41 @@ public class UserService {
   @Autowired
   private ExposedMessageSource messageSource;
 
+  private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
   /**
    * Creates a new user or updates an existing one.
    *
-   * @param user user to be saved.
+   * @param request user to be saved.
    * @return saved user.
    */
-  public User saveUser(User user) {
-    permissionService.canManageUsers();
+  public UserSaveRequest saveUser(UserSaveRequest request) {
+    UserDto referenceDataUser = request.getReferenceDataUser();
+    referenceDataUser = userReferenceDataService.putUser(referenceDataUser);
 
-    UserDto referenceDataUser = userReferenceDataService.findOne(user.getReferenceDataUserId());
-    if (referenceDataUser == null) {
-      throw new ValidationMessageException(ERROR_REFERENCE_DATA_USER_NOT_FOUND);
-    }
-    user.setReferenceDataUserId(referenceDataUser.getId());
-
-    User dbUser = userRepository.findOneByReferenceDataUserId(user.getReferenceDataUserId());
+    User dbUser = userRepository.findOneByReferenceDataUserId(request.getId());
     boolean isNewUser = dbUser == null;
 
-    if (!isNewUser) {
-      dbUser.setUsername(user.getUsername());
-      dbUser.setEnabled(user.getEnabled());
-    } else {
-      dbUser = user;
+    if (isNewUser) {
+      dbUser = new User();
+      dbUser.setReferenceDataUserId(referenceDataUser.getId());
     }
 
-    String newPassword = user.getPassword();
+    dbUser.setUsername(request.getUsername());
+    dbUser.setEnabled(request.getEnabled());
+
+    String newPassword = request.getPassword();
     if (StringUtils.hasText(newPassword)) {
-      BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
       dbUser.setPassword(encoder.encode(newPassword));
     }
+
     dbUser = userRepository.save(dbUser);
 
     if (isNewUser && referenceDataUser.hasEmail()) {
       sendEmailVerificationEmail(dbUser, referenceDataUser.getEmail());
     }
 
-    return dbUser;
+    return new UserSaveRequest(dbUser, referenceDataUser);
   }
 
   /**

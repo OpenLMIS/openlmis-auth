@@ -15,18 +15,19 @@
 
 package org.openlmis.auth.dto.referencedata;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
 
-import java.util.UUID;
+public class BaseDtoTest {
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@EqualsAndHashCode
-public class BaseDto {
-  
-  @Getter
-  @Setter
-  private UUID id;
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(BaseDto.class)
+        .withRedefinedSubclass(UserDto.class)
+        .suppress(Warning.NONFINAL_FIELDS) // dto can't contain final fields
+        .verify();
+  }
+
 }

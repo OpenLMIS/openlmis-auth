@@ -23,6 +23,7 @@ public abstract class MessageKeys {
   private static final String ERROR_PREFIX = SERVICE_PREFIX + "." + ERROR;
 
   public static final String ERROR_SEND_REQUEST = ERROR + ".sendRequest";
+  public static final String ERROR_IO = ERROR_PREFIX + ".io";
 
   public static final String ERROR_TOKEN_INVALID = ERROR_PREFIX + ".token.invalid";
   public static final String ERROR_TOKEN_EXPIRED = ERROR_PREFIX + ".token.expired";
@@ -38,9 +39,6 @@ public abstract class MessageKeys {
       + ".authentication.rightCanNotBeFound";
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
       + ".authorization.noFollowingPermission";
-
-  public static final String ERROR_REFERENCE_DATA_USER_NOT_FOUND = ERROR_PREFIX
-      + ".users.referenceDataUserNotFound";
 
   public static final String ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL = ERROR_PREFIX
       + ".users.verifyEmail.missingEmail";

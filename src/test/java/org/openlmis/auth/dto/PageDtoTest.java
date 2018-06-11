@@ -13,20 +13,20 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.dto.referencedata;
+package org.openlmis.auth.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
 
-import java.util.UUID;
+public class PageDtoTest {
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@EqualsAndHashCode
-public class BaseDto {
-  
-  @Getter
-  @Setter
-  private UUID id;
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(PageDto.class)
+        .suppress(Warning.NONFINAL_FIELDS) // fields cannot be final
+        .verify();
+  }
+
 }

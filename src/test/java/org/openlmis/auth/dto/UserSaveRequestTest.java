@@ -13,20 +13,33 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.dto.referencedata;
+package org.openlmis.auth.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.UUID;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
+import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.referencedata.UserDto;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@EqualsAndHashCode
-public class BaseDto {
-  
-  @Getter
-  @Setter
-  private UUID id;
+public class UserSaveRequestTest {
+
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(UserSaveRequest.class)
+        .withRedefinedSuperclass()
+        .suppress(Warning.NONFINAL_FIELDS) // dto can't contain final fields
+        .verify();
+  }
+
+  @Test
+  public void shouldGetReferenceDataUser() {
+    UserDto admin = new DummyUserDto();
+    UserSaveRequest request = new UserSaveRequest(new User(), admin);
+
+    assertThat(request.getReferenceDataUser()).isEqualTo(admin);
+  }
 }

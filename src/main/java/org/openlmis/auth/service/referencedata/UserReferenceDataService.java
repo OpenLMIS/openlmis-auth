@@ -15,6 +15,9 @@
 
 package org.openlmis.auth.service.referencedata;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.UUID;
 import lombok.Getter;
 import org.openlmis.auth.dto.ResultDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
@@ -23,10 +26,6 @@ import org.openlmis.auth.service.RequestParameters;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class UserReferenceDataService extends BaseCommunicationService<UserDto> {
@@ -45,19 +44,6 @@ public class UserReferenceDataService extends BaseCommunicationService<UserDto> 
 
   protected Class<UserDto[]> getArrayResultClass() {
     return UserDto[].class;
-  }
-
-  /**
-   * This method retrieves a user with given name.
-   *
-   * @param name the name of user.
-   * @return UserDto containing user's data, or null if such user was not found.
-   */
-  public UserDto findUserByName(String name) {
-    Map<String, Object> payload = Collections.singletonMap("username", name);
-
-    Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
-    return users.getContent().isEmpty() ? null : users.getContent().get(0);
   }
 
   /**

@@ -18,10 +18,23 @@ package org.openlmis.auth.service;
 import static org.openlmis.auth.util.RequestHelper.createEntity;
 import static org.openlmis.auth.util.RequestHelper.createUri;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.openlmis.auth.dto.LocalizedMessageDto;
+import org.openlmis.auth.dto.PageDto;
 import org.openlmis.auth.dto.ResultDto;
+import org.openlmis.auth.exception.ExternalApiException;
+import org.openlmis.auth.exception.ServerException;
+import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.util.DynamicPageTypeReference;
 import org.openlmis.auth.util.DynamicResultDtoTypeReference;
-import org.openlmis.auth.util.PageImplRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,14 +48,6 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 @SuppressWarnings("PMD.TooManyMethods")
 public abstract class BaseCommunicationService<T> {
   protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -51,6 +56,9 @@ public abstract class BaseCommunicationService<T> {
 
   @Autowired
   private AccessTokenService accessTokenService;
+
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @Value("${auth.server.clientId}")
   private String clientId;
@@ -188,7 +196,11 @@ public abstract class BaseCommunicationService<T> {
       return response.getBody();
 
     } catch (HttpStatusCodeException ex) {
-      throw buildDataRetrievalException(ex);
+      if (ex.getStatusCode() == HttpStatus.BAD_REQUEST) {
+        throw buildExternalApiException(ex);
+      } else {
+        throw buildDataRetrievalException(ex);
+      }
     }
   }
 
@@ -237,7 +249,7 @@ public abstract class BaseCommunicationService<T> {
     params.putAll(parameters);
 
     try {
-      ResponseEntity<PageImplRepresentation<P>> response = restTemplate.exchange(
+      ResponseEntity<PageDto<P>> response = restTemplate.exchange(
               buildUri(url, params),
               method,
               createEntity(obtainAccessToken(), payload),
@@ -250,10 +262,21 @@ public abstract class BaseCommunicationService<T> {
     }
   }
 
-  private DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
+  protected DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
     return new DataRetrievalException(getResultClass().getSimpleName(),
         ex.getStatusCode(),
         ex.getResponseBodyAsString());
+  }
+
+  protected RuntimeException buildExternalApiException(HttpStatusCodeException ex) {
+    try {
+      LocalizedMessageDto localizedMessage = objectMapper
+          .readValue(ex.getResponseBodyAsString(), LocalizedMessageDto.class);
+
+      throw new ExternalApiException(ex, localizedMessage);
+    } catch (IOException exp) {
+      throw new ServerException(exp, MessageKeys.ERROR_IO, exp.getMessage());
+    }
   }
 
   protected URI buildUri(String url, Map<String, ?> params) {

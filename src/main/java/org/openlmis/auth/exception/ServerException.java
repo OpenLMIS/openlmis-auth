@@ -13,20 +13,17 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.dto.referencedata;
+package org.openlmis.auth.exception;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import org.openlmis.auth.util.Message;
 
-import java.util.UUID;
+/**
+ * Exception for indicating that an internal server exception occured. This should result
+ * in a Internal Error api response
+ */
+public class ServerException extends BaseMessageException {
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@EqualsAndHashCode
-public class BaseDto {
-  
-  @Getter
-  @Setter
-  private UUID id;
+  public ServerException(Throwable cause, String messageKey, Object... messageParameters) {
+    super(new Message(messageKey, messageParameters), cause);
+  }
 }

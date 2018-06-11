@@ -17,9 +17,14 @@ package org.openlmis.auth.web;
 
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_SEND_REQUEST;
 
+import java.util.Map;
+import javax.persistence.PersistenceException;
+import org.openlmis.auth.dto.LocalizedMessageDto;
 import org.openlmis.auth.exception.BindingResultException;
+import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.exception.NotFoundException;
 import org.openlmis.auth.exception.PermissionMessageException;
+import org.openlmis.auth.exception.ServerException;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.util.Message;
@@ -29,10 +34,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.HttpStatusCodeException;
-
-import java.util.Map;
-
-import javax.persistence.PersistenceException;
 
 /**
  * Controller advice responsible for handling errors from web layer.
@@ -111,6 +112,22 @@ public class WebErrorHandling extends AbstractErrorHandling {
   public Message.LocalizedMessage handlePersistenceException(PersistenceException ex) {
     logger.error(ex.getMessage());
     return getLocalizedMessage(new Message(MessageKeys.ERROR_CONSTRAINT));
+  }
+
+  @ExceptionHandler(ServerException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  public Message.LocalizedMessage handleServerException(ServerException ex) {
+    logger.error("An internal error occurred", ex);
+    return getLocalizedMessage(ex.asMessage());
+  }
+
+  @ExceptionHandler(ExternalApiException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public LocalizedMessageDto handleExternalApiException(ExternalApiException ex) {
+    logger.error("An external api error occurred", ex);
+    return ex.getMessageLocalized();
   }
 
 }

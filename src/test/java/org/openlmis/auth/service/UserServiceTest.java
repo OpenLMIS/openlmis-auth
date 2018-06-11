@@ -41,8 +41,8 @@ import org.openlmis.auth.DummyUserDto;
 import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.UserSaveRequest;
 import org.openlmis.auth.dto.referencedata.UserDto;
-import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
@@ -82,6 +82,8 @@ public class UserServiceTest extends BaseServiceTest {
   @Captor
   private ArgumentCaptor<NotificationRequest> notificationRequestCaptor;
 
+  private DummyUserDto referenceDataUser = new DummyUserDto();
+
   @Before
   public void setUp() {
     when(passwordResetTokenRepository.findOneByUser(any(User.class))).thenReturn(null);
@@ -94,25 +96,26 @@ public class UserServiceTest extends BaseServiceTest {
 
     when(messageSource.getMessage(anyString(), any(String[].class), any(Locale.class)))
         .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
+
+    when(userReferenceDataService.putUser(any(UserDto.class))).thenReturn(referenceDataUser);
   }
 
   @Test
   public void shouldCreateNewUser() {
     // given
-    DummyUserDto userDto = new DummyUserDto();
-    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(userDto);
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(referenceDataUser);
     when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(null);
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new User());
+    userService.saveUser(new UserSaveRequest(new User(), referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
     verify(notificationService).send(notificationRequestCaptor.capture());
 
     NotificationRequest notificationRequest = notificationRequestCaptor.getValue();
-    assertThat(notificationRequest.getTo()).isEqualTo(userDto.getEmail());
+    assertThat(notificationRequest.getTo()).isEqualTo(referenceDataUser.getEmail());
     assertThat(notificationRequest.getSubject()).isEqualTo(EMAIL_VERIFICATION_EMAIL_SUBJECT);
     assertThat(notificationRequest.getContent()).isEqualTo(EMAIL_VERIFICATION_EMAIL_BODY);
   }
@@ -120,7 +123,6 @@ public class UserServiceTest extends BaseServiceTest {
   @Test
   public void shouldUpdateExistingUser() {
     // given
-    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
     User oldUser = mock(User.class);
     UUID oldUserId = UUID.randomUUID();
     when(oldUser.getUsername()).thenReturn("user");
@@ -130,7 +132,7 @@ public class UserServiceTest extends BaseServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new User());
+    userService.saveUser(new UserSaveRequest(new User(), referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
@@ -140,7 +142,6 @@ public class UserServiceTest extends BaseServiceTest {
   @Test
   public void shouldReplacePasswordDuringUserUpdate() {
     // given
-    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
     User oldUser = new User();
     UUID oldUserId = UUID.randomUUID();
     String oldUserPassword = "oldPassword";
@@ -157,7 +158,7 @@ public class UserServiceTest extends BaseServiceTest {
     given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(newUser);
+    userService.saveUser(new UserSaveRequest(newUser, referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
@@ -170,12 +171,11 @@ public class UserServiceTest extends BaseServiceTest {
   @Test
   public void shouldNotReplacePasswordWhenNotProvidedDuringUserUpdate() {
     // given
-    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(new UserDto());
-    User oldUser = new User();
-    oldUser.setUsername("username");
     UUID oldUserId = UUID.randomUUID();
     String oldUserPassword = "oldPassword";
 
+    User oldUser = new User();
+    oldUser.setUsername("username");
     oldUser.setId(oldUserId);
     oldUser.setPassword(oldUserPassword);
 
@@ -184,7 +184,7 @@ public class UserServiceTest extends BaseServiceTest {
     given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new User());
+    userService.saveUser(new UserSaveRequest(new User(), referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
@@ -194,14 +194,4 @@ public class UserServiceTest extends BaseServiceTest {
     assertThat(result.getPassword()).isEqualTo(oldUserPassword);
   }
 
-  @Test(expected = ValidationMessageException.class)
-  public void shouldThrowExceptionIfReferenceDataUserNotFound() throws Exception {
-    // given
-    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(null);
-    when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(null);
-    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
-
-    // when
-    userService.saveUser(new User());
-  }
 }

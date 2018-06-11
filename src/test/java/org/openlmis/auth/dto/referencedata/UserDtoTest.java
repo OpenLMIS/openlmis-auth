@@ -17,8 +17,11 @@ package org.openlmis.auth.dto.referencedata;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.dto.UserSaveRequest;
 
 public class UserDtoTest {
   private UserDto user = new DummyUserDto();
@@ -33,4 +36,15 @@ public class UserDtoTest {
     user.setEmail(null);
     assertThat(user.hasEmail()).isFalse();
   }
+
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(UserDto.class)
+        .withRedefinedSuperclass()
+        .withRedefinedSubclass(UserSaveRequest.class)
+        .suppress(Warning.NONFINAL_FIELDS) // dto can't contain final fields
+        .verify();
+  }
+
 }

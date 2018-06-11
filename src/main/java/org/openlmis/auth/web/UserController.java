@@ -34,8 +34,8 @@ import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.UserSaveRequest;
 import org.openlmis.auth.dto.referencedata.UserDto;
-import org.openlmis.auth.exception.BindingResultException;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
@@ -121,15 +121,11 @@ public class UserController {
   @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public User saveUser(@RequestBody User user, BindingResult bindingResult) {
+  public UserSaveRequest saveUser(@RequestBody UserSaveRequest request) {
     permissionService.canManageUsers();
     LOGGER.debug("Creating or updating user");
 
-    if (bindingResult.getErrorCount() == 0) {
-      return userService.saveUser(user);
-    } else {
-      throw new BindingResultException(getErrors(bindingResult));
-    }
+    return userService.saveUser(request);
   }
 
   /**

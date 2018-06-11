@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -45,10 +46,16 @@ public abstract class BaseCommunicationServiceTest {
   protected RestTemplate restTemplate;
 
   @Mock
-  private AccessTokenService accessTokenService;
+  protected AccessTokenService accessTokenService;
+
+  @Mock
+  protected ObjectMapper objectMapper;
 
   @Captor
   protected ArgumentCaptor<URI> uriCaptor;
+
+  @Captor
+  protected ArgumentCaptor<HttpEntity> entityCaptor;
 
   @Before
   public void setUp() {
@@ -68,6 +75,7 @@ public abstract class BaseCommunicationServiceTest {
     service.setAccessTokenService(accessTokenService);
 
     ReflectionTestUtils.setField(service, "clientId", "trusted-client");
+    ReflectionTestUtils.setField(service, "objectMapper", objectMapper);
 
     return service;
   }

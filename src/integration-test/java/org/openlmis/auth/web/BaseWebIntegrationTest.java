@@ -17,7 +17,6 @@ package org.openlmis.auth.web;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.BDDMockito.given;
 import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.BEARER;
 import static org.openlmis.auth.web.TestWebData.Tokens.SERVICE_TOKEN;
@@ -36,9 +35,7 @@ import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
 import java.util.Map;
 import javax.annotation.PostConstruct;
-import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.openlmis.auth.DummyUserDto;
 import org.openlmis.auth.OAuth2AuthenticationDataBuilder;
 import org.openlmis.auth.i18n.MessageService;
 import org.openlmis.auth.security.AccessTokenEnhancer;
@@ -104,16 +101,6 @@ public abstract class BaseWebIntegrationTest {
     RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
     restAssured = ramlDefinition.createRestAssured();
-  }
-
-  @Before
-  public void setUp() {
-    try {
-      given(userReferenceDataService.findUserByName(DummyUserDto.USERNAME))
-          .willReturn(new DummyUserDto());
-    } catch (Exception exp) {
-      throw new IllegalStateException(exp);
-    }
   }
 
   String getMessage(Message message) {
