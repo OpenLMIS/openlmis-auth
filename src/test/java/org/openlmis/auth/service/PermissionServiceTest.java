@@ -15,6 +15,7 @@
 
 package org.openlmis.auth.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -208,6 +209,24 @@ public class PermissionServiceTest {
         .thenReturn(new ResultDto<>(true));
 
     permissionService.canResendVerificationEmail(UUID.randomUUID());
+  }
+
+  @Test
+  public void shouldReturnTrueIfUserHasRight() {
+    when(securityContext.getAuthentication()).thenReturn(userClient);
+    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+        .thenReturn(new ResultDto<>(true));
+
+    assertThat(permissionService.hasRight(USERS_MANAGE)).isTrue();
+  }
+
+  @Test
+  public void shouldReturnFalseIfUserHasNoRight() {
+    when(securityContext.getAuthentication()).thenReturn(userClient);
+    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+        .thenReturn(new ResultDto<>(false));
+
+    assertThat(permissionService.hasRight(USERS_MANAGE)).isFalse();
   }
 
 }

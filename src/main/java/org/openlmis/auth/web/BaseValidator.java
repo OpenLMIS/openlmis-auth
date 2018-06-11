@@ -13,27 +13,28 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth;
+package org.openlmis.auth.web;
 
-import java.util.UUID;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import java.util.Objects;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
 
-public final class DummyUserDto extends UserDto {
-  public static final String AUTH_ID = "51f6bdc1-4932-4bc3-9589-368646ef7ad3";
-  public static final String REFERENCE_ID = "35316636-6264-6331-2d34-3933322d3462";
-  public static final String USERNAME = "admin";
-  public static final String PASSWORD = "password";
-  public static final String EMAIL = "test@openlmis.org";
+interface BaseValidator extends Validator {
 
-  /**
-   * Creates new instance of dummy user dto.
-   */
-  public DummyUserDto() {
-    super(
-        USERNAME, "Admin", "User", EMAIL, null, null, null, null, false,
-        false, false, true, null, null
-    );
-    setId(UUID.fromString(REFERENCE_ID));
+  default void rejectIfNotEqual(Errors errors, Object oldData, Object newData, String field,
+      String message) {
+    if (!Objects.equals(oldData, newData)) {
+      rejectValue(errors, field, message);
+    }
+  }
+
+  default void rejectIfEmptyOrWhitespace(Errors errors, String field, String message) {
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, field, message, message);
+  }
+
+  default void rejectValue(Errors errors, String field, String message) {
+    errors.rejectValue(field, message, message);
   }
 
 }

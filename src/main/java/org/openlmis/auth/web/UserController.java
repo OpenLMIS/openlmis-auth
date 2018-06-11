@@ -106,6 +106,9 @@ public class UserController {
   @Autowired
   private TokenStore tokenStore;
 
+  @Autowired
+  private UserSaveRequestValidator userSaveRequestValidator;
+
   @InitBinder
   protected void initBinder(WebDataBinder binder) {
     binder.setValidator(this.validator);
@@ -119,9 +122,16 @@ public class UserController {
   @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserSaveRequest saveUser(@RequestBody UserSaveRequest request) {
+  public UserSaveRequest saveUser(@RequestBody UserSaveRequest request,
+      BindingResult bindingResult) {
     permissionService.canManageUsers();
     LOGGER.debug("Creating or updating user");
+
+    userSaveRequestValidator.validate(request, bindingResult);
+
+    if (bindingResult.hasErrors()) {
+      throw new ValidationMessageException(bindingResult.getFieldError().getDefaultMessage());
+    }
 
     return userService.saveUser(request);
   }

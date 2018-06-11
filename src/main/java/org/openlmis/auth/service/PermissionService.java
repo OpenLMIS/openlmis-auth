@@ -34,7 +34,7 @@ import java.util.UUID;
 
 @Service
 public class PermissionService {
-  static final String USERS_MANAGE = "USERS_MANAGE";
+  public static final String USERS_MANAGE = "USERS_MANAGE";
   public static final String SERVICE_ACCOUNTS_MANAGE = "SERVICE_ACCOUNTS_MANAGE";
 
   @Autowired
@@ -74,43 +74,41 @@ public class PermissionService {
   }
 
   public void canManageUsers() {
-    checkPermission(USERS_MANAGE, null, null, null, true, false);
+    checkPermission(USERS_MANAGE, false);
   }
 
   public void canManageApiKeys() {
-    checkPermission(SERVICE_ACCOUNTS_MANAGE, null, null, null, true, false);
+    checkPermission(SERVICE_ACCOUNTS_MANAGE, false);
   }
 
-  private void checkPermission(String rightName, UUID program, UUID facility, UUID warehouse,
-                               boolean allowUserTokens, boolean allowApiKey) {
+  private void checkPermission(String rightName, boolean allowApiKey) {
+    if (!hasRight(rightName, allowApiKey)) {
+      // at this point, token is unauthorized
+      throw new PermissionMessageException(new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName));
+    }
+  }
+
+  public boolean hasRight(String rightName) {
+    return hasRight(rightName, false);
+  }
+
+  private boolean hasRight(String rightName, boolean allowApiKey) {
     OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
         .getContext()
         .getAuthentication();
 
     if (authentication.isClientOnly()) {
-      if (checkServiceToken(allowApiKey, authentication)) {
-        return;
-      }
+      return checkServiceToken(allowApiKey, authentication);
     } else {
-      if (checkUserToken(rightName, program, facility, warehouse, allowUserTokens)) {
-        return;
-      }
+      return checkUserToken(rightName);
     }
-
-    // at this point, token is unauthorized
-    throw new PermissionMessageException(new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName));
   }
 
-  private boolean checkUserToken(String rightName, UUID program, UUID facility, UUID warehouse,
-                                 boolean allowUserTokens) {
-    if (!allowUserTokens) {
-      return false;
-    }
-
+  private boolean checkUserToken(String rightName) {
     UserDto user = authenticationHelper.getCurrentUser();
     RightDto right = authenticationHelper.getRight(rightName);
     ResultDto<Boolean> result = userReferenceDataService.hasRight(
-        user.getId(), right.getId(), program, facility, warehouse
+        user.getId(), right.getId(), null, null, null
     );
 
     return null != result && result.getResult();

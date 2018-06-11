@@ -15,6 +15,7 @@
 
 package org.openlmis.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -43,6 +44,7 @@ public final class UserSaveRequest extends UserDto {
     super(
         referenceDataUser.getUsername(), referenceDataUser.getFirstName(),
         referenceDataUser.getLastName(), referenceDataUser.getEmail(),
+        referenceDataUser.getJobTitle(), referenceDataUser.getPhoneNumber(),
         referenceDataUser.getTimezone(), referenceDataUser.getHomeFacilityId(),
         referenceDataUser.isVerified(), referenceDataUser.isActive(),
         referenceDataUser.isLoginRestricted(), referenceDataUser.getAllowNotify(),
@@ -57,10 +59,11 @@ public final class UserSaveRequest extends UserDto {
   /**
    * Gets a reference data user data part of the given user request body.
    */
+  @JsonIgnore
   public UserDto getReferenceDataUser() {
     UserDto data = new UserDto(
-        getUsername(), getFirstName(), getLastName(), getEmail(), getTimezone(),
-        getHomeFacilityId(), isVerified(), isActive(), isLoginRestricted(),
+        getUsername(), getFirstName(), getLastName(), getEmail(), getJobTitle(), getPhoneNumber(),
+        getTimezone(), getHomeFacilityId(), isVerified(), isActive(), isLoginRestricted(),
         getAllowNotify(), getExtraData(), getRoleAssignments()
     );
     data.setId(getId());

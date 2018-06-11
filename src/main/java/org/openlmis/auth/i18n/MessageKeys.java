@@ -16,11 +16,16 @@
 package org.openlmis.auth.i18n;
 
 public abstract class MessageKeys {
+
   private static final String ERROR = "error";
   private static final String USERS = "users";
 
   private static final String SERVICE_PREFIX = "auth";
   private static final String ERROR_PREFIX = SERVICE_PREFIX + "." + ERROR;
+
+  public static final String ERROR_FIELD_IS_INVARIANT = ERROR_PREFIX + ".fieldIsInvariant";
+  public static final String ERROR_USERNAME_INVALID = ERROR_PREFIX + ".username.invalid";
+  public static final String ERROR_FIELD_REQUIRED = ERROR_PREFIX + ".fieldRequired";
 
   public static final String ERROR_SEND_REQUEST = ERROR + ".sendRequest";
   public static final String ERROR_IO = ERROR_PREFIX + ".io";

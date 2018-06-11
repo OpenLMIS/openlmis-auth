@@ -17,6 +17,7 @@ package org.openlmis.auth.dto.referencedata;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -26,58 +27,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class UserDto extends BaseDto {
-
-  @Getter
-  @Setter
   private String username;
-
-  @Getter
-  @Setter
   private String firstName;
-
-  @Getter
-  @Setter
   private String lastName;
-
-  @Getter
-  @Setter
   private String email;
-
-  @Getter
-  @Setter
+  private String jobTitle;
+  private String phoneNumber;
   private String timezone;
-
-  @Getter
-  @Setter
   private UUID homeFacilityId;
-
-  @Getter
-  @Setter
   private boolean verified;
-
-  @Getter
-  @Setter
   private boolean active;
-
-  @Getter
-  @Setter
   private boolean loginRestricted;
-
-  @Getter
-  @Setter
   private Boolean allowNotify;
-
-  @Getter
-  @Setter
   private Map<String, String> extraData;
-
-  @Getter
-  @Setter
-  private Set<RoleAssignmentDto> roleAssignments;
+  private Set<RoleAssignmentDto> roleAssignments = Sets.newHashSet();
 
   public boolean hasEmail() {
     return isNotBlank(email);
