@@ -25,8 +25,6 @@ import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VA
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.validation.Valid;
@@ -275,13 +273,5 @@ public class UserController {
     if (token.isExpired()) {
       throw new ValidationMessageException(ERROR_TOKEN_EXPIRED);
     }
-  }
-
-  private Map<String, String> getErrors(final BindingResult bindingResult) {
-    Map<String, String> errors = new HashMap<>();
-    for (FieldError error : bindingResult.getFieldErrors()) {
-      errors.put(error.getField(), error.getDefaultMessage());
-    }
-    return errors;
   }
 }
