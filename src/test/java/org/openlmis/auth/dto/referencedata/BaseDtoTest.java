@@ -18,6 +18,7 @@ package org.openlmis.auth.dto.referencedata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
+import org.openlmis.auth.ToStringTestUtils;
 
 public class BaseDtoTest {
 
@@ -28,6 +29,11 @@ public class BaseDtoTest {
         .withRedefinedSubclass(UserDto.class)
         .suppress(Warning.NONFINAL_FIELDS) // dto can't contain final fields
         .verify();
+  }
+
+  @Test
+  public void shouldImplementToString() {
+    ToStringTestUtils.verify(BaseDto.class, new BaseDto());
   }
 
 }

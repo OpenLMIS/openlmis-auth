@@ -21,9 +21,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.UUID;
+import lombok.ToString;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode
+@ToString
 public class BaseDto {
   
   @Getter

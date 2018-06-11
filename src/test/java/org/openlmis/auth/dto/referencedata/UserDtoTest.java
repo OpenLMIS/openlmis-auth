@@ -21,6 +21,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.ToStringTestUtils;
 import org.openlmis.auth.dto.UserSaveRequest;
 
 public class UserDtoTest {
@@ -45,6 +46,11 @@ public class UserDtoTest {
         .withRedefinedSubclass(UserSaveRequest.class)
         .suppress(Warning.NONFINAL_FIELDS) // dto can't contain final fields
         .verify();
+  }
+
+  @Test
+  public void shouldImplementToString() {
+    ToStringTestUtils.verify(UserDto.class, user);
   }
 
 }
