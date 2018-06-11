@@ -65,7 +65,7 @@ public class PermissionService {
    * Checks whether user can resend verification email of the user with the given id.
    *
    */
-  public void canResendVerificationEmail(UUID referenceDataUserId) {
+  public void canSendVerificationEmail(UUID referenceDataUserId) {
     if (referenceDataUserId.equals(authenticationHelper.getCurrentUser().getId())) {
       return;
     }

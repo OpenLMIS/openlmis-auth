@@ -256,7 +256,7 @@ public class UserController {
   @RequestMapping(value = "/users/auth/verifyEmail", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   public void sendVerificationEmail(@RequestParam(value = "userId") UUID referenceDataUserId) {
-    permissionService.canResendVerificationEmail(referenceDataUserId);
+    permissionService.canSendVerificationEmail(referenceDataUserId);
     UserDto referenceUser = userReferenceDataService.findOne(referenceDataUserId);
 
     if (referenceUser == null) {

@@ -394,7 +394,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldNotResendVerificationEmailIfUserHasNoPermissions() {
     PermissionMessageException ex = buildUserManagerPermissionError();
-    doThrow(ex).when(permissionService).canResendVerificationEmail(admin.getId());
+    doThrow(ex).when(permissionService).canSendVerificationEmail(admin.getId());
 
     startRequest(USER_TOKEN)
         .queryParam(QUERY_PARAM_USER_ID, admin.getId())
