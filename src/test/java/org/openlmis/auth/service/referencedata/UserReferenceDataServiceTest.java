@@ -16,8 +16,11 @@
 package org.openlmis.auth.service.referencedata;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -29,16 +32,20 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.auth.DummyUserDto;
 import org.openlmis.auth.dto.LocalizedMessageDto;
 import org.openlmis.auth.dto.PageDto;
+import org.openlmis.auth.dto.ResultDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.service.BaseCommunicationServiceTest;
 import org.openlmis.auth.service.DataRetrievalException;
+import org.openlmis.auth.util.DynamicResultDtoTypeReference;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpEntity;
@@ -198,5 +205,47 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
             any(HttpEntity.class), eq(service.getResultClass()));
 
     service.putUser(new DummyUserDto());
+  }
+
+  @Test
+  public void shouldReturnTrueIfUserHasRight() {
+    executeHasRightEndpoint(true);
+  }
+
+  @Test
+  public void shouldReturnFalseIfUserHasNoRight() {
+    executeHasRightEndpoint(false);
+  }
+
+  private void executeHasRightEndpoint(boolean expectedValue) {
+    // given
+    UUID userId = UUID.randomUUID();
+    UUID rightId = UUID.randomUUID();
+    ResponseEntity response = mock(ResponseEntity.class);
+
+    // when
+    when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET),
+        any(HttpEntity.class), any(DynamicResultDtoTypeReference.class)))
+        .thenReturn(response);
+    when(response.getBody()).thenReturn(new ResultDto<>(expectedValue));
+
+    ResultDto result = service.hasRight(userId, rightId);
+
+    // then
+    Assert.assertThat(result.getResult(), is(expectedValue));
+
+    verify(restTemplate, atLeastOnce()).exchange(
+        uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),
+        any(DynamicResultDtoTypeReference.class)
+    );
+
+    URI uri = uriCaptor.getValue();
+    String url = service.getServiceUrl() + service.getUrl()
+        + userId + "/hasRight?rightId=" + rightId;
+
+    assertThat(uri.toString()).isEqualTo(url);
+
+    assertAuthHeader(entityCaptor.getValue());
+    Assert.assertThat(entityCaptor.getValue().getBody(), is(nullValue()));
   }
 }

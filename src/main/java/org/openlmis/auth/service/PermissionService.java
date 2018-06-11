@@ -113,7 +113,7 @@ public class PermissionService {
 
     RightDto right = authenticationHelper.getRight(rightName);
     ResultDto<Boolean> result = userReferenceDataService.hasRight(
-        user.getId(), right.getId(), null, null, null
+        user.getId(), right.getId()
     );
 
     return null != result && result.getResult();

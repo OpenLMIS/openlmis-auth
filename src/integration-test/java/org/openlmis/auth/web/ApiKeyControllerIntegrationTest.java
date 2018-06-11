@@ -120,7 +120,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     given(authenticationHelper.getCurrentUser()).willReturn(user);
     given(authenticationHelper.getRight(SERVICE_ACCOUNTS_MANAGE)).willReturn(right);
 
-    given(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null,null))
+    given(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .willReturn(new ResultDto<>(true));
 
   }
@@ -141,7 +141,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnForbiddenForCreateApiKeyEndpointWhenUserHasNoRight() {
-    given(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null,null))
+    given(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .willReturn(new ResultDto<>(false));
 
     String response = post(USER_TOKEN)
@@ -207,7 +207,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnForbiddenForGetApiKeysEndpointWhenUserHasNoRight() {
-    given(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null,null))
+    given(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .willReturn(new ResultDto<>(false));
 
     String response = get(10, USER_TOKEN)
@@ -259,7 +259,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnForbiddenForDeleteApiKeyEndpointWhenUserHasNoRight() {
-    given(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null,null))
+    given(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .willReturn(new ResultDto<>(false));
 
     String response = delete(USER_TOKEN)

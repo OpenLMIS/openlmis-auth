@@ -95,7 +95,7 @@ public class PermissionServiceTest {
     when(authenticationHelper.getCurrentUser()).thenReturn(user);
     when(authenticationHelper.getRight(USERS_MANAGE)).thenReturn(right);
     when(authenticationHelper.getRight(SERVICE_ACCOUNTS_MANAGE)).thenReturn(right);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .thenReturn(new ResultDto<>(true));
 
     ReflectionTestUtils.setField(permissionService, "serviceTokenClientId", SERVICE_CLIENT_ID);
@@ -117,7 +117,7 @@ public class PermissionServiceTest {
   @Test(expected = PermissionMessageException.class)
   public void userShouldNotBeAbleToManageUsersIfHasNoRight() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .thenReturn(new ResultDto<>(false));
 
     permissionService.canManageUsers(null);
@@ -171,7 +171,7 @@ public class PermissionServiceTest {
   @Test
   public void userWithoutRightShouldBeUnableToEditOtherUsersPassword() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .thenReturn(new ResultDto<>(false));
 
     exception.expect(PermissionMessageException.class);
@@ -183,7 +183,7 @@ public class PermissionServiceTest {
   @Test
   public void userWithRightShouldBeUnableToEditOtherUsersPassword() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .thenReturn(new ResultDto<>(true));
 
     permissionService.canEditUserPassword("OtherUser");
@@ -201,7 +201,7 @@ public class PermissionServiceTest {
   @Test
   public void userWithoutRightShouldBeUnableToResendVerificationEmail() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .thenReturn(new ResultDto<>(false));
 
     exception.expect(PermissionMessageException.class);
@@ -213,7 +213,7 @@ public class PermissionServiceTest {
   @Test
   public void userWithRightShouldBeUnableToResendVerificationEmail() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .thenReturn(new ResultDto<>(true));
 
     permissionService.canSendVerificationEmail(UUID.randomUUID());
@@ -222,7 +222,7 @@ public class PermissionServiceTest {
   @Test
   public void shouldReturnTrueIfUserHasRight() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .thenReturn(new ResultDto<>(true));
 
     assertThat(permissionService.hasRight(USERS_MANAGE)).isTrue();
@@ -231,7 +231,7 @@ public class PermissionServiceTest {
   @Test
   public void shouldReturnFalseIfUserHasNoRight() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId(), null, null, null))
+    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .thenReturn(new ResultDto<>(false));
 
     assertThat(permissionService.hasRight(USERS_MANAGE)).isFalse();
