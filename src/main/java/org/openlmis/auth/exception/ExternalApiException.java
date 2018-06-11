@@ -19,7 +19,7 @@ import org.openlmis.auth.dto.LocalizedMessageDto;
 
 public class ExternalApiException extends RuntimeException {
 
-  private final LocalizedMessageDto localizedMessage;
+  private final transient LocalizedMessageDto localizedMessage;
 
   public ExternalApiException(Throwable cause,
                               LocalizedMessageDto localizedMessage) {
