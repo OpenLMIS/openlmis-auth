@@ -96,6 +96,8 @@ public class UserSaveRequestValidatorTest {
     when(permissionService.hasRight(USERS_MANAGE)).thenReturn(true);
     when(messageSource.getMessage(anyString(), any(Object[].class), any(Locale.class)))
         .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
+    when(userReferenceDataService.findOne(request.getId()))
+        .thenReturn(userDto);
   }
 
   @Test
@@ -133,6 +135,15 @@ public class UserSaveRequestValidatorTest {
   }
 
   @Test
+  public void shouldRejectWhenVerifiedFlagWasChanged() {
+    request.setVerified(!userDto.isVerified());
+
+    validator.validate(request, errors);
+
+    assertErrorMessage(errors, VERIFIED, MessageKeys.ERROR_FIELD_IS_INVARIANT);
+  }
+
+  @Test
   public void shouldNotRejectIfUserHasNoRightForEditAndFieldsWereNotChanged() {
     prepareForValidateInvariants();
 
@@ -162,7 +173,6 @@ public class UserSaveRequestValidatorTest {
     request.setJobTitle("test-job-title");
     request.setTimezone("test-time-zone");
     request.setHomeFacilityId(UUID.randomUUID());
-    request.setVerified(!userDto.isVerified());
     request.setActive(!userDto.isActive());
     request.setLoginRestricted(!userDto.isLoginRestricted());
     request.setAllowNotify(!userDto.getAllowNotify());
@@ -171,13 +181,12 @@ public class UserSaveRequestValidatorTest {
     request.setEnabled(!user.getEnabled());
     validator.validate(request, errors);
 
-    assertThat(errors.getErrorCount()).isGreaterThanOrEqualTo(10);
+    assertThat(errors.getErrorCount()).isGreaterThanOrEqualTo(9);
     assertErrorMessage(errors, ENABLED, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, USERNAME, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, JOB_TITLE, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, TIMEZONE, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, HOME_FACILITY_ID, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-    assertErrorMessage(errors, VERIFIED, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, ACTIVE, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, LOGIN_RESTRICTED, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, ALLOW_NOTIFY, MessageKeys.ERROR_FIELD_IS_INVARIANT);
@@ -189,8 +198,6 @@ public class UserSaveRequestValidatorTest {
     when(permissionService.hasRight(USERS_MANAGE)).thenReturn(false);
     when(userRepository.findOneByReferenceDataUserId(request.getId()))
         .thenReturn(user);
-    when(userReferenceDataService.findOne(request.getId()))
-        .thenReturn(userDto);
   }
 
   private void assertErrorMessage(Errors errors, String field, String expectedMessage) {

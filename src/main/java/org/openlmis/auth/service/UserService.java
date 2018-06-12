@@ -23,6 +23,7 @@ import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.function.Function;
 import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.ExpirationToken;
@@ -80,15 +81,29 @@ public class UserService {
    * @return saved user.
    */
   public UserSaveRequest saveUser(UserSaveRequest request) {
-    UserDto referenceDataUser = request.getReferenceDataUser();
-    referenceDataUser = userReferenceDataService.putUser(referenceDataUser);
+    UserDto newReferenceDataUser = request.getReferenceDataUser();
+
+    if (null == request.getId()) {
+      request.setVerified(false);
+    } else {
+      UserDto oldReferenceDataUser = userReferenceDataService.findOne(request.getId());
+
+      if (!Objects.equals(oldReferenceDataUser.getEmail(), newReferenceDataUser.getEmail())) {
+        newReferenceDataUser.setEmail(oldReferenceDataUser.getEmail());
+        newReferenceDataUser.setVerified(oldReferenceDataUser.isVerified());
+
+        request.setVerified(false);
+      }
+    }
+
+    newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
 
     User dbUser = userRepository.findOneByReferenceDataUserId(request.getId());
     boolean isNewUser = dbUser == null;
 
     if (isNewUser) {
       dbUser = new User();
-      dbUser.setReferenceDataUserId(referenceDataUser.getId());
+      dbUser.setReferenceDataUserId(newReferenceDataUser.getId());
     }
 
     dbUser.setUsername(request.getUsername());
@@ -101,11 +116,11 @@ public class UserService {
 
     dbUser = userRepository.save(dbUser);
 
-    if (isNewUser && referenceDataUser.hasEmail()) {
-      sendEmailVerificationEmail(dbUser, referenceDataUser.getEmail());
+    if (request.hasEmail() && !request.isVerified()) {
+      sendEmailVerificationEmail(dbUser, request.getEmail());
     }
 
-    return new UserSaveRequest(dbUser, referenceDataUser);
+    return new UserSaveRequest(dbUser, newReferenceDataUser);
   }
 
   /**
@@ -130,11 +145,12 @@ public class UserService {
    * @param user token's user
    * @return email verification token
    */
-  private EmailVerificationToken createEmailVerificationToken(User user) {
+  private EmailVerificationToken createEmailVerificationToken(User user, String email) {
     return createExpirationToken(user, emailVerificationTokenRepository, arg -> {
       EmailVerificationToken token = new EmailVerificationToken();
       token.setUser(arg);
       token.setExpiryDate(ZonedDateTime.now().plusHours(TOKEN_VALIDITY_HOURS));
+      token.setEmail(email);
 
       return token;
     });
@@ -182,7 +198,7 @@ public class UserService {
    * @param email     recipient's email address
    */
   public void sendEmailVerificationEmail(User user, String email) {
-    EmailVerificationToken token = createEmailVerificationToken(user);
+    EmailVerificationToken token = createEmailVerificationToken(user, email);
     sendEmail(
         user, email, token,
         EMAIL_VERIFICATION_EMAIL_SUBJECT, EMAIL_VERIFICATION_EMAIL_BODY,

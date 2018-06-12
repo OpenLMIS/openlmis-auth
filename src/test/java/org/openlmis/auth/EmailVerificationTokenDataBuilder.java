@@ -24,6 +24,7 @@ public class EmailVerificationTokenDataBuilder {
   private UUID id = UUID.randomUUID();
   private ZonedDateTime expiryDate = ZonedDateTime.now().plusHours(12);
   private User user = new UserDataBuilder().build();
+  private String email = "example@test.org";
 
   public EmailVerificationTokenDataBuilder withoutId() {
     this.id = null;
@@ -48,6 +49,7 @@ public class EmailVerificationTokenDataBuilder {
     token.setId(id);
     token.setExpiryDate(expiryDate);
     token.setUser(user);
+    token.setEmail(email);
 
     return token;
   }

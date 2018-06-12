@@ -82,6 +82,9 @@ public class UserServiceTest extends BaseServiceTest {
   @Captor
   private ArgumentCaptor<NotificationRequest> notificationRequestCaptor;
 
+  @Captor
+  private ArgumentCaptor<UserDto> userCaptor;
+
   private DummyUserDto referenceDataUser = new DummyUserDto();
 
   @Before
@@ -97,21 +100,24 @@ public class UserServiceTest extends BaseServiceTest {
     when(messageSource.getMessage(anyString(), any(String[].class), any(Locale.class)))
         .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
 
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(referenceDataUser);
     when(userReferenceDataService.putUser(any(UserDto.class))).thenReturn(referenceDataUser);
   }
 
   @Test
   public void shouldCreateNewUser() {
     // given
-    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(referenceDataUser);
     when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(null);
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserSaveRequest(new User(), referenceDataUser));
+    UserSaveRequest request = new UserSaveRequest(new User(), referenceDataUser);
+    request.setId(null);
+
+    userService.saveUser(request);
 
     // then
-    verify(userRepository, times(1)).save(any(User.class));
+    verify(userRepository).save(any(User.class));
     verify(notificationService).send(notificationRequestCaptor.capture());
 
     NotificationRequest notificationRequest = notificationRequestCaptor.getValue();
@@ -137,6 +143,31 @@ public class UserServiceTest extends BaseServiceTest {
     // then
     verify(userRepository, times(1)).save(any(User.class));
     verifyZeroInteractions(notificationService);
+  }
+
+  @Test
+  public void shouldReplaceEmailAndVerificationFlagIfEmailWasChanged() {
+    // given
+    when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(new User());
+    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
+
+    // when
+    UserSaveRequest request = new UserSaveRequest(new User(), referenceDataUser);
+    request.setEmail("my_test_email@unit.test.org");
+
+    userService.saveUser(request);
+
+    // then
+    verify(userReferenceDataService).putUser(userCaptor.capture());
+    verify(userRepository).save(any(User.class));
+    verify(notificationService).send(notificationRequestCaptor.capture());
+
+    UserDto user = userCaptor.getValue();
+    assertThat(user.getEmail()).isEqualTo(referenceDataUser.getEmail());
+    assertThat(user.isVerified()).isEqualTo(referenceDataUser.isVerified());
+
+    NotificationRequest notificationRequest = notificationRequestCaptor.getValue();
+    assertThat(notificationRequest.getTo()).isEqualTo(request.getEmail());
   }
 
   @Test

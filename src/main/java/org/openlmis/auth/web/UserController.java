@@ -244,6 +244,7 @@ public class UserController {
     verifyToken(details);
 
     UserDto user = userReferenceDataService.findOne(details.getUser().getReferenceDataUserId());
+    user.setEmail(details.getEmail());
     user.setVerified(true);
 
     userReferenceDataService.putUser(user);

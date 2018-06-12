@@ -35,7 +35,7 @@ public final class DummyUserDto extends UserDto {
    */
   public DummyUserDto() {
     super(
-        USERNAME, "Admin", "User", EMAIL, null, null, null, null, false,
+        USERNAME, "Admin", "User", EMAIL, null, null, null, null, true,
         false, false, true, null, getDummyRoleAssignments()
     );
     setId(UUID.fromString(REFERENCE_ID));

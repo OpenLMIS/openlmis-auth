@@ -333,6 +333,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .then()
         .statusCode(HttpStatus.OK.value());
 
+    assertThat(admin.getEmail(), is(token.getEmail()));
+    assertThat(admin.isVerified(), is(true));
+
     verify(userReferenceDataService).putUser(admin);
     verify(emailVerificationTokenRepository).delete(token.getId());
 
@@ -377,6 +380,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldResendVerificationEmail() {
+    admin.setVerified(false);
     doNothing().when(userService).sendEmailVerificationEmail(any(User.class), anyString());
 
     startRequest(USER_TOKEN)

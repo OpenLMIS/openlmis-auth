@@ -89,8 +89,14 @@ public class UserSaveRequestValidator extends BaseValidator {
     if (!errors.hasErrors()) {
       UserSaveRequest dto = (UserSaveRequest) target;
 
-      if (null != dto.getId() && !permissionService.hasRight(USERS_MANAGE)) {
-        validateInvariants(dto, errors);
+      if (null != dto.getId()) {
+        UserDto reference = userReferenceDataService.findOne(dto.getId());
+
+        rejectIfInvariantWasChanged(errors, VERIFIED, reference.isVerified(), dto.isVerified());
+
+        if (!permissionService.hasRight(USERS_MANAGE)) {
+          validateInvariants(reference, dto, errors);
+        }
       }
 
       verifyUsername(dto.getUsername(), errors);
@@ -104,19 +110,16 @@ public class UserSaveRequestValidator extends BaseValidator {
     }
   }
 
-  private void validateInvariants(UserSaveRequest dto, Errors errors) {
+  private void validateInvariants(UserDto reference, UserSaveRequest dto, Errors errors) {
     User db = userRepository.findOneByReferenceDataUserId(dto.getId());
 
     rejectIfInvariantWasChanged(errors, ENABLED, db.getEnabled(), dto.getEnabled());
-
-    UserDto reference = userReferenceDataService.findOne(dto.getId());
 
     rejectIfInvariantWasChanged(errors, USERNAME, reference.getUsername(), dto.getUsername());
     rejectIfInvariantWasChanged(errors, JOB_TITLE, reference.getJobTitle(), dto.getJobTitle());
     rejectIfInvariantWasChanged(errors, TIMEZONE, reference.getTimezone(), dto.getTimezone());
     rejectIfInvariantWasChanged(errors, HOME_FACILITY_ID,
         reference.getHomeFacilityId(), dto.getHomeFacilityId());
-    rejectIfInvariantWasChanged(errors, VERIFIED, reference.isVerified(), dto.isVerified());
     rejectIfInvariantWasChanged(errors, ACTIVE, reference.isActive(), dto.isActive());
     rejectIfInvariantWasChanged(errors, LOGIN_RESTRICTED,
         reference.isLoginRestricted(), dto.isLoginRestricted());
