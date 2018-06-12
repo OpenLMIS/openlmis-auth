@@ -17,11 +17,13 @@ package org.openlmis.auth.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "email_verification_tokens")
+@EqualsAndHashCode(callSuper = true)
 public class EmailVerificationToken extends ExpirationToken {
 
   @Getter

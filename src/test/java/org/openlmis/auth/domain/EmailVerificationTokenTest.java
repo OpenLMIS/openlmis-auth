@@ -15,6 +15,8 @@
 
 package org.openlmis.auth.domain;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Test;
 import org.openlmis.auth.EmailVerificationTokenDataBuilder;
 
 public class EmailVerificationTokenTest extends ExpirationTokenTest {
@@ -22,6 +24,15 @@ public class EmailVerificationTokenTest extends ExpirationTokenTest {
   @Override
   ExpirationToken generateInstance() {
     return new EmailVerificationTokenDataBuilder().build();
+  }
+
+  @Test
+  @Override
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(EmailVerificationToken.class)
+        .withRedefinedSuperclass()
+        .verify();
   }
 
 }
