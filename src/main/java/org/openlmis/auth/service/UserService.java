@@ -83,17 +83,7 @@ public class UserService {
     UserDto referenceDataUser = request.getReferenceDataUser();
     referenceDataUser = userReferenceDataService.putUser(referenceDataUser);
 
-    try {
-      User dbUser = addOrUpdateUser(request, referenceDataUser);
-      return new UserSaveRequest(dbUser, referenceDataUser);
-    } catch (Exception exp) {
-      userReferenceDataService.deleteUser(referenceDataUser.getId());
-      throw exp;
-    }
-  }
-
-  private User addOrUpdateUser(UserSaveRequest request, UserDto referenceDataUser) {
-    User dbUser = userRepository.findOneByReferenceDataUserId(referenceDataUser.getId());
+    User dbUser = userRepository.findOneByReferenceDataUserId(request.getId());
     boolean isNewUser = dbUser == null;
 
     if (isNewUser) {
@@ -115,7 +105,7 @@ public class UserService {
       sendEmailVerificationEmail(dbUser, referenceDataUser.getEmail());
     }
 
-    return dbUser;
+    return new UserSaveRequest(dbUser, referenceDataUser);
   }
 
   /**

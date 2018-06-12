@@ -69,10 +69,6 @@ public class UserReferenceDataService extends BaseCommunicationService<UserDto> 
     return put("", user);
   }
 
-  public void deleteUser(UUID id) {
-    delete(id);
-  }
-
   /**
    * Check if user has a right with certain criteria.
    *
