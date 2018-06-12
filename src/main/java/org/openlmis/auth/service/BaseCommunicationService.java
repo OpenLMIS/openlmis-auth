@@ -204,6 +204,21 @@ public abstract class BaseCommunicationService<T> {
     }
   }
 
+  protected void delete(UUID id) {
+    String url = getServiceUrl() + getUrl() + id;
+
+    try {
+      restTemplate.exchange(
+          createUri(url),
+          HttpMethod.DELETE,
+          createEntity(obtainAccessToken()),
+          Object.class
+      );
+    } catch (HttpStatusCodeException ex) {
+      throw buildDataRetrievalException(ex);
+    }
+  }
+
   protected <P> ResultDto<P> getResult(String resourceUrl, RequestParameters parameters,
                                        Class<P> type) {
     String url = getServiceUrl() + getUrl() + resourceUrl;

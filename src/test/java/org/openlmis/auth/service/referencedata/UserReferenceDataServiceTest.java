@@ -55,6 +55,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
 
   UserReferenceDataService service;
@@ -215,6 +216,31 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
   @Test
   public void shouldReturnFalseIfUserHasNoRight() {
     executeHasRightEndpoint(false);
+  }
+
+  @Test
+  public void shouldDeleteUser() {
+    // given
+    UUID userId = UUID.randomUUID();
+    ResponseEntity response = mock(ResponseEntity.class);
+
+    // when
+    when(restTemplate.exchange(any(URI.class), eq(HttpMethod.DELETE), any(HttpEntity.class),
+        eq(Object.class)))
+        .thenReturn(response);
+    when(response.getStatusCode()).thenReturn(HttpStatus.NO_CONTENT);
+
+    service.deleteUser(userId);
+
+    // then
+    verify(restTemplate).exchange(uriCaptor.capture(), eq(HttpMethod.DELETE),
+        entityCaptor.capture(), eq(Object.class));
+
+    URI uri = uriCaptor.getValue();
+    String url = service.getServiceUrl() + service.getUrl() + userId;
+
+    assertThat(uri.toString()).isEqualTo(url);
+    assertAuthHeader(entityCaptor.getValue());
   }
 
   private void executeHasRightEndpoint(boolean expectedValue) {

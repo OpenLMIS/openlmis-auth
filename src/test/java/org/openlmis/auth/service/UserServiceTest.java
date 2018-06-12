@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,7 +31,9 @@ import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_EMAIL_SUBJEC
 import java.util.Locale;
 import java.util.UUID;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -50,10 +53,14 @@ import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.util.NotificationRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @SuppressWarnings({"PMD.UnusedPrivateField"})
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest extends BaseServiceTest {
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
 
   @Mock
   private UserRepository userRepository;
@@ -194,4 +201,22 @@ public class UserServiceTest extends BaseServiceTest {
     assertThat(result.getPassword()).isEqualTo(oldUserPassword);
   }
 
+  @Test
+  public void shouldSendDeleteRequestIfThereWereProblemsWithAddingUser() {
+    // given
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(referenceDataUser);
+    when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(null);
+    doThrow(new DataIntegrityViolationException("test-error"))
+        .when(userRepository)
+        .save(any(User.class));
+
+    exception.expect(DataIntegrityViolationException.class);
+    exception.expectMessage("test-error");
+
+    // when
+    userService.saveUser(new UserSaveRequest(new User(), referenceDataUser));
+
+    verify(userReferenceDataService).putUser(referenceDataUser);
+    verify(userReferenceDataService).deleteUser(referenceDataUser.getId());
+  }
 }
