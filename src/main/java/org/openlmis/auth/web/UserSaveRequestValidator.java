@@ -38,7 +38,7 @@ import org.springframework.validation.Validator;
  * A validator for {@link org.openlmis.auth.dto.UserSaveRequest} object.
  */
 @Component
-public class UserSaveRequestValidator implements BaseValidator {
+public class UserSaveRequestValidator extends BaseValidator {
 
   @Autowired
   private PermissionService permissionService;

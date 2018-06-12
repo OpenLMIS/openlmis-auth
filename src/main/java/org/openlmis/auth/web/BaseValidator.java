@@ -16,25 +16,39 @@
 package org.openlmis.auth.web;
 
 import java.util.Objects;
+import org.openlmis.auth.i18n.ExposedMessageSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
-interface BaseValidator extends Validator {
+abstract class BaseValidator implements Validator {
 
-  default void rejectIfNotEqual(Errors errors, Object oldData, Object newData, String field,
-      String message) {
+  @Autowired
+  @Qualifier("messageSource")
+  private ExposedMessageSource messageSource;
+
+  void rejectIfNotEqual(Errors errors, Object oldData, Object newData, String field,
+      String messageKey) {
     if (!Objects.equals(oldData, newData)) {
-      rejectValue(errors, field, message);
+      rejectValue(errors, field, messageKey);
     }
   }
 
-  default void rejectIfEmptyOrWhitespace(Errors errors, String field, String message) {
-    ValidationUtils.rejectIfEmptyOrWhitespace(errors, field, message, message);
+  void rejectIfEmptyOrWhitespace(Errors errors, String field, String messageKey) {
+    ValidationUtils
+        .rejectIfEmptyOrWhitespace(errors, field, messageKey, getMessage(field, messageKey));
   }
 
-  default void rejectValue(Errors errors, String field, String message) {
-    errors.rejectValue(field, message, message);
+  void rejectValue(Errors errors, String field, String messageKey) {
+    errors.rejectValue(field, messageKey, getMessage(field, messageKey));
+  }
+
+  private String getMessage(String field, String messageKey) {
+    return messageSource
+        .getMessage(messageKey, new Object[]{field}, LocaleContextHolder.getLocale());
   }
 
 }

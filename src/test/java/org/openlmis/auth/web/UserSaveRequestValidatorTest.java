@@ -16,6 +16,8 @@
 package org.openlmis.auth.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 import static org.openlmis.auth.web.UserSaveRequestValidator.ACTIVE;
@@ -32,6 +34,7 @@ import static org.openlmis.auth.web.UserSaveRequestValidator.VERIFIED;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import java.util.Locale;
 import java.util.UUID;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
@@ -45,6 +48,7 @@ import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserSaveRequest;
 import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
@@ -65,6 +69,9 @@ public class UserSaveRequestValidatorTest {
 
   @Mock
   private UserReferenceDataService userReferenceDataService;
+
+  @Mock
+  private ExposedMessageSource messageSource;
 
   @InjectMocks
   private Validator validator = new UserSaveRequestValidator();
@@ -87,6 +94,8 @@ public class UserSaveRequestValidatorTest {
     errors = new BeanPropertyBindingResult(request, "request");
 
     when(permissionService.hasRight(USERS_MANAGE)).thenReturn(true);
+    when(messageSource.getMessage(anyString(), any(Object[].class), any(Locale.class)))
+        .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
   }
 
   @Test
