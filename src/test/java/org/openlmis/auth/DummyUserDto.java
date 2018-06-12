@@ -15,7 +15,12 @@
 
 package org.openlmis.auth;
 
+import static java.util.UUID.randomUUID;
+
+import com.google.common.collect.Sets;
+import java.util.Set;
 import java.util.UUID;
+import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 
 public final class DummyUserDto extends UserDto {
@@ -31,9 +36,17 @@ public final class DummyUserDto extends UserDto {
   public DummyUserDto() {
     super(
         USERNAME, "Admin", "User", EMAIL, null, null, null, null, false,
-        false, false, true, null, null
+        false, false, true, null, getDummyRoleAssignments()
     );
     setId(UUID.fromString(REFERENCE_ID));
+  }
+
+  private static Set<RoleAssignmentDto> getDummyRoleAssignments() {
+    return Sets.newHashSet(
+        new RoleAssignmentDto(randomUUID(), null, null, null), // general
+        new RoleAssignmentDto(randomUUID(), randomUUID(), randomUUID(), null), // supervision
+        new RoleAssignmentDto(randomUUID(), null, null, randomUUID()) // fulfillment
+    );
   }
 
 }
