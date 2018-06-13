@@ -379,6 +379,25 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
+  public void shouldGetPendingVerificationEmail() {
+    EmailVerificationToken token = new EmailVerificationTokenDataBuilder()
+        .withExpiredDate()
+        .build();
+
+    given(emailVerificationTokenRepository.findOneByUser(any(User.class)))
+        .willReturn(token);
+
+    startRequest(USER_TOKEN)
+        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
+        .when()
+        .get(SEND_VERIFICATION_EMAIL_URL)
+        .then()
+        .statusCode(HttpStatus.OK.value());
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
   public void shouldResendVerificationEmail() {
     admin.setVerified(false);
     doNothing().when(userService).sendEmailVerificationEmail(any(User.class), anyString());
@@ -398,7 +417,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldNotResendVerificationEmailIfUserHasNoPermissions() {
     PermissionMessageException ex = buildUserManagerPermissionError();
-    doThrow(ex).when(permissionService).canSendVerificationEmail(admin.getId());
+    doThrow(ex).when(permissionService).canVerifyEmail(admin.getId());
 
     startRequest(USER_TOKEN)
         .queryParam(QUERY_PARAM_USER_ID, admin.getId())

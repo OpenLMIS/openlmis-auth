@@ -32,6 +32,7 @@ import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.EmailVerificationTokenDto;
 import org.openlmis.auth.dto.UserSaveRequest;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.exception.ValidationMessageException;
@@ -252,12 +253,24 @@ public class UserController {
   }
 
   /**
+   * Get current pending verification email.
+   */
+  @GetMapping(value = "/users/auth/verifyEmail")
+  @ResponseBody
+  public EmailVerificationTokenDto getVerificationEmail(@RequestParam("userId") UUID userId) {
+    permissionService.canVerifyEmail(userId);
+    User user = userRepository.findOneByReferenceDataUserId(userId);
+    EmailVerificationToken token = emailVerificationTokenRepository.findOneByUser(user);
+    return new EmailVerificationTokenDto(token.getEmail(), token.getExpiryDate());
+  }
+
+  /**
    * Generates token which can be used to verify user's email.
    */
   @RequestMapping(value = "/users/auth/verifyEmail", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   public void sendVerificationEmail(@RequestParam(value = "userId") UUID referenceDataUserId) {
-    permissionService.canSendVerificationEmail(referenceDataUserId);
+    permissionService.canVerifyEmail(referenceDataUserId);
     UserDto referenceUser = userReferenceDataService.findOne(referenceDataUserId);
 
     if (referenceUser == null) {

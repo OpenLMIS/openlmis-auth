@@ -92,6 +92,8 @@ schemas:
   - roleAssignment: !include schemas/roleAssignment.json
   - user: !include schemas/user.json
 
+  - emailVerificationToken: !include schemas/emailVerificationToken.json
+
   - apiKey: !include schemas/apiKey.json
   - apiKeyPage: !include schemas/apiKeyPage.json
 
@@ -304,6 +306,27 @@ resourceTypes:
                            X-Content-Type-Options:
                            X-XSS-Protection:
           /verifyEmail:
+              get:
+                  is: [ secured ]
+                  description: Get pending verification email for a user.
+                  queryParameters:
+                      userId:
+                          displayName: ReferenceDataUserId
+                          description: Reference Data User Id
+                          type: string
+                          required: true
+                          repeat: false
+                  responses:
+                      200:
+                          description: Get pending verification email for the given user
+                          body:
+                              application/json:
+                                  schema: emailVerificationToken
+                      403:
+                          description: The current logged user has no permission to perform action.
+                          body:
+                              application/json:
+                                  schema: localizedMessage
               post:
                   is: [ secured ]
                   description: Resend verification email for the current user.

@@ -191,7 +191,7 @@ public class PermissionServiceTest {
 
   @Test
   public void userShouldBeAbleToResendVerificationEmail() {
-    permissionService.canSendVerificationEmail(user.getId());
+    permissionService.canVerifyEmail(user.getId());
 
     verify(authenticationHelper).getCurrentUser();
     verify(authenticationHelper, never()).getRight(anyString());
@@ -207,7 +207,7 @@ public class PermissionServiceTest {
     exception.expect(PermissionMessageException.class);
     exception.expectMessage(new Message(ERROR_NO_FOLLOWING_PERMISSION, right.getName()).toString());
 
-    permissionService.canSendVerificationEmail(UUID.randomUUID());
+    permissionService.canVerifyEmail(UUID.randomUUID());
   }
 
   @Test
@@ -216,7 +216,7 @@ public class PermissionServiceTest {
     when(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .thenReturn(new ResultDto<>(true));
 
-    permissionService.canSendVerificationEmail(UUID.randomUUID());
+    permissionService.canVerifyEmail(UUID.randomUUID());
   }
 
   @Test
