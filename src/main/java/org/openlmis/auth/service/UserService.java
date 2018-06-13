@@ -16,43 +16,19 @@
 package org.openlmis.auth.service;
 
 
-import static org.openlmis.auth.i18n.MessageKeys.ACCOUNT_CREATED_EMAIL_SUBJECT;
-import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_EMAIL_BODY;
-import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_EMAIL_SUBJECT;
-import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
-import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
-
-import java.time.ZonedDateTime;
 import java.util.Objects;
-import java.util.function.Function;
-import org.openlmis.auth.domain.EmailVerificationToken;
-import org.openlmis.auth.domain.ExpirationToken;
-import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserSaveRequest;
 import org.openlmis.auth.dto.referencedata.UserDto;
-import org.openlmis.auth.i18n.ExposedMessageSource;
-import org.openlmis.auth.repository.EmailVerificationTokenRepository;
-import org.openlmis.auth.repository.ExpirationTokenRepository;
-import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
-import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
-import org.openlmis.util.NotificationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
 public class UserService {
-  public static final long TOKEN_VALIDITY_HOURS = 12;
-
-  static final String RESET_PASSWORD_URL = System.getenv("BASE_URL") + "/#!/resetPassword/";
-  static final String VERIFY_EMAIL_URL = System.getenv("BASE_URL") + "/api/users/auth/verifyEmail/";
-
-  private static final String MAIL_ADDRESS = System.getenv("MAIL_ADDRESS");
 
   @Autowired
   private UserRepository userRepository;
@@ -61,16 +37,7 @@ public class UserService {
   private UserReferenceDataService userReferenceDataService;
 
   @Autowired
-  private PasswordResetTokenRepository passwordResetTokenRepository;
-
-  @Autowired
-  private EmailVerificationTokenRepository emailVerificationTokenRepository;
-
-  @Autowired
-  private NotificationService notificationService;
-
-  @Autowired
-  private ExposedMessageSource messageSource;
+  private EmailVerificationNotifier emailVerificationNotifier;
 
   private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -117,110 +84,10 @@ public class UserService {
     dbUser = userRepository.save(dbUser);
 
     if (request.hasEmail() && !request.isVerified()) {
-      sendEmailVerificationEmail(dbUser, request.getEmail());
+      emailVerificationNotifier.sendNotification(dbUser, request.getEmail());
     }
 
     return new UserSaveRequest(dbUser, newReferenceDataUser);
   }
 
-  /**
-   * Creates (and deletes existing) password reset token for given user.
-   *
-   * @param user token's user
-   * @return password reset token
-   */
-  public PasswordResetToken createPasswordResetToken(User user) {
-    return createExpirationToken(user, passwordResetTokenRepository, arg -> {
-      PasswordResetToken token = new PasswordResetToken();
-      token.setUser(arg);
-      token.setExpiryDate(ZonedDateTime.now().plusHours(TOKEN_VALIDITY_HOURS));
-
-      return token;
-    });
-  }
-
-  /**
-   * Creates (and deletes existing) email verification token for given user.
-   *
-   * @param user token's user
-   * @return email verification token
-   */
-  private EmailVerificationToken createEmailVerificationToken(User user, String email) {
-    return createExpirationToken(user, emailVerificationTokenRepository, arg -> {
-      EmailVerificationToken token = new EmailVerificationToken();
-      token.setUser(arg);
-      token.setExpiryDate(ZonedDateTime.now().plusHours(TOKEN_VALIDITY_HOURS));
-      token.setEmail(email);
-
-      return token;
-    });
-  }
-
-  private <T extends ExpirationToken> T createExpirationToken(User user,
-      ExpirationTokenRepository<T> repository, Function<User, T> creator) {
-    T token = repository.findOneByUser(user);
-
-    if (token != null) {
-      repository.delete(token);
-      // the JPA provider feels free to reorganize and/or optimize the database writes of the
-      // pending changes from the persistent context, in particular the JPA provider does not
-      // feel obliged to perform the database writes in the ordering and form implicated by
-      // the individual changes of the persistent context.
-
-      // the flush() flushes the changes to the database so when the flush() is executed after
-      // delete(), sql gets executed and the following save will have no problems.
-      repository.flush();
-    }
-
-    return repository.save(creator.apply(user));
-  }
-
-  /**
-   * Sends password reset email.
-   *
-   * @param user      the user whose password is being reset
-   * @param email     recipient's email address
-   * @param isNewUser whether the user was just created
-   */
-  public void sendResetPasswordEmail(User user, String email, boolean isNewUser) {
-    PasswordResetToken token = createPasswordResetToken(user);
-
-    String subjectMessageKey = (isNewUser) ? ACCOUNT_CREATED_EMAIL_SUBJECT
-        : PASSWORD_RESET_EMAIL_SUBJECT;
-
-    sendEmail(user, email, token, subjectMessageKey, PASSWORD_RESET_EMAIL_BODY, RESET_PASSWORD_URL);
-  }
-
-  /**
-   * Sends email verification email.
-   *
-   * @param user      the user whose email is being verify
-   * @param email     recipient's email address
-   */
-  public void sendEmailVerificationEmail(User user, String email) {
-    EmailVerificationToken token = createEmailVerificationToken(user, email);
-    sendEmail(
-        user, email, token,
-        EMAIL_VERIFICATION_EMAIL_SUBJECT, EMAIL_VERIFICATION_EMAIL_BODY,
-        VERIFY_EMAIL_URL
-    );
-  }
-
-  private void sendEmail(User user, String email, ExpirationToken token,
-      String subjectKey, String bodyKey, String bodyUrl) {
-    UserDto referenceDataUser = userReferenceDataService.findOne(user.getReferenceDataUserId());
-
-    String[] bodyMsgArgs = {
-        referenceDataUser.getFirstName(),
-        referenceDataUser.getLastName(),
-        bodyUrl + token.getId().toString()
-    };
-    String[] subjectMsgArgs = {};
-
-    notificationService.send(new NotificationRequest(
-        MAIL_ADDRESS,
-        email,
-        messageSource.getMessage(subjectKey, subjectMsgArgs, LocaleContextHolder.getLocale()),
-        messageSource.getMessage(bodyKey, bodyMsgArgs, LocaleContextHolder.getLocale())));
-  }
 }

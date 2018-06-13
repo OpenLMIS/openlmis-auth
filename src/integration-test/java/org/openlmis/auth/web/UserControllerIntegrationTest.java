@@ -42,7 +42,7 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_VERIFIE
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
-import static org.openlmis.auth.service.UserService.TOKEN_VALIDITY_HOURS;
+import static org.openlmis.auth.service.ExpirationTokenNotifier.TOKEN_VALIDITY_HOURS;
 import static org.openlmis.auth.web.TestWebData.Fields.MESSAGE_KEY;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
@@ -67,6 +67,7 @@ import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.service.EmailVerificationNotifier;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.NotificationService;
@@ -115,6 +116,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @SpyBean
   private UserService userService;
+
+  @SpyBean
+  private EmailVerificationNotifier emailVerificationNotifier;
 
   @MockBean
   private NotificationService notificationService;
@@ -400,7 +404,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldResendVerificationEmail() {
     admin.setVerified(false);
-    doNothing().when(userService).sendEmailVerificationEmail(any(User.class), anyString());
+    doNothing().when(emailVerificationNotifier).sendNotification(any(User.class), anyString());
 
     startRequest(USER_TOKEN)
         .queryParam(QUERY_PARAM_USER_ID, admin.getId())
@@ -409,7 +413,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .then()
         .statusCode(HttpStatus.OK.value());
 
-    verify(userService).sendEmailVerificationEmail(any(User.class), eq(admin.getEmail()));
+    verify(emailVerificationNotifier).sendNotification(any(User.class), eq(admin.getEmail()));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }

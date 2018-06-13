@@ -13,41 +13,34 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.service;
+package org.openlmis.auth;
 
-import org.junit.runner.RunWith;
+import java.util.UUID;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.openlmis.auth.domain.BaseEntity;
 
-import java.util.UUID;
+public class SaveAnswer<T extends BaseEntity> implements Answer<T> {
 
-@RunWith(MockitoJUnitRunner.class)
-public abstract class BaseServiceTest {
+  @Override
+  public T answer(InvocationOnMock invocation) {
+    T obj = (T) invocation.getArguments()[0];
 
-  static class SaveAnswer<T extends BaseEntity> implements Answer<T> {
-
-    @Override
-    public T answer(InvocationOnMock invocation) throws Throwable {
-      T obj = (T) invocation.getArguments()[0];
-
-      if (null == obj) {
-        return null;
-      }
-
-      if (null == obj.getId()) {
-        obj.setId(UUID.randomUUID());
-      }
-
-      extraSteps(obj);
-
-      return obj;
+    if (null == obj) {
+      return null;
     }
 
-    void extraSteps(T obj) {
-      // should be overriden if extra steps are required.
+    if (null == obj.getId()) {
+      obj.setId(UUID.randomUUID());
     }
 
+    extraSteps(obj);
+
+    return obj;
   }
+
+  void extraSteps(T obj) {
+    // should be overriden if extra steps are required.
+  }
+
 }

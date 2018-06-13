@@ -40,6 +40,8 @@ import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.service.EmailVerificationNotifier;
+import org.openlmis.auth.service.PasswordResetNotifier;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
@@ -109,6 +111,12 @@ public class UserController {
 
   @Autowired
   private UserSaveRequestValidator userSaveRequestValidator;
+
+  @Autowired
+  private EmailVerificationNotifier emailVerificationNotifier;
+
+  @Autowired
+  private PasswordResetNotifier passwordResetNotifier;
 
   @InitBinder
   protected void initBinder(WebDataBinder binder) {
@@ -195,7 +203,7 @@ public class UserController {
     }
 
     User user = userRepository.findOneByReferenceDataUserId(refDataUser.getId());
-    userService.sendResetPasswordEmail(user, email, false);
+    passwordResetNotifier.sendNotification(user, email, false);
   }
 
   /**
@@ -230,7 +238,7 @@ public class UserController {
     permissionService.canManageUsers(null);
     User user = userRepository.findOneByReferenceDataUserId(referenceDataUserId);
 
-    PasswordResetToken token = userService.createPasswordResetToken(user);
+    PasswordResetToken token = passwordResetNotifier.createPasswordResetToken(user);
 
     return token.getId();
   }
@@ -286,7 +294,7 @@ public class UserController {
     }
 
     User user = userRepository.findOneByReferenceDataUserId(referenceUser.getId());
-    userService.sendEmailVerificationEmail(user, referenceUser.getEmail());
+    emailVerificationNotifier.sendNotification(user, referenceUser.getEmail());
   }
 
   private void verifyToken(ExpirationToken token) {
