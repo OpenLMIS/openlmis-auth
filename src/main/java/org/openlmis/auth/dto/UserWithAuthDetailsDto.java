@@ -29,7 +29,7 @@ import org.openlmis.auth.dto.referencedata.UserDto;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public final class UserSaveRequest extends UserDto {
+public final class UserWithAuthDetailsDto extends UserDto {
 
   @Getter
   @Setter
@@ -42,7 +42,7 @@ public final class UserSaveRequest extends UserDto {
   /**
    * Creates a new instance based on data from auth and reference data users.
    */
-  public UserSaveRequest(User user, UserDto referenceDataUser) {
+  public UserWithAuthDetailsDto(User user, UserDto referenceDataUser) {
     super(
         referenceDataUser.getUsername(), referenceDataUser.getFirstName(),
         referenceDataUser.getLastName(), referenceDataUser.getEmail(),

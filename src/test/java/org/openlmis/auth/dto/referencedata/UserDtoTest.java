@@ -22,7 +22,7 @@ import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.openlmis.auth.DummyUserDto;
 import org.openlmis.auth.ToStringTestUtils;
-import org.openlmis.auth.dto.UserSaveRequest;
+import org.openlmis.auth.dto.UserWithAuthDetailsDto;
 
 public class UserDtoTest {
   private UserDto user = new DummyUserDto();
@@ -43,7 +43,7 @@ public class UserDtoTest {
     EqualsVerifier
         .forClass(UserDto.class)
         .withRedefinedSuperclass()
-        .withRedefinedSubclass(UserSaveRequest.class)
+        .withRedefinedSubclass(UserWithAuthDetailsDto.class)
         .suppress(Warning.NONFINAL_FIELDS) // dto can't contain final fields
         .verify();
   }

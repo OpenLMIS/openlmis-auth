@@ -59,7 +59,7 @@ import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.LocalizedMessageDto;
-import org.openlmis.auth.dto.UserSaveRequest;
+import org.openlmis.auth.dto.UserWithAuthDetailsDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.exception.PermissionMessageException;
@@ -146,7 +146,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldSaveUser() {
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserSaveRequest(user, admin), null)
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserWithAuthDetailsDto(user, admin), null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(200);
   }
@@ -155,7 +155,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   public void shouldNotSaveUserWhenUserHasNoPermission() {
     PermissionMessageException ex = mockUserManagePermissionError();
 
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserSaveRequest(user, admin), null)
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserWithAuthDetailsDto(user, admin), null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
@@ -168,7 +168,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .when(userReferenceDataService)
         .putUser(any(UserDto.class));
 
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserSaveRequest(user, admin), null)
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserWithAuthDetailsDto(user, admin), null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(400)
         .body(Fields.MESSAGE_KEY, is("test.key"))

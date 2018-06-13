@@ -18,7 +18,7 @@ package org.openlmis.auth.service;
 
 import java.util.Objects;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.UserSaveRequest;
+import org.openlmis.auth.dto.UserWithAuthDetailsDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
@@ -47,11 +47,11 @@ public class UserService {
    * @param request user to be saved.
    * @return saved user.
    */
-  public UserSaveRequest saveUser(UserSaveRequest request) {
+  public UserWithAuthDetailsDto saveUser(UserWithAuthDetailsDto request) {
     return null == request.getId() ? addUser(request) : updateUser(request);
   }
 
-  private UserSaveRequest addUser(UserSaveRequest request) {
+  private UserWithAuthDetailsDto addUser(UserWithAuthDetailsDto request) {
     request.setVerified(false);
 
     User dbUser = new User();
@@ -65,10 +65,10 @@ public class UserService {
 
     sendNotification(dbUser, request);
 
-    return new UserSaveRequest(dbUser, newReferenceDataUser);
+    return new UserWithAuthDetailsDto(dbUser, newReferenceDataUser);
   }
 
-  private UserSaveRequest updateUser(UserSaveRequest request) {
+  private UserWithAuthDetailsDto updateUser(UserWithAuthDetailsDto request) {
     UserDto newReferenceDataUser = request.getReferenceDataUser();
     UserDto oldReferenceDataUser = userReferenceDataService.findOne(request.getId());
 
@@ -87,10 +87,10 @@ public class UserService {
 
     sendNotification(dbUser, request);
 
-    return new UserSaveRequest(dbUser, newReferenceDataUser);
+    return new UserWithAuthDetailsDto(dbUser, newReferenceDataUser);
   }
 
-  private void updateUserFields(User dbUser, UserSaveRequest request) {
+  private void updateUserFields(User dbUser, UserWithAuthDetailsDto request) {
     dbUser.setUsername(request.getUsername());
     dbUser.setEnabled(request.getEnabled());
 
@@ -100,7 +100,7 @@ public class UserService {
     }
   }
 
-  private void sendNotification(User dbUser, UserSaveRequest request) {
+  private void sendNotification(User dbUser, UserWithAuthDetailsDto request) {
     if (request.hasEmail() && !request.isVerified()) {
       emailVerificationNotifier.sendNotification(dbUser, request.getEmail());
     }

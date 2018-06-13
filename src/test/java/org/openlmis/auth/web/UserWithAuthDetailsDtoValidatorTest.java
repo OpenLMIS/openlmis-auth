@@ -20,17 +20,17 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
-import static org.openlmis.auth.web.UserSaveRequestValidator.ACTIVE;
-import static org.openlmis.auth.web.UserSaveRequestValidator.ALLOW_NOTIFY;
-import static org.openlmis.auth.web.UserSaveRequestValidator.ENABLED;
-import static org.openlmis.auth.web.UserSaveRequestValidator.EXTRA_DATA;
-import static org.openlmis.auth.web.UserSaveRequestValidator.HOME_FACILITY_ID;
-import static org.openlmis.auth.web.UserSaveRequestValidator.JOB_TITLE;
-import static org.openlmis.auth.web.UserSaveRequestValidator.LOGIN_RESTRICTED;
-import static org.openlmis.auth.web.UserSaveRequestValidator.ROLE_ASSIGNMENTS;
-import static org.openlmis.auth.web.UserSaveRequestValidator.TIMEZONE;
-import static org.openlmis.auth.web.UserSaveRequestValidator.USERNAME;
-import static org.openlmis.auth.web.UserSaveRequestValidator.VERIFIED;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.ACTIVE;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.ALLOW_NOTIFY;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.ENABLED;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.EXTRA_DATA;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.HOME_FACILITY_ID;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.JOB_TITLE;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.LOGIN_RESTRICTED;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.ROLE_ASSIGNMENTS;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.TIMEZONE;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.USERNAME;
+import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.VERIFIED;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -45,7 +45,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.auth.DummyUserDto;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.UserSaveRequest;
+import org.openlmis.auth.dto.UserWithAuthDetailsDto;
 import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.i18n.ExposedMessageSource;
@@ -59,7 +59,7 @@ import org.springframework.validation.Validator;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("PMD.TooManyMethods")
-public class UserSaveRequestValidatorTest {
+public class UserWithAuthDetailsDtoValidatorTest {
 
   @Mock
   private PermissionService permissionService;
@@ -74,11 +74,11 @@ public class UserSaveRequestValidatorTest {
   private ExposedMessageSource messageSource;
 
   @InjectMocks
-  private Validator validator = new UserSaveRequestValidator();
+  private Validator validator = new UserWithAuthDetailsDtoValidator();
 
   private User user;
   private UserDto userDto;
-  private UserSaveRequest request;
+  private UserWithAuthDetailsDto request;
   private Errors errors;
 
   @Before
@@ -89,7 +89,7 @@ public class UserSaveRequestValidatorTest {
     user.setUsername(userDto.getUsername());
     user.setEnabled(true);
 
-    request = new UserSaveRequest(user, userDto);
+    request = new UserWithAuthDetailsDto(user, userDto);
 
     errors = new BeanPropertyBindingResult(request, "request");
 

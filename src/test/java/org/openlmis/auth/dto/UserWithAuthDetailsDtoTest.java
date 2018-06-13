@@ -25,12 +25,12 @@ import org.openlmis.auth.ToStringTestUtils;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.referencedata.UserDto;
 
-public class UserSaveRequestTest {
+public class UserWithAuthDetailsDtoTest {
 
   @Test
   public void equalsContract() {
     EqualsVerifier
-        .forClass(UserSaveRequest.class)
+        .forClass(UserWithAuthDetailsDto.class)
         .withRedefinedSuperclass()
         .suppress(Warning.NONFINAL_FIELDS) // dto can't contain final fields
         .verify();
@@ -39,13 +39,14 @@ public class UserSaveRequestTest {
   @Test
   public void shouldImplementToString() {
     ToStringTestUtils
-        .verify(UserSaveRequest.class, new UserSaveRequest(new User(), new DummyUserDto()));
+        .verify(UserWithAuthDetailsDto.class,
+            new UserWithAuthDetailsDto(new User(), new DummyUserDto()));
   }
 
   @Test
   public void shouldGetReferenceDataUser() {
     UserDto admin = new DummyUserDto();
-    UserSaveRequest request = new UserSaveRequest(new User(), admin);
+    UserWithAuthDetailsDto request = new UserWithAuthDetailsDto(new User(), admin);
 
     assertThat(request.getReferenceDataUser()).isEqualTo(admin);
   }

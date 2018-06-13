@@ -37,7 +37,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.auth.DummyUserDto;
 import org.openlmis.auth.SaveAnswer;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.UserSaveRequest;
+import org.openlmis.auth.dto.UserWithAuthDetailsDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
@@ -75,7 +75,7 @@ public class UserServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    UserSaveRequest request = new UserSaveRequest(new User(), referenceDataUser);
+    UserWithAuthDetailsDto request = new UserWithAuthDetailsDto(new User(), referenceDataUser);
     request.setId(null);
 
     userService.saveUser(request);
@@ -98,7 +98,7 @@ public class UserServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserSaveRequest(new User(), referenceDataUser));
+    userService.saveUser(new UserWithAuthDetailsDto(new User(), referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
@@ -112,7 +112,7 @@ public class UserServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    UserSaveRequest request = new UserSaveRequest(new User(), referenceDataUser);
+    UserWithAuthDetailsDto request = new UserWithAuthDetailsDto(new User(), referenceDataUser);
     request.setEmail("my_test_email@unit.test.org");
 
     userService.saveUser(request);
@@ -146,7 +146,7 @@ public class UserServiceTest {
     given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserSaveRequest(newUser, referenceDataUser));
+    userService.saveUser(new UserWithAuthDetailsDto(newUser, referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
@@ -172,7 +172,7 @@ public class UserServiceTest {
     given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserSaveRequest(new User(), referenceDataUser));
+    userService.saveUser(new UserWithAuthDetailsDto(new User(), referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));

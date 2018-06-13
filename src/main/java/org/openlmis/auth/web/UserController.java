@@ -32,7 +32,7 @@ import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.EmailVerificationTokenDto;
-import org.openlmis.auth.dto.UserSaveRequest;
+import org.openlmis.auth.dto.UserWithAuthDetailsDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
@@ -109,7 +109,7 @@ public class UserController {
   private TokenStore tokenStore;
 
   @Autowired
-  private UserSaveRequestValidator userSaveRequestValidator;
+  private UserWithAuthDetailsDtoValidator userWithAuthDetailsDtoValidator;
 
   @Autowired
   private EmailVerificationNotifier emailVerificationNotifier;
@@ -130,12 +130,12 @@ public class UserController {
   @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserSaveRequest saveUser(@RequestBody UserSaveRequest request,
+  public UserWithAuthDetailsDto saveUser(@RequestBody UserWithAuthDetailsDto request,
       BindingResult bindingResult) {
     permissionService.canManageUsers(request.getId());
     LOGGER.debug("Creating or updating user");
 
-    userSaveRequestValidator.validate(request, bindingResult);
+    userWithAuthDetailsDtoValidator.validate(request, bindingResult);
 
     if (bindingResult.hasErrors()) {
       throw new ValidationMessageException(bindingResult.getFieldError().getDefaultMessage());
