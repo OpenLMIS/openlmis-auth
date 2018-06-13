@@ -269,7 +269,9 @@ public class UserController {
     permissionService.canVerifyEmail(userId);
     User user = userRepository.findOne(userId);
     EmailVerificationToken token = emailVerificationTokenRepository.findOneByUser(user);
-    return new EmailVerificationTokenDto(token.getEmail(), token.getExpiryDate());
+    return null == token
+        ? null
+        : new EmailVerificationTokenDto(token.getEmail(), token.getExpiryDate());
   }
 
   /**
