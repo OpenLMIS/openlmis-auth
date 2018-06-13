@@ -71,7 +71,7 @@ public class UserServiceTest {
   @Test
   public void shouldCreateNewUser() {
     // given
-    when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(null);
+    when(userRepository.findOne(any(UUID.class))).thenReturn(null);
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
@@ -94,7 +94,7 @@ public class UserServiceTest {
     when(oldUser.getUsername()).thenReturn("user");
     when(oldUser.getId()).thenReturn(oldUserId);
 
-    when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(oldUser);
+    when(userRepository.findOne(any(UUID.class))).thenReturn(oldUser);
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
@@ -108,7 +108,7 @@ public class UserServiceTest {
   @Test
   public void shouldReplaceEmailAndVerificationFlagIfEmailWasChanged() {
     // given
-    when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(new User());
+    when(userRepository.findOne(any(UUID.class))).thenReturn(new User());
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
@@ -141,7 +141,7 @@ public class UserServiceTest {
     User newUser = mock(User.class);
     when(newUser.getPassword()).thenReturn("newPassword");
 
-    when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(oldUser);
+    when(userRepository.findOne(any(UUID.class))).thenReturn(oldUser);
     ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
     given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
@@ -167,7 +167,7 @@ public class UserServiceTest {
     oldUser.setId(oldUserId);
     oldUser.setPassword(oldUserPassword);
 
-    when(userRepository.findOneByReferenceDataUserId(any(UUID.class))).thenReturn(oldUser);
+    when(userRepository.findOne(any(UUID.class))).thenReturn(oldUser);
     ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
     given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 

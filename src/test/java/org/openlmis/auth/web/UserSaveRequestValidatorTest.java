@@ -196,7 +196,7 @@ public class UserSaveRequestValidatorTest {
 
   private void prepareForValidateInvariants() {
     when(permissionService.hasRight(USERS_MANAGE)).thenReturn(false);
-    when(userRepository.findOneByReferenceDataUserId(request.getId()))
+    when(userRepository.findOne(request.getId()))
         .thenReturn(user);
   }
 

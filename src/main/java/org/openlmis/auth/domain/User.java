@@ -16,29 +16,20 @@
 package org.openlmis.auth.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.Type;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetails;
-
+import java.util.Collection;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Collection;
-import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "auth_users")
 @JsonIgnoreProperties(value = { "authorities" }, ignoreUnknown = true)
 public class User extends BaseEntity implements UserDetails {
-
-  @Getter
-  @Setter
-  @Type(type = "pg-uuid")
-  @Column(nullable = false, unique = true)
-  private UUID referenceDataUserId;
 
   @Getter
   @Setter

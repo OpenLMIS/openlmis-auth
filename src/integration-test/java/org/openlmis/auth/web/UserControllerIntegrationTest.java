@@ -55,7 +55,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.auth.DummyUserDto;
 import org.openlmis.auth.EmailVerificationTokenDataBuilder;
-import org.openlmis.auth.UserDataBuilder;
 import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
@@ -140,7 +139,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     passwordResetTokenRepository.deleteAll();
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    user = userRepository.findOne(UUID.fromString(DummyUserDto.AUTH_ID));
+    user = userRepository.findOne(admin.getId());
     user.setPassword(encoder.encode(DummyUserDto.PASSWORD));
     userRepository.save(user);
   }
@@ -179,14 +178,14 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldResetPassword() {
     String password = userRepository
-        .findOne(UUID.fromString(DummyUserDto.AUTH_ID))
+        .findOne(admin.getId())
         .getPassword();
     assertNotNull(password);
 
     passwordReset("test1234", USER_TOKEN).statusCode(200);
 
     String newPassword = userRepository
-        .findOne(UUID.fromString(DummyUserDto.AUTH_ID))
+        .findOne(admin.getId())
         .getPassword();
     assertNotNull(newPassword);
     assertNotEquals(password, newPassword);
@@ -251,23 +250,23 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   public void testForgotPassword() {
     forgotPassword().statusCode(200);
 
-    User user = userRepository.findOne(UUID.fromString(DummyUserDto.AUTH_ID));
-    assertNotNull(user);
+    User found = userRepository.findOne(admin.getId());
+    assertNotNull(found);
 
-    PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
+    PasswordResetToken token = passwordResetTokenRepository.findOneByUser(found);
     assertNotNull(token);
 
     PasswordChangeRequest request = new PasswordChangeRequest(token.getId(), "test");
     changePassword(request).statusCode(200);
 
-    User changedUser = userRepository.findOne(UUID.fromString(DummyUserDto.AUTH_ID));
+    User changedUser = userRepository.findOne(admin.getId());
     assertNotNull(changedUser);
-    assertNotEquals(changedUser.getPassword(), user.getPassword());
+    assertNotEquals(changedUser.getPassword(), found.getPassword());
   }
 
   @Test
   public void shouldCreateNewTokenAfterEachForgotPasswordRequest() {
-    User user1 = userRepository.findOne(UUID.fromString(DummyUserDto.AUTH_ID));
+    User user1 = userRepository.findOne(admin.getId());
     assertNotNull(user1);
 
     PasswordResetToken token1 = new PasswordResetToken();
@@ -278,7 +277,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
     forgotPassword().statusCode(200);
 
-    User user2 = userRepository.findOne(UUID.fromString(DummyUserDto.AUTH_ID));
+    User user2 = userRepository.findOne(admin.getId());
     assertNotNull(user2);
     assertEquals(user1.getId(), user2.getId());
 
@@ -295,10 +294,10 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
     forgotPassword().statusCode(500);
 
-    User user = userRepository.findOne(UUID.fromString(DummyUserDto.AUTH_ID));
-    assertNotNull(user);
+    User found = userRepository.findOne(admin.getId());
+    assertNotNull(found);
 
-    PasswordResetToken token = passwordResetTokenRepository.findOneByUser(user);
+    PasswordResetToken token = passwordResetTokenRepository.findOneByUser(found);
     assertNull(token);
   }
 
@@ -324,7 +323,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldVerifyEmail() {
     EmailVerificationToken token = new EmailVerificationTokenDataBuilder()
-        .withUser(new UserDataBuilder().withReferenceDataUserId(admin.getId()).build())
+        .withUser(user)
         .build();
 
     given(emailVerificationTokenRepository.findOne(token.getId()))

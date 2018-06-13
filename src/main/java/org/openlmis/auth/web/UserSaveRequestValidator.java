@@ -111,7 +111,7 @@ public class UserSaveRequestValidator extends BaseValidator {
   }
 
   private void validateInvariants(UserDto reference, UserSaveRequest dto, Errors errors) {
-    User db = userRepository.findOneByReferenceDataUserId(dto.getId());
+    User db = userRepository.findOne(dto.getId());
 
     rejectIfInvariantWasChanged(errors, ENABLED, db.getEnabled(), dto.getEnabled());
 

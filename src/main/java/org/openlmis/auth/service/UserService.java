@@ -48,31 +48,49 @@ public class UserService {
    * @return saved user.
    */
   public UserSaveRequest saveUser(UserSaveRequest request) {
+    return null == request.getId() ? addUser(request) : updateUser(request);
+  }
+
+  private UserSaveRequest addUser(UserSaveRequest request) {
+    request.setVerified(false);
+
+    User dbUser = new User();
+    updateUserFields(dbUser, request);
+
+    dbUser = userRepository.save(dbUser);
+
+    request.setId(dbUser.getId());
     UserDto newReferenceDataUser = request.getReferenceDataUser();
-
-    if (null == request.getId()) {
-      request.setVerified(false);
-    } else {
-      UserDto oldReferenceDataUser = userReferenceDataService.findOne(request.getId());
-
-      if (!Objects.equals(oldReferenceDataUser.getEmail(), newReferenceDataUser.getEmail())) {
-        newReferenceDataUser.setEmail(oldReferenceDataUser.getEmail());
-        newReferenceDataUser.setVerified(oldReferenceDataUser.isVerified());
-
-        request.setVerified(false);
-      }
-    }
-
     newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
 
-    User dbUser = userRepository.findOneByReferenceDataUserId(request.getId());
-    boolean isNewUser = dbUser == null;
+    sendNotification(dbUser, request);
 
-    if (isNewUser) {
-      dbUser = new User();
-      dbUser.setReferenceDataUserId(newReferenceDataUser.getId());
+    return new UserSaveRequest(dbUser, newReferenceDataUser);
+  }
+
+  private UserSaveRequest updateUser(UserSaveRequest request) {
+    UserDto newReferenceDataUser = request.getReferenceDataUser();
+    UserDto oldReferenceDataUser = userReferenceDataService.findOne(request.getId());
+
+    if (!Objects.equals(oldReferenceDataUser.getEmail(), newReferenceDataUser.getEmail())) {
+      newReferenceDataUser.setEmail(oldReferenceDataUser.getEmail());
+      newReferenceDataUser.setVerified(oldReferenceDataUser.isVerified());
+
+      request.setVerified(false);
     }
 
+    User dbUser = userRepository.findOne(request.getId());
+    updateUserFields(dbUser, request);
+
+    dbUser = userRepository.save(dbUser);
+    newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
+
+    sendNotification(dbUser, request);
+
+    return new UserSaveRequest(dbUser, newReferenceDataUser);
+  }
+
+  private void updateUserFields(User dbUser, UserSaveRequest request) {
     dbUser.setUsername(request.getUsername());
     dbUser.setEnabled(request.getEnabled());
 
@@ -80,14 +98,12 @@ public class UserService {
     if (StringUtils.hasText(newPassword)) {
       dbUser.setPassword(encoder.encode(newPassword));
     }
+  }
 
-    dbUser = userRepository.save(dbUser);
-
+  private void sendNotification(User dbUser, UserSaveRequest request) {
     if (request.hasEmail() && !request.isVerified()) {
       emailVerificationNotifier.sendNotification(dbUser, request.getEmail());
     }
-
-    return new UserSaveRequest(dbUser, newReferenceDataUser);
   }
 
 }

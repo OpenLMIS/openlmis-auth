@@ -18,16 +18,13 @@ package org.openlmis.auth.repository;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import org.junit.Test;
 import org.openlmis.auth.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
 
 public class UserRepositoryIntegrationTest extends BaseCrudRepositoryIntegrationTest<User> {
 
@@ -43,10 +40,10 @@ public class UserRepositoryIntegrationTest extends BaseCrudRepositoryIntegration
     userRepository.save(user);
 
     String searchTerm = user.getUsername().toUpperCase();
-    Optional<User> found = userRepository.findOneByUsernameIgnoreCase(searchTerm);
+    User found = userRepository.findOneByUsernameIgnoreCase(searchTerm);
 
-    assertNotNull(found.get());
-    assertEquals(user.getUsername(), found.get().getUsername());
+    assertNotNull(found);
+    assertEquals(user.getUsername(), found.getUsername());
   }
 
   @Test(expected = PersistenceException.class)
@@ -69,7 +66,6 @@ public class UserRepositoryIntegrationTest extends BaseCrudRepositoryIntegration
   @Override
   User generateInstance() throws Exception {
     User user = new User();
-    user.setReferenceDataUserId(UUID.randomUUID());
     user.setUsername("user" + getNextInstanceNumber());
     user.setEnabled(true);
     return user;

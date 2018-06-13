@@ -33,7 +33,7 @@ public class AccessTokenEnhancer implements TokenEnhancer {
       User user = (User) authentication.getPrincipal();
       final Map<String, Object> additionalInfo = new HashMap<>();
 
-      additionalInfo.put("referenceDataUserId", user.getReferenceDataUserId());
+      additionalInfo.put("referenceDataUserId", user.getId());
       additionalInfo.put("username", user.getUsername());
 
       ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);

@@ -59,7 +59,7 @@ public class OAuth2AuthenticationDataBuilder {
   public OAuth2Authentication buildUserAuthentication() {
     User user = new User();
     user.setUsername(username);
-    user.setReferenceDataUserId(referenceDataUserId);
+    user.setId(referenceDataUserId);
 
     return new DummyOAuth2Authentication(CLIENT_CLIENT_ID, user);
   }

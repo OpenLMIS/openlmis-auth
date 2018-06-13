@@ -24,6 +24,7 @@ import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,6 +40,7 @@ public class EmailVerificationNotifier extends ExpirationTokenNotifier<EmailVeri
    * @param user      the user whose email is being verify
    * @param email     recipient's email address
    */
+  @Async
   public void sendNotification(User user, String email) {
     EmailVerificationToken token = createEmailVerificationToken(user, email);
     sendEmail(

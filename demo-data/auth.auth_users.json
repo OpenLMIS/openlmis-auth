@@ -1,149 +1,128 @@
 [
   {
-    "id": "00000000-4932-4bc3-9589-368646ef7ad3",
+    "id": "a337ec45-31a0-4f2b-9b2e-a105c4b669bb",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "administrator",
-    "referenceDataUserId": "a337ec45-31a0-4f2b-9b2e-a105c4b669bb"
+    "username": "administrator"
   },
   {
-    "id": "29606a63-5a53-4db5-9c46-95737da16347",
+    "id": "56a50e9a-9668-437d-a09c-7e709ce22222",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "devadmin",
-    "referenceDataUserId": "56a50e9a-9668-437d-a09c-7e709ce22222"
+    "username": "devadmin"
   },
   {
-    "id": "4de0ebb0-4ae5-4c7d-9119-dfaa735ff342",
+    "id": "c994d1ea-47f7-435d-9d4d-42fb54197698",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "srmanager1",
-    "referenceDataUserId": "c994d1ea-47f7-435d-9d4d-42fb54197698"
+    "username": "srmanager1"
   },
   {
-    "id": "383e537b-b8af-4753-be83-8664e157fd79",
+    "id": "f72bf4ee-eb86-4bfd-be88-4f481f4e2fe0",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "srmanager2",
-    "referenceDataUserId": "f72bf4ee-eb86-4bfd-be88-4f481f4e2fe0"
+    "username": "srmanager2"
   },
   {
-    "id": "96e20de1-04b9-4747-b185-53de23f7a0fa",
+    "id": "7d6c0269-0c6a-4c9a-a098-46de276b9d26",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "srmanager3",
-    "referenceDataUserId": "7d6c0269-0c6a-4c9a-a098-46de276b9d26"
+    "username": "srmanager3"
   },
   {
-    "id": "56cfec87-f765-45f9-9694-4b9904d9b77e",
+    "id": "c54df462-66d8-4a02-bee9-b786fe2f30ee",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "srmanager4",
-    "referenceDataUserId": "c54df462-66d8-4a02-bee9-b786fe2f30ee"
+    "username": "srmanager4"
   },
   {
-    "id": "df12fda0-6be1-4063-b312-0d632bbba634",
+    "id": "cb5cd52f-f205-475d-8763-90852839424d",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "smanager1",
-    "referenceDataUserId": "cb5cd52f-f205-475d-8763-90852839424d"
+    "username": "smanager1"
   },
   {
-    "id": "e464097a-bca7-43e4-840e-f8b7655d0ff6",
+    "id": "9b2778af-5372-4410-a5c8-899e7f74296b",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "smanager2",
-    "referenceDataUserId": "9b2778af-5372-4410-a5c8-899e7f74296b"
+    "username": "smanager2"
   },
   {
-    "id": "ed153ddc-5095-4931-8bfd-fc10cbde30ed",
+    "id": "2fbe9be3-f5e4-47ec-a10a-f3380c0daf75",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "smanager3",
-    "referenceDataUserId": "2fbe9be3-f5e4-47ec-a10a-f3380c0daf75"
+    "username": "smanager3"
   },
   {
-    "id": "7819ef61-d440-4452-85ae-140311a6f338",
+    "id": "469c6e1c-aab7-4640-8925-f3c34bbe752d",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "smanager4",
-    "referenceDataUserId": "469c6e1c-aab7-4640-8925-f3c34bbe752d"
+    "username": "smanager4"
   },
   {
-    "id": "17eadf0a-69fc-41a2-aaa8-787cb8f4e11f",
+    "id": "573cf089-dfff-4273-b353-d94058164e55",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "dsrmanager",
-    "referenceDataUserId": "573cf089-dfff-4273-b353-d94058164e55"
+    "username": "dsrmanager"
   },
   {
-    "id": "c860e2ed-7449-4d70-95c9-4aea7f38b326",
+    "id": "2bb552b3-0324-42ef-bb21-c5cc74a38592",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "psupervisor",
-    "referenceDataUserId": "2bb552b3-0324-42ef-bb21-c5cc74a38592"
+    "username": "psupervisor"
   },
   {
-    "id": "03f4082b-cd15-491c-b629-a1eba62e7616",
+    "id": "247b366d-f8ab-4226-9ae9-a188d5ee8e22",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "wclerk1",
-    "referenceDataUserId": "247b366d-f8ab-4226-9ae9-a188d5ee8e22"
+    "username": "wclerk1"
   },
   {
-    "id": "0bdfea30-aff1-4de7-a5b7-dc9f3c474c15",
+    "id": "476415b1-ca81-4561-a3b7-fa3d08434800",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "wclerk2",
-    "referenceDataUserId": "476415b1-ca81-4561-a3b7-fa3d08434800"
+    "username": "wclerk2"
   },
   {
-    "id": "04525438-5817-469f-adb0-b2242c901aba",
+    "id": "1e3b03a5-1d48-4de1-bb4a-389beece2277",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "rivo",
-    "referenceDataUserId": "1e3b03a5-1d48-4de1-bb4a-389beece2277"
+    "username": "rivo"
   },
   {
-    "id": "3d6ecbcb-b2a8-4a5d-a7ca-20b045441a43",
+    "id": "560be32a-ea2e-4d12-ae00-1f69376ad535",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "divo1",
-    "referenceDataUserId": "560be32a-ea2e-4d12-ae00-1f69376ad535"
+    "username": "divo1"
   },
   {
-    "id": "91a297da-e979-4f42-b0b6-76f9b0a82801",
+    "id": "0053b56d-be93-4d82-a021-b713dbaae2a9",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "divo2",
-    "referenceDataUserId": "0053b56d-be93-4d82-a021-b713dbaae2a9"
+    "username": "divo2"
   },
   {
-    "id": "e99addbc-e90d-4b6b-96a4-7e9063408235",
+    "id": "211a6b4d-3c59-4fb2-8075-eedb79a18103",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "vsrmanager1",
-    "referenceDataUserId": "211a6b4d-3c59-4fb2-8075-eedb79a18103"
+    "username": "vsrmanager1"
   },
   {
-    "id": "84f1053e-3d28-4a32-8d29-f23e204c3f3e",
+    "id": "c6f44c75-d2d3-4ca9-b5e8-7eb3bf1ff31f",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "vsrmanager2",
-    "referenceDataUserId": "c6f44c75-d2d3-4ca9-b5e8-7eb3bf1ff31f"
+    "username": "vsrmanager2"
   },
   {
-    "id": "0e4055fa-c060-4e7c-9265-18972db4aff9",
+    "id": "ce962fad-c872-4244-92fe-2f70995d311a",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "vwclerk1",
-    "referenceDataUserId": "ce962fad-c872-4244-92fe-2f70995d311a"
+    "username": "vwclerk1"
   },
   {
-    "id": "4396388f-18da-417b-8d71-977ca12f09a7",
+    "id": "9cc9a0a4-e434-4582-9efc-2a1de44bc1f1",
     "enabled": "t",
     "password": "$2a$10$4IZfidcJzbR5Krvj87ZJdOZvuQoD/kvPAJe549rUNoP3N3uH0Lq2G",
-    "username": "vnurse1",
-    "referenceDataUserId": "9cc9a0a4-e434-4582-9efc-2a1de44bc1f1"
+    "username": "vnurse1"
   }
 ]

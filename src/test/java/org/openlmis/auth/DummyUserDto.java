@@ -24,7 +24,6 @@ import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
 
 public final class DummyUserDto extends UserDto {
-  public static final String AUTH_ID = "51f6bdc1-4932-4bc3-9589-368646ef7ad3";
   public static final String REFERENCE_ID = "35316636-6264-6331-2d34-3933322d3462";
   public static final String USERNAME = "admin";
   public static final String PASSWORD = "password";

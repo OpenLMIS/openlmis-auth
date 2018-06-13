@@ -62,7 +62,7 @@ public abstract class ExpirationTokenNotifier<T extends ExpirationToken> {
 
   void sendEmail(User user, String email, ExpirationToken token,
       String subjectKey, String bodyKey, String bodyUrl) {
-    UserDto referenceDataUser = userReferenceDataService.findOne(user.getReferenceDataUserId());
+    UserDto referenceDataUser = userReferenceDataService.findOne(user.getId());
 
     String[] bodyMsgArgs = {
         referenceDataUser.getFirstName(),

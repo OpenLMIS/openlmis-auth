@@ -25,7 +25,6 @@ import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VA
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
-import java.util.Optional;
 import java.util.UUID;
 import javax.validation.Valid;
 import org.openlmis.auth.domain.EmailVerificationToken;
@@ -179,10 +178,11 @@ public class UserController {
     }
 
     String username = passwordResetRequest.getUsername();
-    Optional<User> userOptional = userRepository.findOneByUsernameIgnoreCase(username);
+    User user = userRepository.findOneByUsernameIgnoreCase(username);
 
-    User user = userOptional
-        .orElseThrow(() -> new ValidationMessageException(USER_NOT_FOUND));
+    if (null == user) {
+      throw new ValidationMessageException(USER_NOT_FOUND);
+    }
 
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     user.setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
@@ -202,7 +202,7 @@ public class UserController {
       throw new ValidationMessageException(USER_NOT_FOUND_BY_EMAIL);
     }
 
-    User user = userRepository.findOneByReferenceDataUserId(refDataUser.getId());
+    User user = userRepository.findOne(refDataUser.getId());
     passwordResetNotifier.sendNotification(user, email, false);
   }
 
@@ -236,7 +236,7 @@ public class UserController {
   public UUID generatePasswordResetToken(
       @RequestParam(value = "userId") UUID referenceDataUserId) {
     permissionService.canManageUsers(null);
-    User user = userRepository.findOneByReferenceDataUserId(referenceDataUserId);
+    User user = userRepository.findOne(referenceDataUserId);
 
     PasswordResetToken token = passwordResetNotifier.createPasswordResetToken(user);
 
@@ -252,7 +252,7 @@ public class UserController {
     EmailVerificationToken details = emailVerificationTokenRepository.findOne(token);
     verifyToken(details);
 
-    UserDto user = userReferenceDataService.findOne(details.getUser().getReferenceDataUserId());
+    UserDto user = userReferenceDataService.findOne(details.getUser().getId());
     user.setEmail(details.getEmail());
     user.setVerified(true);
 
@@ -267,7 +267,7 @@ public class UserController {
   @ResponseBody
   public EmailVerificationTokenDto getVerificationEmail(@RequestParam("userId") UUID userId) {
     permissionService.canVerifyEmail(userId);
-    User user = userRepository.findOneByReferenceDataUserId(userId);
+    User user = userRepository.findOne(userId);
     EmailVerificationToken token = emailVerificationTokenRepository.findOneByUser(user);
     return new EmailVerificationTokenDto(token.getEmail(), token.getExpiryDate());
   }
@@ -293,7 +293,7 @@ public class UserController {
       throw new ValidationMessageException(ERROR_VERIFY_EMAIL_USER_VERIFIED);
     }
 
-    User user = userRepository.findOneByReferenceDataUserId(referenceUser.getId());
+    User user = userRepository.findOne(referenceUser.getId());
     emailVerificationNotifier.sendNotification(user, referenceUser.getEmail());
   }
 

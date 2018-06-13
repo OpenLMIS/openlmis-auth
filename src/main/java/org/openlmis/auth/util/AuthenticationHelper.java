@@ -15,6 +15,9 @@
 
 package org.openlmis.auth.util;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_RIGHT_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_USER_NOT_FOUND;
+
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.RightDto;
 import org.openlmis.auth.dto.referencedata.UserDto;
@@ -24,9 +27,6 @@ import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_RIGHT_NOT_FOUND;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_USER_NOT_FOUND;
 
 @Component
 public class AuthenticationHelper {
@@ -46,7 +46,7 @@ public class AuthenticationHelper {
    */
   public UserDto getCurrentUser() {
     User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    UserDto userDto = userReferenceDataService.findOne(user.getReferenceDataUserId());
+    UserDto userDto = userReferenceDataService.findOne(user.getId());
 
     if (userDto == null) {
       throw new AuthenticationMessageException(new Message(ERROR_USER_NOT_FOUND,

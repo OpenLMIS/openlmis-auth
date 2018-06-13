@@ -15,16 +15,13 @@
 
 package org.openlmis.auth.repository;
 
+import java.util.UUID;
 import org.openlmis.auth.domain.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
-import java.util.UUID;
-
 public interface UserRepository extends CrudRepository<User, UUID> {
 
-  Optional<User> findOneByUsernameIgnoreCase(@Param("username") String username);
+  User findOneByUsernameIgnoreCase(@Param("username") String username);
 
-  User findOneByReferenceDataUserId(@Param("referenceDataUserId") UUID referenceDataUserId);
 }
