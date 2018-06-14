@@ -35,16 +35,16 @@ public class EmailVerificationNotifier extends ExpirationTokenNotifier<EmailVeri
   private EmailVerificationTokenRepository emailVerificationTokenRepository;
 
   /**
-   * Sends email verification email.
+   * Sends email verification notification.
    *
    * @param user      the user whose email is being verified
-   * @param email     recipient's new email address
+   * @param emailAddress     recipient's new email address
    */
   @Async
-  public void sendNotification(User user, String email) {
-    EmailVerificationToken token = createEmailVerificationToken(user, email);
+  public void sendNotification(User user, String emailAddress) {
+    EmailVerificationToken token = createEmailVerificationToken(user, emailAddress);
     sendEmail(
-        user, email, token,
+        user, emailAddress, token,
         EMAIL_VERIFICATION_EMAIL_SUBJECT, EMAIL_VERIFICATION_EMAIL_BODY,
         VERIFY_EMAIL_URL
     );
@@ -56,12 +56,12 @@ public class EmailVerificationNotifier extends ExpirationTokenNotifier<EmailVeri
    * @param user token's user
    * @return email verification token
    */
-  private EmailVerificationToken createEmailVerificationToken(User user, String email) {
+  private EmailVerificationToken createEmailVerificationToken(User user, String emailAddress) {
     return createExpirationToken(user, emailVerificationTokenRepository, arg -> {
       EmailVerificationToken token = new EmailVerificationToken();
       token.setUser(arg);
       token.setExpiryDate(ZonedDateTime.now().plusHours(TOKEN_VALIDITY_HOURS));
-      token.setEmailAddress(email);
+      token.setEmailAddress(emailAddress);
 
       return token;
     });
