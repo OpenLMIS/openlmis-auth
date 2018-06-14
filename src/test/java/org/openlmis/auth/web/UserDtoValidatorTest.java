@@ -18,10 +18,13 @@ package org.openlmis.auth.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 import static org.openlmis.auth.web.UserDtoValidator.ACTIVE;
 import static org.openlmis.auth.web.UserDtoValidator.ALLOW_NOTIFY;
+import static org.openlmis.auth.web.UserDtoValidator.EMAIL;
 import static org.openlmis.auth.web.UserDtoValidator.ENABLED;
 import static org.openlmis.auth.web.UserDtoValidator.EXTRA_DATA;
 import static org.openlmis.auth.web.UserDtoValidator.HOME_FACILITY_ID;
@@ -192,6 +195,80 @@ public class UserDtoValidatorTest {
     assertErrorMessage(errors, ALLOW_NOTIFY, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, EXTRA_DATA, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, ROLE_ASSIGNMENTS, MessageKeys.ERROR_FIELD_IS_INVARIANT);
+  }
+
+  @Test
+  public void shouldRejectIfEmailIsDuplicated() {
+    request.setId(null);
+    doReturn(mock(UserMainDetailsDto.class))
+        .when(userReferenceDataService)
+        .findUserByEmail(request.getEmail());
+
+    validator.validate(request, errors);
+
+    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_DUPLICATED);
+  }
+
+  @Test
+  public void shouldNotRejectIfEmailIsDuplicatedAndIdsAreSame() {
+    UserMainDetailsDto old = new UserMainDetailsDto();
+    old.setId(request.getId());
+
+    doReturn(old)
+        .when(userReferenceDataService)
+        .findUserByEmail(request.getEmail());
+
+    validator.validate(request, errors);
+    assertThat(errors.hasFieldErrors(EMAIL)).isFalse();
+  }
+
+  @Test
+  public void shouldRejectIfEmailIsDuplicatedAndIdsAreDifferent() {
+    UserMainDetailsDto old = new UserMainDetailsDto();
+    old.setId(UUID.randomUUID());
+
+    doReturn(old)
+        .when(userReferenceDataService)
+        .findUserByEmail(request.getEmail());
+
+    validator.validate(request, errors);
+    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_DUPLICATED);
+  }
+
+  @Test
+  public void shouldNotRejectWhenEmailIsNull() {
+    request.setEmail(null);
+
+    validator.validate(request, errors);
+
+    assertThat(errors.hasFieldErrors(EMAIL)).isFalse();
+  }
+
+  @Test
+  public void shouldRejectWhenEmailIsEmpty() {
+    request.setEmail("");
+
+    validator.validate(request, errors);
+
+    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
+  }
+
+  @Test
+  public void shouldRejectWhenEmailIsWhitespace() {
+    request.setEmail(" ");
+
+    validator.validate(request, errors);
+
+    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
+  }
+
+  @Test
+  public void shouldRejectWhenEmailIsInvalid() {
+    request.setEmail("invalid@email");
+
+    validator.validate(request, errors);
+
+    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
   }
 
   private void prepareForValidateInvariants() {

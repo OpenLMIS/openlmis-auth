@@ -53,6 +53,7 @@ dependencies {
     compile 'org.hibernate:hibernate-java8'
     compile "org.slf4j:slf4j-ext:1.7.25"
     compile 'com.google.guava:guava:23.3-jre'
+    compile 'commons-validator:commons-validator:1.6'
 
     testCompile 'io.rest-assured:rest-assured:3.0.0'
     testCompile 'io.rest-assured:json-schema-validator:3.0.0'

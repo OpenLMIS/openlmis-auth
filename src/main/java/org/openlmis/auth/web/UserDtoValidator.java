@@ -20,6 +20,8 @@ import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
@@ -51,6 +53,7 @@ public class UserDtoValidator extends BaseValidator {
 
   // User fields
   static final String USERNAME = "username";
+  static final String EMAIL = "email";
   static final String JOB_TITLE = "jobTitle";
   static final String TIMEZONE = "timezone";
   static final String HOME_FACILITY_ID = "homeFacilityId";
@@ -86,6 +89,10 @@ public class UserDtoValidator extends BaseValidator {
   public void validate(Object target, Errors errors) {
     rejectIfEmptyOrWhitespace(errors, USERNAME, MessageKeys.ERROR_FIELD_REQUIRED);
 
+    if (errors.getFieldValue(EMAIL) != null) {
+      rejectIfEmptyOrWhitespace(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
+    }
+
     if (!errors.hasErrors()) {
       UserDto dto = (UserDto) target;
 
@@ -100,6 +107,10 @@ public class UserDtoValidator extends BaseValidator {
       }
 
       verifyUsername(dto.getUsername(), errors);
+
+      if (dto.getEmail() != null) {
+        verifyEmail(dto.getId(), dto.getEmail(), errors);
+      }
     }
   }
 
@@ -107,6 +118,19 @@ public class UserDtoValidator extends BaseValidator {
     // user name cannot contains invalid characters
     if (!username.matches("\\w+")) {
       rejectValue(errors, USERNAME, MessageKeys.ERROR_USERNAME_INVALID);
+    }
+  }
+
+  private void verifyEmail(UUID id, String email, Errors errors) {
+    // user email cannot be duplicated
+    UserMainDetailsDto reference = userReferenceDataService.findUserByEmail(email);
+
+    if (null != reference && (null == id || !id.equals(reference.getId()))) {
+      rejectValue(errors, EMAIL, MessageKeys.ERROR_EMAIL_DUPLICATED);
+    }
+
+    if (!EmailValidator.getInstance().isValid(email)) {
+      rejectValue(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
     }
   }
 
@@ -141,4 +165,5 @@ public class UserDtoValidator extends BaseValidator {
       Object newValue) {
     rejectIfNotEqual(errors, oldValue, newValue, field, MessageKeys.ERROR_FIELD_IS_INVARIANT);
   }
+
 }
