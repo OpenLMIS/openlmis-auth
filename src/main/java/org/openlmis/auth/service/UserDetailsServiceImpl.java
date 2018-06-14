@@ -15,7 +15,7 @@
 
 package org.openlmis.auth.service;
 
-import org.openlmis.auth.domain.User;
+import java.util.Optional;
 import org.openlmis.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,14 +31,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) {
-    User user = userRepository.findOneByUsernameIgnoreCase(username);
-
-    if (null == user) {
-      throw new UsernameNotFoundException(
-          String.format("User with username=%s was not found", username)
-      );
-    }
-
-    return user;
+    return Optional
+        .ofNullable(userRepository.findOneByUsernameIgnoreCase(username))
+        .orElseThrow(() -> new UsernameNotFoundException(
+          String.format("User with username=%s was not found", username)));
   }
 }
