@@ -15,15 +15,20 @@
 
 package org.openlmis.auth.service;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_SEND_NOTIFICATION_FAILURE;
+
 import java.util.function.Function;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
+import org.openlmis.auth.exception.ServerException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.ExpirationTokenRepository;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.util.NotificationRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -31,6 +36,8 @@ public abstract class ExpirationTokenNotifier<T extends ExpirationToken> {
   public static final long TOKEN_VALIDITY_HOURS = 12;
 
   static final String MAIL_ADDRESS = System.getenv("MAIL_ADDRESS");
+
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Autowired
   private UserReferenceDataService userReferenceDataService;
@@ -71,11 +78,16 @@ public abstract class ExpirationTokenNotifier<T extends ExpirationToken> {
     };
     String[] subjectMsgArgs = {};
 
-    notificationService.send(new NotificationRequest(
-        MAIL_ADDRESS,
-        email,
-        messageSource.getMessage(subjectKey, subjectMsgArgs, LocaleContextHolder.getLocale()),
-        messageSource.getMessage(bodyKey, bodyMsgArgs, LocaleContextHolder.getLocale())));
+    try {
+      notificationService.send(new NotificationRequest(
+          MAIL_ADDRESS,
+          email,
+          messageSource.getMessage(subjectKey, subjectMsgArgs, LocaleContextHolder.getLocale()),
+          messageSource.getMessage(bodyKey, bodyMsgArgs, LocaleContextHolder.getLocale())));
+    } catch (Exception exp) {
+      logger.warn("Can't send request to the notification service", exp);
+      throw new ServerException(exp, ERROR_SEND_NOTIFICATION_FAILURE);
+    }
   }
 
 }

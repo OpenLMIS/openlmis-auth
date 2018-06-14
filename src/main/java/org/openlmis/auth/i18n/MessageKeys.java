@@ -75,6 +75,9 @@ public abstract class MessageKeys {
   public static final String ERROR_CLIENT_NOT_SUPPORTED =
       ERROR_PREFIX + ".apiKey.create.clientUserNotSupported";
 
+  public static final String ERROR_SEND_NOTIFICATION_FAILURE =
+      ERROR_PREFIX + ".sendNotification.failure";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }
