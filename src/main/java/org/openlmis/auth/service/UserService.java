@@ -57,7 +57,7 @@ public class UserService {
     UserMainDetailsDto newReferenceDataUser = request.getReferenceDataUser();
     newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
 
-    sendNotification(dbUser, request);
+    sendVerificationEmail(dbUser, request);
 
     return new UserDto(dbUser, newReferenceDataUser);
   }
@@ -79,12 +79,12 @@ public class UserService {
     dbUser = userRepository.save(dbUser);
     newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
 
-    sendNotification(dbUser, request);
+    sendVerificationEmail(dbUser, request);
 
     return new UserDto(dbUser, newReferenceDataUser);
   }
 
-  private void sendNotification(User dbUser, UserDto request) {
+  private void sendVerificationEmail(User dbUser, UserDto request) {
     if (request.hasEmail() && !request.isVerified()) {
       emailVerificationNotifier.sendNotification(dbUser, request.getEmail());
     }
