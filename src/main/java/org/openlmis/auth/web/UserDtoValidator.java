@@ -38,7 +38,7 @@ import org.springframework.validation.Validator;
  * A validator for {@link UserDto} object.
  */
 @Component
-public class UserWithAuthDetailsDtoValidator extends BaseValidator {
+public class UserDtoValidator extends BaseValidator {
 
   @Autowired
   private PermissionService permissionService;

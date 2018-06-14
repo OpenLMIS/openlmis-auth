@@ -20,17 +20,17 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.ACTIVE;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.ALLOW_NOTIFY;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.ENABLED;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.EXTRA_DATA;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.HOME_FACILITY_ID;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.JOB_TITLE;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.LOGIN_RESTRICTED;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.ROLE_ASSIGNMENTS;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.TIMEZONE;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.USERNAME;
-import static org.openlmis.auth.web.UserWithAuthDetailsDtoValidator.VERIFIED;
+import static org.openlmis.auth.web.UserDtoValidator.ACTIVE;
+import static org.openlmis.auth.web.UserDtoValidator.ALLOW_NOTIFY;
+import static org.openlmis.auth.web.UserDtoValidator.ENABLED;
+import static org.openlmis.auth.web.UserDtoValidator.EXTRA_DATA;
+import static org.openlmis.auth.web.UserDtoValidator.HOME_FACILITY_ID;
+import static org.openlmis.auth.web.UserDtoValidator.JOB_TITLE;
+import static org.openlmis.auth.web.UserDtoValidator.LOGIN_RESTRICTED;
+import static org.openlmis.auth.web.UserDtoValidator.ROLE_ASSIGNMENTS;
+import static org.openlmis.auth.web.UserDtoValidator.TIMEZONE;
+import static org.openlmis.auth.web.UserDtoValidator.USERNAME;
+import static org.openlmis.auth.web.UserDtoValidator.VERIFIED;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -74,7 +74,7 @@ public class UserDtoValidatorTest {
   private ExposedMessageSource messageSource;
 
   @InjectMocks
-  private Validator validator = new UserWithAuthDetailsDtoValidator();
+  private Validator validator = new UserDtoValidator();
 
   private User user;
   private UserMainDetailsDto userMainDetailsDto;
