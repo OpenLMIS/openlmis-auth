@@ -37,8 +37,8 @@ public class EmailVerificationNotifier extends ExpirationTokenNotifier<EmailVeri
   /**
    * Sends email verification email.
    *
-   * @param user      the user whose email is being verify
-   * @param email     recipient's email address
+   * @param user      the user whose email is being verified
+   * @param email     recipient's new email address
    */
   @Async
   public void sendNotification(User user, String email) {
