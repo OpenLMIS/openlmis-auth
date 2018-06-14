@@ -23,9 +23,7 @@ import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 @Service
 public class UserService {
@@ -38,8 +36,6 @@ public class UserService {
 
   @Autowired
   private EmailVerificationNotifier emailVerificationNotifier;
-
-  private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
   /**
    * Creates a new user or updates an existing one.
@@ -54,9 +50,7 @@ public class UserService {
   private UserDto addUser(UserDto request) {
     request.setVerified(false);
 
-    User dbUser = new User();
-    updateUserFields(dbUser, request);
-
+    User dbUser = User.newInstance(request);
     dbUser = userRepository.save(dbUser);
 
     request.setId(dbUser.getId());
@@ -80,7 +74,7 @@ public class UserService {
     }
 
     User dbUser = userRepository.findOne(request.getId());
-    updateUserFields(dbUser, request);
+    dbUser.updateFrom(request);
 
     dbUser = userRepository.save(dbUser);
     newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
@@ -88,16 +82,6 @@ public class UserService {
     sendNotification(dbUser, request);
 
     return new UserDto(dbUser, newReferenceDataUser);
-  }
-
-  private void updateUserFields(User dbUser, UserDto request) {
-    dbUser.setUsername(request.getUsername());
-    dbUser.setEnabled(request.getEnabled());
-
-    String newPassword = request.getPassword();
-    if (StringUtils.hasText(newPassword)) {
-      dbUser.setPassword(encoder.encode(newPassword));
-    }
   }
 
   private void sendNotification(User dbUser, UserDto request) {

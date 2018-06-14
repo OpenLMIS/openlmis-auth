@@ -17,6 +17,7 @@ package org.openlmis.auth.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Collection;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -25,11 +26,14 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.StringUtils;
 
 @Entity
 @Table(name = "auth_users")
 @JsonIgnoreProperties(value = { "authorities" }, ignoreUnknown = true)
 public class User extends BaseEntity implements UserDetails {
+  private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
 
   @Getter
   @Setter
@@ -45,6 +49,30 @@ public class User extends BaseEntity implements UserDetails {
   @Setter
   @Column
   private Boolean enabled;
+
+  /**
+   * Creates new instance of {@link User} based on passed data.
+   */
+  public static User newInstance(Importer importer) {
+    User user = new User();
+    user.setId(importer.getId());
+    user.updateFrom(importer);
+
+    return user;
+  }
+
+  /**
+   * Update user data from {@link Importer}.
+   */
+  public void updateFrom(Importer importer) {
+    username = importer.getUsername();
+    enabled = importer.getEnabled();
+
+    String newPassword = importer.getPassword();
+    if (StringUtils.hasText(newPassword)) {
+      password = ENCODER.encode(newPassword);
+    }
+  }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -69,6 +97,18 @@ public class User extends BaseEntity implements UserDetails {
   @Override
   public boolean isEnabled() {
     return this.getEnabled();
+  }
+
+  public interface Importer {
+
+    UUID getId();
+
+    String getUsername();
+
+    String getPassword();
+
+    Boolean getEnabled();
+
   }
 
 }

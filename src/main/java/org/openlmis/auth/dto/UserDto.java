@@ -29,7 +29,7 @@ import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public final class UserDto extends UserMainDetailsDto {
+public final class UserDto extends UserMainDetailsDto implements User.Importer {
 
   @Getter
   @Setter
