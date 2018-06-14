@@ -23,13 +23,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public final class UserWithAuthDetailsDto extends UserDto {
+public final class UserDto extends UserMainDetailsDto {
 
   @Getter
   @Setter
@@ -42,7 +42,7 @@ public final class UserWithAuthDetailsDto extends UserDto {
   /**
    * Creates a new instance based on data from auth and reference data users.
    */
-  public UserWithAuthDetailsDto(User user, UserDto referenceDataUser) {
+  public UserDto(User user, UserMainDetailsDto referenceDataUser) {
     super(
         referenceDataUser.getUsername(), referenceDataUser.getFirstName(),
         referenceDataUser.getLastName(), referenceDataUser.getEmail(),
@@ -62,8 +62,8 @@ public final class UserWithAuthDetailsDto extends UserDto {
    * Gets a reference data user data part of the given user request body.
    */
   @JsonIgnore
-  public UserDto getReferenceDataUser() {
-    UserDto data = new UserDto(
+  public UserMainDetailsDto getReferenceDataUser() {
+    UserMainDetailsDto data = new UserMainDetailsDto(
         getUsername(), getFirstName(), getLastName(), getEmail(), getJobTitle(), getPhoneNumber(),
         getTimezone(), getHomeFacilityId(), isVerified(), isActive(), isLoginRestricted(),
         getAllowNotify(), getExtraData(), getRoleAssignments()

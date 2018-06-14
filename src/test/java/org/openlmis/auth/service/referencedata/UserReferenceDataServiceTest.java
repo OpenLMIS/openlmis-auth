@@ -36,11 +36,11 @@ import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.dto.LocalizedMessageDto;
 import org.openlmis.auth.dto.PageDto;
 import org.openlmis.auth.dto.ResultDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.service.BaseCommunicationServiceTest;
@@ -81,10 +81,10 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
   @Test
   public void shouldFindUserByEmail() {
     // given
-    UserDto userDto = new DummyUserDto();
+    UserMainDetailsDto userMainDetailsDto = new DummyUserMainDetailsDto();
 
     Map<String, Object> payload = new HashMap<>();
-    payload.put("email", userDto.getEmail());
+    payload.put("email", userMainDetailsDto.getEmail());
 
     ResponseEntity response = mock(ResponseEntity.class);
 
@@ -93,11 +93,12 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
         any(ParameterizedTypeReference.class)))
         .thenReturn(response);
 
-    PageDto<UserDto> page = new PageDto<>(new PageImpl<>(ImmutableList.of(userDto)));
+    PageDto<UserMainDetailsDto> page = new PageDto<>(new PageImpl<>(ImmutableList.of(
+        userMainDetailsDto)));
 
     when(response.getBody()).thenReturn(page);
 
-    UserDto user = service.findUserByEmail(userDto.getEmail());
+    UserMainDetailsDto user = service.findUserByEmail(userMainDetailsDto.getEmail());
 
     // then
     verify(restTemplate).exchange(uriCaptor.capture(), eq(HttpMethod.POST),
@@ -107,7 +108,7 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
     String url = service.getServiceUrl() + service.getUrl() + "search";
 
     assertThat(uri.toString()).isEqualTo(url);
-    assertThat(user.getEmail()).isEqualTo(userDto.getEmail());
+    assertThat(user.getEmail()).isEqualTo(userMainDetailsDto.getEmail());
 
     assertAuthHeader(entityCaptor.getValue());
     assertThat(entityCaptor.getValue().getBody()).isEqualTo(payload);
@@ -128,10 +129,10 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
         any(ParameterizedTypeReference.class)))
         .thenReturn(response);
 
-    PageDto<UserDto> page = new PageDto<>(new PageImpl<>(Collections.emptyList()));
+    PageDto<UserMainDetailsDto> page = new PageDto<>(new PageImpl<>(Collections.emptyList()));
     when(response.getBody()).thenReturn(page);
 
-    UserDto user = service.findUserByEmail(email);
+    UserMainDetailsDto user = service.findUserByEmail(email);
 
     // then
     verify(restTemplate).exchange(uriCaptor.capture(), eq(HttpMethod.POST),
@@ -150,7 +151,7 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
   @Test
   public void shouldSaveUser() {
     // given
-    UserDto request = new DummyUserDto();
+    UserMainDetailsDto request = new DummyUserMainDetailsDto();
     ResponseEntity response = mock(ResponseEntity.class);
 
     // when
@@ -160,7 +161,7 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
 
     when(response.getBody()).thenReturn(request);
 
-    UserDto user = service.putUser(request);
+    UserMainDetailsDto user = service.putUser(request);
 
     // then
     verify(restTemplate).exchange(uriCaptor.capture(), eq(HttpMethod.PUT),
@@ -189,7 +190,7 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
             any(URI.class), eq(HttpMethod.PUT),
             any(HttpEntity.class), eq(service.getResultClass()));
 
-    service.putUser(new DummyUserDto());
+    service.putUser(new DummyUserMainDetailsDto());
   }
 
   @Test(expected = DataRetrievalException.class)
@@ -204,7 +205,7 @@ public class UserReferenceDataServiceTest extends BaseCommunicationServiceTest {
             any(URI.class), eq(HttpMethod.PUT),
             any(HttpEntity.class), eq(service.getResultClass()));
 
-    service.putUser(new DummyUserDto());
+    service.putUser(new DummyUserMainDetailsDto());
   }
 
   @Test

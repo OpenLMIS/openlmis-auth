@@ -13,44 +13,41 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.dto.referencedata;
+package org.openlmis.auth.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
-import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.ToStringTestUtils;
-import org.openlmis.auth.dto.UserWithAuthDetailsDto;
+import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 
 public class UserDtoTest {
-  private UserDto user = new DummyUserDto();
-
-  @Test
-  public void shouldHasEmail() {
-    assertThat(user.hasEmail()).isTrue();
-  }
-
-  @Test
-  public void shouldNotHasEmail() {
-    user.setEmail(null);
-    assertThat(user.hasEmail()).isFalse();
-  }
 
   @Test
   public void equalsContract() {
     EqualsVerifier
         .forClass(UserDto.class)
         .withRedefinedSuperclass()
-        .withRedefinedSubclass(UserWithAuthDetailsDto.class)
         .suppress(Warning.NONFINAL_FIELDS) // dto can't contain final fields
         .verify();
   }
 
   @Test
   public void shouldImplementToString() {
-    ToStringTestUtils.verify(UserDto.class, user);
+    ToStringTestUtils
+        .verify(UserDto.class,
+            new UserDto(new User(), new DummyUserMainDetailsDto()));
   }
 
+  @Test
+  public void shouldGetReferenceDataUser() {
+    UserMainDetailsDto admin = new DummyUserMainDetailsDto();
+    UserDto request = new UserDto(new User(), admin);
+
+    assertThat(request.getReferenceDataUser()).isEqualTo(admin);
+  }
 }

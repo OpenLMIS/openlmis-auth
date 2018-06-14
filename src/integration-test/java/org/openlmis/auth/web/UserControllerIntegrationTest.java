@@ -53,14 +53,14 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
-import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.EmailVerificationTokenDataBuilder;
 import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.LocalizedMessageDto;
-import org.openlmis.auth.dto.UserWithAuthDetailsDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
@@ -123,7 +123,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private NotificationService notificationService;
 
   private User user;
-  private DummyUserDto admin = new DummyUserDto();
+  private UserMainDetailsDto admin = new DummyUserMainDetailsDto();
 
   @Before
   public void setUp() {
@@ -131,7 +131,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .willReturn(admin);
     given(userReferenceDataService.findOne(admin.getId()))
         .willReturn(admin);
-    given(userReferenceDataService.putUser(any(UserDto.class)))
+    given(userReferenceDataService.putUser(any(UserMainDetailsDto.class)))
         .willReturn(admin);
 
     willDoNothing().given(notificationService).send(any(NotificationRequest.class));
@@ -140,13 +140,13 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     user = userRepository.findOne(admin.getId());
-    user.setPassword(encoder.encode(DummyUserDto.PASSWORD));
+    user.setPassword(encoder.encode(DummyUserMainDetailsDto.PASSWORD));
     userRepository.save(user);
   }
 
   @Test
   public void shouldSaveUser() {
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserWithAuthDetailsDto(user, admin), null)
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserDto(user, admin), null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(200);
   }
@@ -155,7 +155,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   public void shouldNotSaveUserWhenUserHasNoPermission() {
     PermissionMessageException ex = mockUserManagePermissionError();
 
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserWithAuthDetailsDto(user, admin), null)
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserDto(user, admin), null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
@@ -166,9 +166,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     LocalizedMessageDto localizedMessage = new LocalizedMessageDto("test.key", "test.message");
     doThrow(new ExternalApiException(null, localizedMessage))
         .when(userReferenceDataService)
-        .putUser(any(UserDto.class));
+        .putUser(any(UserMainDetailsDto.class));
 
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserWithAuthDetailsDto(user, admin), null)
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserDto(user, admin), null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(400)
         .body(Fields.MESSAGE_KEY, is("test.key"))
@@ -238,7 +238,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void revokeTokenTest() {
-    String accessToken = login(DummyUserDto.USERNAME, DummyUserDto.PASSWORD);
+    String accessToken = login(DummyUserMainDetailsDto.USERNAME, DummyUserMainDetailsDto.PASSWORD);
     String response = logoutUser(200, accessToken);
 
     assertTrue(response.contains("You have successfully logged out!"));
@@ -488,7 +488,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   private ValidatableResponse passwordReset(String password, String token) {
-    return passwordReset(DummyUserDto.USERNAME, password, token);
+    return passwordReset(DummyUserMainDetailsDto.USERNAME, password, token);
   }
 
   private ValidatableResponse passwordReset(String username, String password, String token) {
@@ -501,7 +501,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   private ValidatableResponse forgotPassword() {
-    return sendPostRequest(null, FORGOT_PASS_URL, null, of(Fields.EMAIL, DummyUserDto.EMAIL))
+    return sendPostRequest(null, FORGOT_PASS_URL, null,
+        of(Fields.EMAIL, DummyUserMainDetailsDto.EMAIL))
         .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
@@ -513,7 +514,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private ValidatableResponse passwordResetToken() {
     return sendPostRequest(
         USER_TOKEN, RESET_TOKEN_PASS_URL, null,
-        of(Fields.USER_ID, DummyUserDto.REFERENCE_ID))
+        of(Fields.USER_ID, DummyUserMainDetailsDto.REFERENCE_ID))
         .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 

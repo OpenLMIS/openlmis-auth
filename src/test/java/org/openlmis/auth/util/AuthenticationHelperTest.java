@@ -29,7 +29,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.auth.OAuth2AuthenticationDataBuilder;
 import org.openlmis.auth.dto.RightDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.AuthenticationMessageException;
 import org.openlmis.auth.service.referencedata.RightReferenceDataService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
@@ -68,11 +68,11 @@ public class AuthenticationHelperTest {
   @Test
   public void shouldReturnUser() {
     // given
-    UserDto userMock = mock(UserDto.class);
+    UserMainDetailsDto userMock = mock(UserMainDetailsDto.class);
     when(userReferenceDataService.findOne(userId)).thenReturn(userMock);
 
     // when
-    UserDto user = authenticationHelper.getCurrentUser();
+    UserMainDetailsDto user = authenticationHelper.getCurrentUser();
 
     // then
     assertEquals(userMock, user);

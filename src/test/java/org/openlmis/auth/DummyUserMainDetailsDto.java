@@ -21,9 +21,9 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.UUID;
 import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 
-public final class DummyUserDto extends UserDto {
+public final class DummyUserMainDetailsDto extends UserMainDetailsDto {
   public static final String REFERENCE_ID = "35316636-6264-6331-2d34-3933322d3462";
   public static final String USERNAME = "admin";
   public static final String PASSWORD = "password";
@@ -32,7 +32,7 @@ public final class DummyUserDto extends UserDto {
   /**
    * Creates new instance of dummy user dto.
    */
-  public DummyUserDto() {
+  public DummyUserMainDetailsDto() {
     super(
         USERNAME, "Admin", "User", EMAIL, null, null, null, null, true,
         false, false, true, null, getDummyRoleAssignments()

@@ -21,9 +21,9 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.UserWithAuthDetailsDto;
+import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
@@ -35,7 +35,7 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 /**
- * A validator for {@link UserWithAuthDetailsDto} object.
+ * A validator for {@link UserDto} object.
  */
 @Component
 public class UserWithAuthDetailsDtoValidator extends BaseValidator {
@@ -67,16 +67,16 @@ public class UserWithAuthDetailsDtoValidator extends BaseValidator {
    *
    * @param clazz the {@link Class} that this {@link Validator} is being asked if it can {@link
    * #validate(Object, Errors) validate}
-   * @return true if {@code clazz} is equal to {@link UserWithAuthDetailsDto}. Otherwise false.
+   * @return true if {@code clazz} is equal to {@link UserDto}. Otherwise false.
    */
   @Override
   public boolean supports(Class<?> clazz) {
-    return UserWithAuthDetailsDto.class.equals(clazz);
+    return UserDto.class.equals(clazz);
   }
 
   /**
    * Validates the {@code target} object, which must be an instance of
-   * {@link UserWithAuthDetailsDto} class.
+   * {@link UserDto} class.
    *
    * @param target the object that is to be validated (never {@code null})
    * @param errors contextual state about the validation process (never {@code null})
@@ -87,10 +87,10 @@ public class UserWithAuthDetailsDtoValidator extends BaseValidator {
     rejectIfEmptyOrWhitespace(errors, USERNAME, MessageKeys.ERROR_FIELD_REQUIRED);
 
     if (!errors.hasErrors()) {
-      UserWithAuthDetailsDto dto = (UserWithAuthDetailsDto) target;
+      UserDto dto = (UserDto) target;
 
       if (null != dto.getId()) {
-        UserDto reference = userReferenceDataService.findOne(dto.getId());
+        UserMainDetailsDto reference = userReferenceDataService.findOne(dto.getId());
 
         rejectIfInvariantWasChanged(errors, VERIFIED, reference.isVerified(), dto.isVerified());
 
@@ -110,7 +110,7 @@ public class UserWithAuthDetailsDtoValidator extends BaseValidator {
     }
   }
 
-  private void validateInvariants(UserDto reference, UserWithAuthDetailsDto dto, Errors errors) {
+  private void validateInvariants(UserMainDetailsDto reference, UserDto dto, Errors errors) {
     User db = userRepository.findOne(dto.getId());
 
     rejectIfInvariantWasChanged(errors, ENABLED, db.getEnabled(), dto.getEnabled());

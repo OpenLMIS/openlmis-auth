@@ -43,11 +43,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.UserWithAuthDetailsDto;
+import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.repository.UserRepository;
@@ -59,7 +59,7 @@ import org.springframework.validation.Validator;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("PMD.TooManyMethods")
-public class UserWithAuthDetailsDtoValidatorTest {
+public class UserDtoValidatorTest {
 
   @Mock
   private PermissionService permissionService;
@@ -77,19 +77,19 @@ public class UserWithAuthDetailsDtoValidatorTest {
   private Validator validator = new UserWithAuthDetailsDtoValidator();
 
   private User user;
-  private UserDto userDto;
-  private UserWithAuthDetailsDto request;
+  private UserMainDetailsDto userMainDetailsDto;
+  private UserDto request;
   private Errors errors;
 
   @Before
   public void setUp() {
-    userDto = new DummyUserDto();
+    userMainDetailsDto = new DummyUserMainDetailsDto();
 
     user = new User();
-    user.setUsername(userDto.getUsername());
+    user.setUsername(userMainDetailsDto.getUsername());
     user.setEnabled(true);
 
-    request = new UserWithAuthDetailsDto(user, userDto);
+    request = new UserDto(user, userMainDetailsDto);
 
     errors = new BeanPropertyBindingResult(request, "request");
 
@@ -97,7 +97,7 @@ public class UserWithAuthDetailsDtoValidatorTest {
     when(messageSource.getMessage(anyString(), any(Object[].class), any(Locale.class)))
         .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
     when(userReferenceDataService.findOne(request.getId()))
-        .thenReturn(userDto);
+        .thenReturn(userMainDetailsDto);
   }
 
   @Test
@@ -136,7 +136,7 @@ public class UserWithAuthDetailsDtoValidatorTest {
 
   @Test
   public void shouldRejectWhenVerifiedFlagWasChanged() {
-    request.setVerified(!userDto.isVerified());
+    request.setVerified(!userMainDetailsDto.isVerified());
 
     validator.validate(request, errors);
 
@@ -173,9 +173,9 @@ public class UserWithAuthDetailsDtoValidatorTest {
     request.setJobTitle("test-job-title");
     request.setTimezone("test-time-zone");
     request.setHomeFacilityId(UUID.randomUUID());
-    request.setActive(!userDto.isActive());
-    request.setLoginRestricted(!userDto.isLoginRestricted());
-    request.setAllowNotify(!userDto.getAllowNotify());
+    request.setActive(!userMainDetailsDto.isActive());
+    request.setLoginRestricted(!userMainDetailsDto.isLoginRestricted());
+    request.setAllowNotify(!userMainDetailsDto.getAllowNotify());
     request.setExtraData(ImmutableMap.of("a", "b"));
     request.setRoleAssignments(Sets.newHashSet(new RoleAssignmentDto()));
     request.setEnabled(!user.getEnabled());

@@ -25,7 +25,7 @@ import org.openlmis.auth.domain.ApiKey;
 import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.domain.CreationDetails;
 import org.openlmis.auth.dto.ApiKeyDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.NotFoundException;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.repository.ApiKeyRepository;
@@ -109,7 +109,7 @@ public class ApiKeyController {
     canManageApiKeys(profiler);
 
     profiler.start("GET_CURRENT_USER");
-    final UserDto user = authenticationHelper.getCurrentUser();
+    final UserMainDetailsDto user = authenticationHelper.getCurrentUser();
 
     profiler.start("CREATE_CLIENT");
     String clientId = apiKeySettings.generateClientId();

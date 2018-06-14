@@ -19,7 +19,7 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 
 import org.openlmis.auth.dto.ResultDto;
 import org.openlmis.auth.dto.RightDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.auth.util.AuthenticationHelper;
@@ -105,7 +105,7 @@ public class PermissionService {
   }
 
   private boolean checkUserToken(String rightName, UUID expectedUserId) {
-    UserDto user = authenticationHelper.getCurrentUser();
+    UserMainDetailsDto user = authenticationHelper.getCurrentUser();
 
     if (user.getId().equals(expectedUserId)) {
       return true;

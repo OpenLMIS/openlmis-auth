@@ -26,7 +26,7 @@ public class BaseDtoTest {
   public void equalsContract() {
     EqualsVerifier
         .forClass(BaseDto.class)
-        .withRedefinedSubclass(UserDto.class)
+        .withRedefinedSubclass(UserMainDetailsDto.class)
         .suppress(Warning.NONFINAL_FIELDS) // dto can't contain final fields
         .verify();
   }

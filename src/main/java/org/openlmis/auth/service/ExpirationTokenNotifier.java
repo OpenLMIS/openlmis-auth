@@ -18,7 +18,7 @@ package org.openlmis.auth.service;
 import java.util.function.Function;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.ExpirationTokenRepository;
 import org.openlmis.auth.service.notification.NotificationService;
@@ -62,7 +62,7 @@ public abstract class ExpirationTokenNotifier<T extends ExpirationToken> {
 
   void sendEmail(User user, String email, ExpirationToken token,
       String subjectKey, String bodyKey, String bodyUrl) {
-    UserDto referenceDataUser = userReferenceDataService.findOne(user.getId());
+    UserMainDetailsDto referenceDataUser = userReferenceDataService.findOne(user.getId());
 
     String[] bodyMsgArgs = {
         referenceDataUser.getFirstName(),

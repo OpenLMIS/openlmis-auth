@@ -32,8 +32,8 @@ import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.EmailVerificationTokenDto;
-import org.openlmis.auth.dto.UserWithAuthDetailsDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
@@ -130,7 +130,7 @@ public class UserController {
   @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserWithAuthDetailsDto saveUser(@RequestBody UserWithAuthDetailsDto request,
+  public UserDto saveUser(@RequestBody UserDto request,
       BindingResult bindingResult) {
     permissionService.canManageUsers(request.getId());
     LOGGER.debug("Creating or updating user");
@@ -196,7 +196,7 @@ public class UserController {
   @RequestMapping(value = "/users/auth/forgotPassword", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   public void forgotPassword(@RequestParam(value = "email") String email) {
-    UserDto refDataUser = userReferenceDataService.findUserByEmail(email);
+    UserMainDetailsDto refDataUser = userReferenceDataService.findUserByEmail(email);
 
     if (refDataUser == null) {
       throw new ValidationMessageException(USER_NOT_FOUND_BY_EMAIL);
@@ -252,7 +252,7 @@ public class UserController {
     EmailVerificationToken details = emailVerificationTokenRepository.findOne(token);
     verifyToken(details);
 
-    UserDto user = userReferenceDataService.findOne(details.getUser().getId());
+    UserMainDetailsDto user = userReferenceDataService.findOne(details.getUser().getId());
     user.setEmail(details.getEmail());
     user.setVerified(true);
 
@@ -281,7 +281,7 @@ public class UserController {
   @ResponseStatus(HttpStatus.OK)
   public void sendVerificationEmail(@RequestParam(value = "userId") UUID referenceDataUserId) {
     permissionService.canVerifyEmail(referenceDataUserId);
-    UserDto referenceUser = userReferenceDataService.findOne(referenceDataUserId);
+    UserMainDetailsDto referenceUser = userReferenceDataService.findOne(referenceDataUserId);
 
     if (referenceUser == null) {
       throw new ValidationMessageException(USER_NOT_FOUND);

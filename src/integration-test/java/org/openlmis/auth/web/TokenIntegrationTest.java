@@ -23,7 +23,7 @@ import static org.openlmis.auth.web.TestWebData.Tokens.DURATION;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 public class TokenIntegrationTest extends BaseWebIntegrationTest {
@@ -40,8 +40,8 @@ public class TokenIntegrationTest extends BaseWebIntegrationTest {
         .preemptive()
         .basic("user-client", "changeme")
         .queryParam(Fields.PASSWORD, GrantTypes.PASSWORD)
-        .queryParam(Fields.USERNAME, DummyUserDto.USERNAME)
-        .queryParam(Fields.GRANT_TYPE, DummyUserDto.PASSWORD)
+        .queryParam(Fields.USERNAME, DummyUserMainDetailsDto.USERNAME)
+        .queryParam(Fields.GRANT_TYPE, DummyUserMainDetailsDto.PASSWORD)
         .when()
         .post("/api/oauth/token")
         .then()

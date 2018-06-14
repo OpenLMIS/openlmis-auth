@@ -34,11 +34,11 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.SaveAnswer;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.UserWithAuthDetailsDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 
@@ -58,14 +58,15 @@ public class UserServiceTest {
   private UserService userService;
 
   @Captor
-  private ArgumentCaptor<UserDto> userCaptor;
+  private ArgumentCaptor<UserMainDetailsDto> userCaptor;
 
-  private DummyUserDto referenceDataUser = new DummyUserDto();
+  private DummyUserMainDetailsDto referenceDataUser = new DummyUserMainDetailsDto();
 
   @Before
   public void setUp() {
     when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(referenceDataUser);
-    when(userReferenceDataService.putUser(any(UserDto.class))).thenReturn(referenceDataUser);
+    when(userReferenceDataService.putUser(any(UserMainDetailsDto.class)))
+        .thenReturn(referenceDataUser);
   }
 
   @Test
@@ -75,7 +76,7 @@ public class UserServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    UserWithAuthDetailsDto request = new UserWithAuthDetailsDto(new User(), referenceDataUser);
+    UserDto request = new UserDto(new User(), referenceDataUser);
     request.setId(null);
 
     userService.saveUser(request);
@@ -98,7 +99,7 @@ public class UserServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserWithAuthDetailsDto(new User(), referenceDataUser));
+    userService.saveUser(new UserDto(new User(), referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
@@ -112,7 +113,7 @@ public class UserServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    UserWithAuthDetailsDto request = new UserWithAuthDetailsDto(new User(), referenceDataUser);
+    UserDto request = new UserDto(new User(), referenceDataUser);
     request.setEmail("my_test_email@unit.test.org");
 
     userService.saveUser(request);
@@ -122,7 +123,7 @@ public class UserServiceTest {
     verify(userRepository).save(any(User.class));
     verify(emailVerificationNotifier).sendNotification(any(User.class), eq(request.getEmail()));
 
-    UserDto user = userCaptor.getValue();
+    UserMainDetailsDto user = userCaptor.getValue();
     assertThat(user.getEmail()).isEqualTo(referenceDataUser.getEmail());
     assertThat(user.isVerified()).isEqualTo(referenceDataUser.isVerified());
   }
@@ -146,7 +147,7 @@ public class UserServiceTest {
     given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserWithAuthDetailsDto(newUser, referenceDataUser));
+    userService.saveUser(new UserDto(newUser, referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
@@ -172,7 +173,7 @@ public class UserServiceTest {
     given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserWithAuthDetailsDto(new User(), referenceDataUser));
+    userService.saveUser(new UserDto(new User(), referenceDataUser));
 
     // then
     verify(userRepository, times(1)).save(any(User.class));

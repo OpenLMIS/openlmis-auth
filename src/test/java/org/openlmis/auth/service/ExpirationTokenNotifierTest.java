@@ -30,7 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.i18n.ExposedMessageSource;
@@ -60,7 +60,7 @@ public abstract class ExpirationTokenNotifierTest<T extends ExpirationToken> {
   @Before
   public void setUp() {
     when(userReferenceDataService.findOne(any(UUID.class)))
-        .thenReturn(new DummyUserDto());
+        .thenReturn(new DummyUserMainDetailsDto());
     when(messageSource.getMessage(anyString(), any(String[].class), any(Locale.class)))
         .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
   }

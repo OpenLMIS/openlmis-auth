@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import org.openlmis.auth.dto.ResultDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.service.RequestParameters;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserReferenceDataService extends BaseCommunicationService<UserDto> {
+public class UserReferenceDataService extends BaseCommunicationService<UserMainDetailsDto> {
 
   @Getter
   @Value("${service.url}")
@@ -38,24 +38,24 @@ public class UserReferenceDataService extends BaseCommunicationService<UserDto> 
     return "/api/users/";
   }
 
-  protected Class<UserDto> getResultClass() {
-    return UserDto.class;
+  protected Class<UserMainDetailsDto> getResultClass() {
+    return UserMainDetailsDto.class;
   }
 
-  protected Class<UserDto[]> getArrayResultClass() {
-    return UserDto[].class;
+  protected Class<UserMainDetailsDto[]> getArrayResultClass() {
+    return UserMainDetailsDto[].class;
   }
 
   /**
    * This method retrieves a user with given email address.
    *
    * @param email the email address of user.
-   * @return UserDto containing user's data, or null if such user was not found.
+   * @return UserMainDetailsDto containing user's data, or null if such user was not found.
    */
-  public UserDto findUserByEmail(String email) {
+  public UserMainDetailsDto findUserByEmail(String email) {
     Map<String, Object> payload = Collections.singletonMap("email", email);
 
-    Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
+    Page<UserMainDetailsDto> users = getPage("search", Collections.emptyMap(), payload);
     return users.getContent().isEmpty() ? null : users.getContent().get(0);
   }
 
@@ -63,9 +63,9 @@ public class UserReferenceDataService extends BaseCommunicationService<UserDto> 
    * This method creates or updates a user.
    *
    * @param user the user to put.
-   * @return UserDto containing user's data.
+   * @return UserMainDetailsDto containing user's data.
    */
-  public UserDto putUser(UserDto user) {
+  public UserMainDetailsDto putUser(UserMainDetailsDto user) {
     return put("", user);
   }
 

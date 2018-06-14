@@ -20,7 +20,7 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_USER_NOT_FOUND;
 
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.RightDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.AuthenticationMessageException;
 import org.openlmis.auth.service.referencedata.RightReferenceDataService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
@@ -44,16 +44,16 @@ public class AuthenticationHelper {
    * @return RefDUserDto entity of current user.
    * @throws AuthenticationMessageException if user cannot be found.
    */
-  public UserDto getCurrentUser() {
+  public UserMainDetailsDto getCurrentUser() {
     User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    UserDto userDto = userReferenceDataService.findOne(user.getId());
+    UserMainDetailsDto userMainDetailsDto = userReferenceDataService.findOne(user.getId());
 
-    if (userDto == null) {
+    if (userMainDetailsDto == null) {
       throw new AuthenticationMessageException(new Message(ERROR_USER_NOT_FOUND,
           user.getUsername()));
     }
 
-    return userDto;
+    return userMainDetailsDto;
   }
 
   /**

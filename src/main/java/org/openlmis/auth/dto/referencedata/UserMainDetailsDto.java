@@ -34,7 +34,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class UserDto extends BaseDto {
+public class UserMainDetailsDto extends BaseDto {
   private String username;
   private String firstName;
   private String lastName;

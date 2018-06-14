@@ -18,8 +18,8 @@ package org.openlmis.auth.service;
 
 import java.util.Objects;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.UserWithAuthDetailsDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +47,11 @@ public class UserService {
    * @param request user to be saved.
    * @return saved user.
    */
-  public UserWithAuthDetailsDto saveUser(UserWithAuthDetailsDto request) {
+  public UserDto saveUser(UserDto request) {
     return null == request.getId() ? addUser(request) : updateUser(request);
   }
 
-  private UserWithAuthDetailsDto addUser(UserWithAuthDetailsDto request) {
+  private UserDto addUser(UserDto request) {
     request.setVerified(false);
 
     User dbUser = new User();
@@ -60,17 +60,17 @@ public class UserService {
     dbUser = userRepository.save(dbUser);
 
     request.setId(dbUser.getId());
-    UserDto newReferenceDataUser = request.getReferenceDataUser();
+    UserMainDetailsDto newReferenceDataUser = request.getReferenceDataUser();
     newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
 
     sendNotification(dbUser, request);
 
-    return new UserWithAuthDetailsDto(dbUser, newReferenceDataUser);
+    return new UserDto(dbUser, newReferenceDataUser);
   }
 
-  private UserWithAuthDetailsDto updateUser(UserWithAuthDetailsDto request) {
-    UserDto newReferenceDataUser = request.getReferenceDataUser();
-    UserDto oldReferenceDataUser = userReferenceDataService.findOne(request.getId());
+  private UserDto updateUser(UserDto request) {
+    UserMainDetailsDto newReferenceDataUser = request.getReferenceDataUser();
+    UserMainDetailsDto oldReferenceDataUser = userReferenceDataService.findOne(request.getId());
 
     if (!Objects.equals(oldReferenceDataUser.getEmail(), newReferenceDataUser.getEmail())) {
       newReferenceDataUser.setEmail(oldReferenceDataUser.getEmail());
@@ -87,10 +87,10 @@ public class UserService {
 
     sendNotification(dbUser, request);
 
-    return new UserWithAuthDetailsDto(dbUser, newReferenceDataUser);
+    return new UserDto(dbUser, newReferenceDataUser);
   }
 
-  private void updateUserFields(User dbUser, UserWithAuthDetailsDto request) {
+  private void updateUserFields(User dbUser, UserDto request) {
     dbUser.setUsername(request.getUsername());
     dbUser.setEnabled(request.getEnabled());
 
@@ -100,7 +100,7 @@ public class UserService {
     }
   }
 
-  private void sendNotification(User dbUser, UserWithAuthDetailsDto request) {
+  private void sendNotification(User dbUser, UserDto request) {
     if (request.hasEmail() && !request.isVerified()) {
       emailVerificationNotifier.sendNotification(dbUser, request.getEmail());
     }

@@ -42,14 +42,14 @@ import org.junit.Test;
 import org.openlmis.auth.ApiKeyDataBuilder;
 import org.openlmis.auth.ClientDataBuilder;
 import org.openlmis.auth.DummyRightDto;
-import org.openlmis.auth.DummyUserDto;
+import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.OAuth2AuthenticationDataBuilder;
 import org.openlmis.auth.domain.ApiKey;
 import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.dto.ApiKeyDto;
 import org.openlmis.auth.dto.ResultDto;
 import org.openlmis.auth.dto.RightDto;
-import org.openlmis.auth.dto.referencedata.UserDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.repository.ApiKeyRepository;
 import org.openlmis.auth.repository.ClientRepository;
 import org.openlmis.auth.service.AccessTokenService;
@@ -96,7 +96,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private ApiKey key;
 
-  private UserDto user = new DummyUserDto();
+  private UserMainDetailsDto user = new DummyUserMainDetailsDto();
   private RightDto right = new DummyRightDto();
 
   @Before
