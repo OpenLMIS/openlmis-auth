@@ -16,7 +16,6 @@
 package org.openlmis.auth.service;
 
 
-import static org.openlmis.auth.i18n.MessageKeys.ACCOUNT_CREATED_EMAIL_SUBJECT;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
 
@@ -39,15 +38,15 @@ public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordReset
    *
    * @param user      the user whose password is being reset
    * @param email     recipient's email address
-   * @param isNewUser whether the user was just created
    */
-  public void sendNotification(User user, String email, boolean isNewUser) {
+  public void sendNotification(User user, String email) {
     PasswordResetToken token = createPasswordResetToken(user);
 
-    String subjectMessageKey = (isNewUser) ? ACCOUNT_CREATED_EMAIL_SUBJECT
-        : PASSWORD_RESET_EMAIL_SUBJECT;
-
-    sendEmail(user, email, token, subjectMessageKey, PASSWORD_RESET_EMAIL_BODY, RESET_PASSWORD_URL);
+    sendEmail(
+        user, email, token,
+        PASSWORD_RESET_EMAIL_SUBJECT, PASSWORD_RESET_EMAIL_BODY,
+        RESET_PASSWORD_URL
+    );
   }
 
   /**

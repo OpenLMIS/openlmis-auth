@@ -51,8 +51,6 @@ public abstract class MessageKeys {
   public static final String ERROR_VERIFY_EMAIL_USER_VERIFIED = ERROR_PREFIX
       + ".users.verifyEmail.userVerified";
 
-  public static final String ACCOUNT_CREATED_EMAIL_SUBJECT = SERVICE_PREFIX
-      + ".email.accountCreated.subject";
   public static final String PASSWORD_RESET_EMAIL_SUBJECT = SERVICE_PREFIX
       + ".email.resetPassword.subject";
   public static final String PASSWORD_RESET_EMAIL_BODY = SERVICE_PREFIX

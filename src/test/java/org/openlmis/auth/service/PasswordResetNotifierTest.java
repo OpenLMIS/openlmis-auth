@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.auth.i18n.MessageKeys.ACCOUNT_CREATED_EMAIL_SUBJECT;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
 
@@ -73,24 +72,9 @@ public class PasswordResetNotifierTest extends ExpirationTokenNotifierTest<Passw
   }
 
   @Test
-  public void shouldSendNotificationForNewUser() {
+  public void shouldSendNotification() {
     // when
-    notifier.sendNotification(user, email, true);
-
-    // then
-    verify(passwordResetTokenRepository).save(tokenCaptor.capture());
-    verifyNotificationRequest(
-        email, ACCOUNT_CREATED_EMAIL_SUBJECT, PASSWORD_RESET_EMAIL_BODY
-    );
-
-    PasswordResetToken token = tokenCaptor.getValue();
-    assertThat(token.getUser()).isEqualTo(user);
-  }
-
-  @Test
-  public void shouldSendNotificationForExistingUser() {
-    // when
-    notifier.sendNotification(user, email, false);
+    notifier.sendNotification(user, email);
 
     // then
     verify(passwordResetTokenRepository).save(tokenCaptor.capture());

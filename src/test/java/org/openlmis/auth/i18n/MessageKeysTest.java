@@ -18,7 +18,6 @@ package org.openlmis.auth.i18n;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.openlmis.auth.i18n.MessageKeys.ACCOUNT_CREATED_EMAIL_SUBJECT;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
@@ -30,9 +29,9 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_REQUIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
-import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
+import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
 import org.junit.Test;
 
@@ -54,7 +53,6 @@ public class MessageKeysTest {
     verifyValue(ERROR_RIGHT_NOT_FOUND, "auth.error.authentication.rightCanNotBeFound");
     verifyValue(ERROR_NO_FOLLOWING_PERMISSION, "auth.error.authorization.noFollowingPermission");
 
-    verifyValue(ACCOUNT_CREATED_EMAIL_SUBJECT, "auth.email.accountCreated.subject");
     verifyValue(PASSWORD_RESET_EMAIL_SUBJECT, "auth.email.resetPassword.subject");
     verifyValue(PASSWORD_RESET_EMAIL_BODY, "auth.email.resetPassword.body");
 
