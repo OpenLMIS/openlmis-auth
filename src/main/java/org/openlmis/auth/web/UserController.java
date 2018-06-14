@@ -109,7 +109,7 @@ public class UserController {
   private TokenStore tokenStore;
 
   @Autowired
-  private UserWithAuthDetailsDtoValidator userWithAuthDetailsDtoValidator;
+  private UserDtoValidator userDtoValidator;
 
   @Autowired
   private EmailVerificationNotifier emailVerificationNotifier;
@@ -135,7 +135,7 @@ public class UserController {
     permissionService.canManageUsers(request.getId());
     LOGGER.debug("Creating or updating user");
 
-    userWithAuthDetailsDtoValidator.validate(request, bindingResult);
+    userDtoValidator.validate(request, bindingResult);
 
     if (bindingResult.hasErrors()) {
       throw new ValidationMessageException(bindingResult.getFieldError().getDefaultMessage());
