@@ -85,6 +85,6 @@ public class EmailVerificationNotifierTest
 
     EmailVerificationToken token = tokenCaptor.getValue();
     assertThat(token.getUser()).isEqualTo(user);
-    assertThat(token.getEmail()).isEqualTo(email);
+    assertThat(token.getEmailAddress()).isEqualTo(email);
   }
 }

@@ -49,7 +49,7 @@ public class EmailVerificationTokenDataBuilder {
     token.setId(id);
     token.setExpiryDate(expiryDate);
     token.setUser(user);
-    token.setEmail(email);
+    token.setEmailAddress(email);
 
     return token;
   }

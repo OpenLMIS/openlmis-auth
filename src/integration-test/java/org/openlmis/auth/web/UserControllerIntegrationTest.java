@@ -336,7 +336,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .then()
         .statusCode(HttpStatus.OK.value());
 
-    assertThat(admin.getEmail(), is(token.getEmail()));
+    assertThat(admin.getEmail(), is(token.getEmailAddress()));
     assertThat(admin.isVerified(), is(true));
 
     verify(userReferenceDataService).putUser(admin);

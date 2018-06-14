@@ -30,6 +30,6 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 public final class EmailVerificationTokenDto {
-  private String email;
+  private String emailAddress;
   private ZonedDateTime expiryDate;
 }

@@ -253,7 +253,7 @@ public class UserController {
     verifyToken(details);
 
     UserMainDetailsDto user = userReferenceDataService.findOne(details.getUser().getId());
-    user.setEmail(details.getEmail());
+    user.setEmail(details.getEmailAddress());
     user.setVerified(true);
 
     userReferenceDataService.putUser(user);
@@ -271,7 +271,7 @@ public class UserController {
     EmailVerificationToken token = emailVerificationTokenRepository.findOneByUser(user);
     return null == token
         ? null
-        : new EmailVerificationTokenDto(token.getEmail(), token.getExpiryDate());
+        : new EmailVerificationTokenDto(token.getEmailAddress(), token.getExpiryDate());
   }
 
   /**

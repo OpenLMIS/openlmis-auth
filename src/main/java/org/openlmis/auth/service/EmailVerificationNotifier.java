@@ -61,7 +61,7 @@ public class EmailVerificationNotifier extends ExpirationTokenNotifier<EmailVeri
       EmailVerificationToken token = new EmailVerificationToken();
       token.setUser(arg);
       token.setExpiryDate(ZonedDateTime.now().plusHours(TOKEN_VALIDITY_HOURS));
-      token.setEmail(email);
+      token.setEmailAddress(email);
 
       return token;
     });

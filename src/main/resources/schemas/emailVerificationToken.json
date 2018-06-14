@@ -4,9 +4,9 @@
   "title": "API Key",
   "description": "A single verification email token",
   "properties": {
-    "email": {
+    "emailAddress": {
       "type": "string",
-      "title": "email"
+      "title": "emailAddress"
     },
     "expiryDate": {
       "type": "string",

@@ -28,6 +28,6 @@ public class EmailVerificationToken extends ExpirationToken {
 
   @Getter
   @Setter
-  private String email;
+  private String emailAddress;
 
 }
