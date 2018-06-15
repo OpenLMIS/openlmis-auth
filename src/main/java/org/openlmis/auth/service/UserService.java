@@ -63,12 +63,13 @@ public class UserService {
   }
 
   private UserDto updateUser(UserDto request) {
-    UserMainDetailsDto newReferenceDataUser = request.getReferenceDataUser();
-    UserMainDetailsDto oldReferenceDataUser = userReferenceDataService.findOne(request.getId());
+    UserMainDetailsDto referenceDataUserToSave = request.getReferenceDataUser();
+    UserMainDetailsDto existingReferenceDataUser = userReferenceDataService
+        .findOne(request.getId());
 
-    if (!Objects.equals(oldReferenceDataUser.getEmail(), newReferenceDataUser.getEmail())) {
-      newReferenceDataUser.setEmail(oldReferenceDataUser.getEmail());
-      newReferenceDataUser.setVerified(oldReferenceDataUser.isVerified());
+    if (!Objects.equals(existingReferenceDataUser.getEmail(), referenceDataUserToSave.getEmail())) {
+      referenceDataUserToSave.setEmail(existingReferenceDataUser.getEmail());
+      referenceDataUserToSave.setVerified(existingReferenceDataUser.isVerified());
 
       request.setVerified(false);
     }
@@ -77,11 +78,11 @@ public class UserService {
     dbUser.updateFrom(request);
 
     dbUser = userRepository.save(dbUser);
-    newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
+    referenceDataUserToSave = userReferenceDataService.putUser(referenceDataUserToSave);
 
     sendVerificationEmail(dbUser, request);
 
-    return new UserDto(dbUser, newReferenceDataUser);
+    return new UserDto(dbUser, referenceDataUserToSave);
   }
 
   private void sendVerificationEmail(User dbUser, UserDto request) {
