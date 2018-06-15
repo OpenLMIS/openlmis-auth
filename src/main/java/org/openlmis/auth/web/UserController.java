@@ -135,6 +135,7 @@ public class UserController {
     permissionService.canManageUsers(request.getId());
     LOGGER.debug("Creating or updating user");
 
+    request.updateEmailAddress();
     userDtoValidator.validate(request, bindingResult);
 
     if (bindingResult.hasErrors()) {

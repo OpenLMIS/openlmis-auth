@@ -58,6 +58,16 @@ public final class UserDto extends UserMainDetailsDto implements User.Importer {
     this.enabled = user.getEnabled();
   }
 
+  /**
+   * Update email address from the given request. If it is blank, the email field will be set to
+   * {@code null} to avoid blank strings in the database.
+   */
+  public void updateEmailAddress() {
+    if (!hasEmailAddress()) {
+      setEmail(null);
+    }
+  }
+
   public boolean hasEmailAddress() {
     return hasEmail();
   }

@@ -83,4 +83,27 @@ public class UserDtoTest {
     request.setVerified(true);
     assertThat(request.isNotEmailVerified()).isFalse();
   }
+
+  @Test
+  public void shouldNotSetEmailToNullIfFieldContainsValue() {
+    String email = "test@unit.org";
+
+    request.setEmail(email);
+    request.updateEmailAddress();
+
+    assertThat(request.getEmailAddress()).isEqualTo(email);
+  }
+
+  @Test
+  public void shouldSetEmailToNullIfFieldContainsBlankValue() {
+    request.setEmail("");
+    request.updateEmailAddress();
+
+    assertThat(request.getEmailAddress()).isNull();
+
+    request.setEmail("    ");
+    request.updateEmailAddress();
+
+    assertThat(request.getEmailAddress()).isNull();
+  }
 }
