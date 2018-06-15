@@ -245,24 +245,6 @@ public class UserDtoValidatorTest {
   }
 
   @Test
-  public void shouldRejectWhenEmailIsEmpty() {
-    request.setEmail("");
-
-    validator.validate(request, errors);
-
-    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
-  }
-
-  @Test
-  public void shouldRejectWhenEmailIsWhitespace() {
-    request.setEmail(" ");
-
-    validator.validate(request, errors);
-
-    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
-  }
-
-  @Test
   public void shouldRejectWhenEmailIsInvalid() {
     request.setEmail("invalid@email");
 

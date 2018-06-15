@@ -58,16 +58,6 @@ public final class UserDto extends UserMainDetailsDto implements User.Importer {
     this.enabled = user.getEnabled();
   }
 
-  /**
-   * Update email address from the given request. If it is blank, the email field will be set to
-   * {@code null} to avoid blank strings in the database.
-   */
-  public void updateEmailAddress() {
-    if (!hasEmailAddress()) {
-      setEmail(null);
-    }
-  }
-
   public boolean hasEmailAddress() {
     return hasEmail();
   }
@@ -85,8 +75,10 @@ public final class UserDto extends UserMainDetailsDto implements User.Importer {
    */
   @JsonIgnore
   public UserMainDetailsDto getReferenceDataUser() {
+    String email = hasEmailAddress() ? getEmailAddress() : null;
+
     UserMainDetailsDto data = new UserMainDetailsDto(
-        getUsername(), getFirstName(), getLastName(), getEmail(), getJobTitle(), getPhoneNumber(),
+        getUsername(), getFirstName(), getLastName(), email, getJobTitle(), getPhoneNumber(),
         getTimezone(), getHomeFacilityId(), isVerified(), isActive(), isLoginRestricted(),
         getAllowNotify(), getExtraData(), getRoleAssignments()
     );

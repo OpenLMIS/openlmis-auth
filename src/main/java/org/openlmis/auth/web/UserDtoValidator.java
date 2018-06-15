@@ -15,6 +15,7 @@
 
 package org.openlmis.auth.web;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 
 import java.util.Collections;
@@ -89,10 +90,6 @@ public class UserDtoValidator extends BaseValidator {
   public void validate(Object target, Errors errors) {
     rejectIfEmptyOrWhitespace(errors, USERNAME, MessageKeys.ERROR_FIELD_REQUIRED);
 
-    if (errors.getFieldValue(EMAIL) != null) {
-      rejectIfEmptyOrWhitespace(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
-    }
-
     if (!errors.hasErrors()) {
       UserDto dto = (UserDto) target;
 
@@ -108,7 +105,7 @@ public class UserDtoValidator extends BaseValidator {
 
       verifyUsername(dto.getUsername(), errors);
 
-      if (dto.getEmail() != null) {
+      if (isNotBlank(dto.getEmail())) {
         verifyEmail(dto.getId(), dto.getEmail(), errors);
       }
     }
@@ -122,15 +119,15 @@ public class UserDtoValidator extends BaseValidator {
   }
 
   private void verifyEmail(UUID id, String email, Errors errors) {
+    if (!EmailValidator.getInstance().isValid(email)) {
+      rejectValue(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
+    }
+
     // user email cannot be duplicated
     UserMainDetailsDto reference = userReferenceDataService.findUserByEmail(email);
 
     if (null != reference && (null == id || !id.equals(reference.getId()))) {
       rejectValue(errors, EMAIL, MessageKeys.ERROR_EMAIL_DUPLICATED);
-    }
-
-    if (!EmailValidator.getInstance().isValid(email)) {
-      rejectValue(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
     }
   }
 
