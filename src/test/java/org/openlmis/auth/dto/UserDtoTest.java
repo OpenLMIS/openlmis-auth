@@ -26,6 +26,8 @@ import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 
 public class UserDtoTest {
+  private UserMainDetailsDto admin = new DummyUserMainDetailsDto();
+  private UserDto request = new UserDto(new User(), admin);
 
   @Test
   public void equalsContract() {
@@ -45,9 +47,40 @@ public class UserDtoTest {
 
   @Test
   public void shouldGetReferenceDataUser() {
-    UserMainDetailsDto admin = new DummyUserMainDetailsDto();
-    UserDto request = new UserDto(new User(), admin);
-
     assertThat(request.getReferenceDataUser()).isEqualTo(admin);
+  }
+
+  @Test
+  public void shouldReturnTrueIfEmailAddressIsSet() {
+    assertThat(request.hasEmailAddress()).isTrue();
+  }
+
+  @Test
+  public void shouldReturnFalseIfEmailFieldIsBlank() {
+    request.setEmail(null);
+    assertThat(request.hasEmailAddress()).isFalse();
+
+    request.setEmail("");
+    assertThat(request.hasEmailAddress()).isFalse();
+
+    request.setEmail("     ");
+    assertThat(request.hasEmailAddress()).isFalse();
+  }
+
+  @Test
+  public void shouldReturnEmailAddress() {
+    assertThat(request.getEmailAddress()).isEqualTo(admin.getEmail());
+  }
+
+  @Test
+  public void shouldReturnTrueIfEmailWasNotVerified() {
+    request.setVerified(false);
+    assertThat(request.isNotEmailVerified()).isTrue();
+  }
+
+  @Test
+  public void shouldReturnFalseIfEmailWasVerified() {
+    request.setVerified(true);
+    assertThat(request.isNotEmailVerified()).isFalse();
   }
 }

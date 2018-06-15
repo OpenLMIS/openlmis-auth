@@ -58,6 +58,18 @@ public final class UserDto extends UserMainDetailsDto implements User.Importer {
     this.enabled = user.getEnabled();
   }
 
+  public boolean hasEmailAddress() {
+    return hasEmail();
+  }
+
+  public String getEmailAddress() {
+    return getEmail();
+  }
+
+  public boolean isNotEmailVerified() {
+    return !isVerified();
+  }
+
   /**
    * Gets a reference data user data part of the given user request body.
    */

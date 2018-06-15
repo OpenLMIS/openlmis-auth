@@ -57,8 +57,8 @@ public class UserService {
     UserMainDetailsDto newReferenceDataUser = request.getReferenceDataUser();
     newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
 
-    if (request.hasEmail() && !request.isVerified()) {
-      emailVerificationNotifier.sendNotification(dbUser, request.getEmail());
+    if (request.hasEmailAddress() && request.isNotEmailVerified()) {
+      emailVerificationNotifier.sendNotification(dbUser, request.getEmailAddress());
     }
 
     return new UserDto(dbUser, newReferenceDataUser);
@@ -82,8 +82,8 @@ public class UserService {
     dbUser = userRepository.save(dbUser);
     referenceDataUserToSave = userReferenceDataService.putUser(referenceDataUserToSave);
 
-    if (request.hasEmail() && !request.isVerified()) {
-      emailVerificationNotifier.sendNotification(dbUser, request.getEmail());
+    if (request.hasEmailAddress() && request.isNotEmailVerified()) {
+      emailVerificationNotifier.sendNotification(dbUser, request.getEmailAddress());
     }
 
     return new UserDto(dbUser, referenceDataUserToSave);
