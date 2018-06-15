@@ -402,7 +402,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldResendVerificationEmail() {
-    admin.setVerified(false);
+    EmailVerificationToken token = new EmailVerificationTokenDataBuilder().build();
+
+    given(emailVerificationTokenRepository.findOneByUser(any(User.class))).willReturn(token);
     doNothing().when(emailVerificationNotifier).sendNotification(any(User.class), anyString());
 
     startRequest(USER_TOKEN)
@@ -412,7 +414,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .then()
         .statusCode(HttpStatus.OK.value());
 
-    verify(emailVerificationNotifier).sendNotification(any(User.class), eq(admin.getEmail()));
+    verify(emailVerificationNotifier)
+        .sendNotification(any(User.class), eq(token.getEmailAddress()));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }

@@ -279,24 +279,27 @@ public class UserController {
    */
   @RequestMapping(value = "/users/auth/verifyEmail", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
-  public void sendVerificationEmail(@RequestParam(value = "userId") UUID referenceDataUserId) {
-    permissionService.canVerifyEmail(referenceDataUserId);
-    UserMainDetailsDto referenceUser = userReferenceDataService.findOne(referenceDataUserId);
+  public void sendVerificationEmail(@RequestParam(value = "userId") UUID userId) {
+    permissionService.canVerifyEmail(userId);
 
-    if (referenceUser == null) {
+    User user =  userRepository.findOne(userId);
+    UserMainDetailsDto referenceUser = userReferenceDataService.findOne(userId);
+
+    if (null == user || null == referenceUser) {
       throw new ValidationMessageException(USER_NOT_FOUND);
     }
 
-    if (!referenceUser.hasEmail()) {
-      throw new ValidationMessageException(ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL);
+    EmailVerificationToken existsToken = emailVerificationTokenRepository.findOneByUser(user);
+
+    if (null == existsToken) {
+      if (referenceUser.hasEmail()) {
+        throw new ValidationMessageException(ERROR_VERIFY_EMAIL_USER_VERIFIED);
+      } else {
+        throw new ValidationMessageException(ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL);
+      }
     }
 
-    if (referenceUser.isVerified()) {
-      throw new ValidationMessageException(ERROR_VERIFY_EMAIL_USER_VERIFIED);
-    }
-
-    User user = userRepository.findOne(referenceUser.getId());
-    emailVerificationNotifier.sendNotification(user, referenceUser.getEmail());
+    emailVerificationNotifier.sendNotification(user, existsToken.getEmailAddress());
   }
 
   private void verifyToken(ExpirationToken token) {
