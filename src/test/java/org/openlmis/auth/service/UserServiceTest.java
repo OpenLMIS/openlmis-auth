@@ -129,6 +129,28 @@ public class UserServiceTest {
   }
 
   @Test
+  public void shouldNotReplaceEmailAndVerificationFlagIfEmailWasSetToNull() {
+    // given
+    when(userRepository.findOne(any(UUID.class))).thenReturn(new User());
+    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
+
+    // when
+    UserDto request = new UserDto(new User(), referenceDataUser);
+    request.setEmail(null);
+
+    userService.saveUser(request);
+
+    // then
+    verify(userReferenceDataService).putUser(userCaptor.capture());
+    verify(userRepository).save(any(User.class));
+    verifyZeroInteractions(emailVerificationNotifier);
+
+    UserMainDetailsDto user = userCaptor.getValue();
+    assertThat(user.getEmail()).isEqualTo(null);
+    assertThat(user.isVerified()).isEqualTo(referenceDataUser.isVerified());
+  }
+
+  @Test
   public void shouldReplacePasswordDuringUserUpdate() {
     // given
     User oldUser = new User();

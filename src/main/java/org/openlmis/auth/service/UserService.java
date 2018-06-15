@@ -16,7 +16,6 @@
 package org.openlmis.auth.service;
 
 
-import java.util.Objects;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
@@ -69,7 +68,8 @@ public class UserService {
     UserMainDetailsDto existingReferenceDataUser = userReferenceDataService
         .findOne(request.getId());
 
-    if (!Objects.equals(existingReferenceDataUser.getEmail(), referenceDataUserToSave.getEmail())) {
+    if (request.hasEmailAddress()
+        && !referenceDataUserToSave.getEmail().equals(existingReferenceDataUser.getEmail())) {
       referenceDataUserToSave.setEmail(existingReferenceDataUser.getEmail());
       referenceDataUserToSave.setVerified(existingReferenceDataUser.isVerified());
 
