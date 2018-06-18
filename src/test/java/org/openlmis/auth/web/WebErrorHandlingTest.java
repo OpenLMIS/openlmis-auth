@@ -20,12 +20,15 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CONSTRAINT;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_EMAIL_DUPLICATED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_SEND_REQUEST;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,10 +46,12 @@ import org.openlmis.auth.i18n.MessageService;
 import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.Message.LocalizedMessage;
 import org.springframework.context.MessageSource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("PMD.TooManyMethods")
 public class WebErrorHandlingTest {
   private static final Locale ENGLISH_LOCALE = Locale.ENGLISH;
   private static final String MESSAGE_KEY = "key";
@@ -177,6 +182,51 @@ public class WebErrorHandlingTest {
     // then
     assertThat(message)
         .hasFieldOrPropertyWithValue("messageKey", MESSAGE_KEY);
+  }
+
+  @Test
+  public void shouldHandleDataIntegrityViolationException() {
+    ConstraintViolationException cause = mock(ConstraintViolationException.class);
+    when(cause.getConstraintName()).thenReturn("email_verification_tokens_emailaddress_uk");
+
+    testDataIntegrityViolation(cause, ERROR_EMAIL_DUPLICATED);
+  }
+
+  @Test
+  public void shouldHandleDataIntegrityViolationExceptionWithUnhandledConstraint() {
+    ConstraintViolationException cause = mock(ConstraintViolationException.class);
+    when(cause.getConstraintName()).thenReturn("my_test_constraint_name");
+
+    testDataIntegrityViolation(cause, null);
+  }
+
+  @Test
+  public void shouldHandleDataIntegrityViolationExceptionWithoutConstraintViolationCause() {
+    NullPointerException cause = mock(NullPointerException.class);
+
+    testDataIntegrityViolation(cause, null);
+  }
+
+  @Test
+  public void shouldHandleDataIntegrityViolationExceptionWithoutCause() {
+    testDataIntegrityViolation(null, null);
+  }
+
+  private void testDataIntegrityViolation(Exception cause, String messageKey) {
+    // given
+    String nonNullMessageKey = StringUtils.defaultIfBlank(messageKey, "my_test_message_key");
+
+    DataIntegrityViolationException exp = mock(DataIntegrityViolationException.class);
+
+    when(exp.getCause()).thenReturn(cause);
+    when(exp.getMessage()).thenReturn(nonNullMessageKey);
+
+    // when
+    mockMessage(nonNullMessageKey);
+    LocalizedMessage message = errorHandler.handleDataIntegrityViolation(exp);
+
+    // then
+    assertMessage(message, nonNullMessageKey);
   }
 
   private void assertMessage(LocalizedMessage localized, String key) {

@@ -62,4 +62,15 @@ public class EmailVerificationTokenRepositoryIntegrationTest
     repository.saveAndFlush(newToken);
   }
 
+  @Test(expected = DataIntegrityViolationException.class)
+  public void shouldBePossibleToHaveOnlyOneTokenPerEmail() {
+    EmailVerificationToken token = generateInstance();
+    repository.save(token);
+
+    EmailVerificationToken newToken = generateInstance();
+    newToken.setEmailAddress(token.getEmailAddress());
+
+    repository.saveAndFlush(newToken);
+  }
+
 }

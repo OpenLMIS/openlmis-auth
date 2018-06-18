@@ -15,10 +15,14 @@
 
 package org.openlmis.auth.web;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_CONSTRAINT;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_EMAIL_DUPLICATED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_SEND_REQUEST;
 
+import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.openlmis.auth.dto.LocalizedMessageDto;
 import org.openlmis.auth.exception.BindingResultException;
 import org.openlmis.auth.exception.ExternalApiException;
@@ -26,8 +30,8 @@ import org.openlmis.auth.exception.NotFoundException;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.exception.ServerException;
 import org.openlmis.auth.exception.ValidationMessageException;
-import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.util.Message;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -40,6 +44,12 @@ import org.springframework.web.client.HttpStatusCodeException;
  */
 @ControllerAdvice
 public class WebErrorHandling extends AbstractErrorHandling {
+
+  private static final Map<String, String> CONSTRAINT_MAP = new HashMap<>();
+
+  static {
+    CONSTRAINT_MAP.put("email_verification_tokens_emailaddress_uk", ERROR_EMAIL_DUPLICATED);
+  }
 
   /**
    * Handles the {@link HttpStatusCodeException} which signals a problems with sending a request.
@@ -103,6 +113,7 @@ public class WebErrorHandling extends AbstractErrorHandling {
 
   /**
    * Handles persistence exception.
+   *
    * @param ex the persistence exception
    * @return the user-oriented error message.
    */
@@ -111,7 +122,7 @@ public class WebErrorHandling extends AbstractErrorHandling {
   @ResponseBody
   public Message.LocalizedMessage handlePersistenceException(PersistenceException ex) {
     logger.error(ex.getMessage());
-    return getLocalizedMessage(new Message(MessageKeys.ERROR_CONSTRAINT));
+    return getLocalizedMessage(new Message(ERROR_CONSTRAINT));
   }
 
   @ExceptionHandler(ServerException.class)
@@ -128,6 +139,32 @@ public class WebErrorHandling extends AbstractErrorHandling {
   public LocalizedMessageDto handleExternalApiException(ExternalApiException ex) {
     logger.error("An external api error occurred", ex);
     return ex.getMessageLocalized();
+  }
+
+  /**
+   * Handles data integrity violation exception.
+   *
+   * @param dive the data integrity exception
+   * @return the user-oriented error message.
+   */
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public Message.LocalizedMessage handleDataIntegrityViolation(
+      DataIntegrityViolationException dive) {
+
+    logger.info(dive.getMessage());
+
+    if (dive.getCause() instanceof ConstraintViolationException) {
+      ConstraintViolationException cause = (ConstraintViolationException) dive.getCause();
+      String messageKey = CONSTRAINT_MAP.get(cause.getConstraintName());
+
+      if (null != messageKey) {
+        return getLocalizedMessage(messageKey);
+      }
+    }
+
+    return getLocalizedMessage(dive.getMessage());
   }
 
 }

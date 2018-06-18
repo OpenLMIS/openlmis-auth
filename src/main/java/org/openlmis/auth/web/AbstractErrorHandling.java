@@ -40,4 +40,8 @@ abstract class AbstractErrorHandling {
     return messageService.localize(message);
   }
 
+  Message.LocalizedMessage getLocalizedMessage(String message) {
+    return getLocalizedMessage(new Message(message));
+  }
+
 }
