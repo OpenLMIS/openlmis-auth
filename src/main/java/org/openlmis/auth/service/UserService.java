@@ -16,9 +16,11 @@
 package org.openlmis.auth.service;
 
 
+import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
+import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,9 @@ public class UserService {
 
   @Autowired
   private UserReferenceDataService userReferenceDataService;
+
+  @Autowired
+  private EmailVerificationTokenRepository emailVerificationTokenRepository;
 
   @Autowired
   private EmailVerificationNotifier emailVerificationNotifier;
@@ -64,6 +69,8 @@ public class UserService {
   }
 
   private UserDto updateUser(UserDto request) {
+    boolean emailChanged = false;
+
     UserMainDetailsDto referenceDataUserToSave = request.getReferenceDataUser();
     UserMainDetailsDto existingReferenceDataUser = userReferenceDataService
         .findOne(request.getId());
@@ -73,16 +80,18 @@ public class UserService {
       referenceDataUserToSave.setEmail(existingReferenceDataUser.getEmail());
       referenceDataUserToSave.setVerified(existingReferenceDataUser.isVerified());
 
-      request.setVerified(false);
+      emailChanged = true;
     }
 
     User dbUser = userRepository.findOne(request.getId());
     dbUser.updateFrom(request);
 
     dbUser = userRepository.save(dbUser);
+    EmailVerificationToken token = emailVerificationTokenRepository.findOneByUser(dbUser);
     referenceDataUserToSave = userReferenceDataService.putUser(referenceDataUserToSave);
 
-    if (request.hasEmailAddress() && request.isNotEmailVerified()) {
+    if (emailChanged
+        && (null == token || !token.getEmailAddress().equals(request.getEmailAddress()))) {
       emailVerificationNotifier.sendNotification(dbUser, request.getEmailAddress());
     }
 

@@ -35,10 +35,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.auth.DummyUserMainDetailsDto;
+import org.openlmis.auth.EmailVerificationTokenDataBuilder;
 import org.openlmis.auth.SaveAnswer;
+import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
+import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 
@@ -50,6 +53,9 @@ public class UserServiceTest {
 
   @Mock
   private UserReferenceDataService userReferenceDataService;
+
+  @Mock
+  private EmailVerificationTokenRepository emailVerificationTokenRepository;
 
   @Mock
   private EmailVerificationNotifier emailVerificationNotifier;
@@ -107,7 +113,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void shouldReplaceEmailAndVerificationFlagIfEmailWasChanged() {
+  public void shouldSendNotificationIfEmailWasChanged() {
     // given
     when(userRepository.findOne(any(UUID.class))).thenReturn(new User());
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
@@ -120,7 +126,6 @@ public class UserServiceTest {
 
     // then
     verify(userReferenceDataService).putUser(userCaptor.capture());
-    verify(userRepository).save(any(User.class));
     verify(emailVerificationNotifier).sendNotification(any(User.class), eq(request.getEmail()));
 
     UserMainDetailsDto user = userCaptor.getValue();
@@ -129,7 +134,26 @@ public class UserServiceTest {
   }
 
   @Test
-  public void shouldNotReplaceEmailAndVerificationFlagIfEmailWasSetToNull() {
+  public void shouldSendNotificationIfEmailWasChangedAgain() {
+    // given
+    EmailVerificationToken token = new EmailVerificationTokenDataBuilder().build();
+
+    when(emailVerificationTokenRepository.findOneByUser(any(User.class))).thenReturn(token);
+    when(userRepository.findOne(any(UUID.class))).thenReturn(new User());
+    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
+
+    // when
+    UserDto request = new UserDto(new User(), referenceDataUser);
+    request.setEmail("new_email_" + token.getEmailAddress());
+
+    userService.saveUser(request);
+
+    // then
+    verify(emailVerificationNotifier).sendNotification(any(User.class), eq(request.getEmail()));
+  }
+
+  @Test
+  public void shouldNotSendNotificationIfEmailWasSetToNull() {
     // given
     when(userRepository.findOne(any(UUID.class))).thenReturn(new User());
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
@@ -148,6 +172,45 @@ public class UserServiceTest {
     UserMainDetailsDto user = userCaptor.getValue();
     assertThat(user.getEmail()).isEqualTo(null);
     assertThat(user.isVerified()).isEqualTo(referenceDataUser.isVerified());
+  }
+
+  @Test
+  public void shouldNotSendNotificationIfEmailWasNotChanged() {
+    // given
+    when(userRepository.findOne(any(UUID.class))).thenReturn(new User());
+    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
+
+    // when
+    UserDto request = new UserDto(new User(), referenceDataUser);
+    request.setFirstName("my_new_first_name");
+
+    userService.saveUser(request);
+
+    // then
+    verify(userReferenceDataService).putUser(userCaptor.capture());
+    verifyZeroInteractions(emailVerificationNotifier);
+
+    UserMainDetailsDto user = userCaptor.getValue();
+    assertThat(user.getFirstName()).isEqualTo(request.getFirstName());
+  }
+
+  @Test
+  public void shouldNotSendNotificationIfTokenExistsAndEmailsAreSame() {
+    // given
+    EmailVerificationToken token = new EmailVerificationTokenDataBuilder().build();
+
+    when(emailVerificationTokenRepository.findOneByUser(any(User.class))).thenReturn(token);
+    when(userRepository.findOne(any(UUID.class))).thenReturn(new User());
+    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
+
+    // when
+    UserDto request = new UserDto(new User(), referenceDataUser);
+    request.setEmail(token.getEmailAddress());
+
+    userService.saveUser(request);
+
+    // then
+    verifyZeroInteractions(emailVerificationNotifier);
   }
 
   @Test
