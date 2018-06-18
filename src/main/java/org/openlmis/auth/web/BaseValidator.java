@@ -18,7 +18,6 @@ package org.openlmis.auth.web;
 import java.util.Objects;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -27,7 +26,6 @@ import org.springframework.validation.Validator;
 abstract class BaseValidator implements Validator {
 
   @Autowired
-  @Qualifier("messageSource")
   private ExposedMessageSource messageSource;
 
   void rejectIfNotEqual(Errors errors, Object oldData, Object newData, String field,

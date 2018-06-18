@@ -61,6 +61,9 @@ public abstract class MessageKeys {
   public static final String EMAIL_VERIFICATION_EMAIL_BODY = SERVICE_PREFIX
       + ".email.verifyEmail.body";
 
+  public static final String EMAIL_VERIFICATION_SUCCESS = SERVICE_PREFIX
+      + ".email.verifyEmail.success";
+
   public static final String USERS_PASSWORD_RESET_INVALID_VALUE = USERS
       + ".passwordReset.invalidValue";
 

@@ -356,6 +356,8 @@ resourceTypes:
                       responses:
                          200:
                              description: Email verified successfully
+                             body:
+                                 text/plain;charset=UTF-8:
                          400:
                              description: There were issues with email verification.
                              body:

@@ -30,7 +30,6 @@ import org.junit.runner.RunWith;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.i18n.MessageKeys;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -41,7 +40,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class ExposedMessageSourceIntegrationTest {
 
   @Autowired
-  @Qualifier("messageSource")
   private ExposedMessageSource exposedMessageSource;
 
   @Test

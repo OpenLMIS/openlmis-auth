@@ -35,6 +35,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_SUCCESS;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
@@ -63,6 +64,7 @@ import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.exception.PermissionMessageException;
+import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
@@ -79,6 +81,7 @@ import org.openlmis.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.HttpServerErrorException;
@@ -121,6 +124,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @MockBean
   private NotificationService notificationService;
+
+  @Autowired
+  private ExposedMessageSource messageSource;
 
   private User user;
   private UserMainDetailsDto admin = new DummyUserMainDetailsDto();
@@ -329,12 +335,21 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     given(emailVerificationTokenRepository.findOne(token.getId()))
         .willReturn(token);
 
-    startRequest(USER_TOKEN)
+    String expectedResponse = messageSource.getMessage(
+        EMAIL_VERIFICATION_SUCCESS,
+        new Object[]{token.getEmailAddress()},
+        LocaleContextHolder.getLocale());
+
+    String response = startRequest(USER_TOKEN)
         .pathParam(PATH_PARAM_TOKEN, token.getId())
         .when()
         .get(VERIFY_EMAIL_URL)
         .then()
-        .statusCode(HttpStatus.OK.value());
+        .statusCode(HttpStatus.OK.value())
+        .extract()
+        .asString();
+
+    assertThat(response, is(expectedResponse));
 
     assertThat(admin.getEmail(), is(token.getEmailAddress()));
     assertThat(admin.isVerified(), is(true));

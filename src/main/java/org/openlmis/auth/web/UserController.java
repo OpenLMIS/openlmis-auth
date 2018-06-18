@@ -16,6 +16,7 @@
 
 package org.openlmis.auth.web;
 
+import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_SUCCESS;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_VERIFIED;
@@ -248,7 +249,8 @@ public class UserController {
    */
   @GetMapping(value = "/users/auth/verifyEmail/{token}")
   @ResponseStatus(HttpStatus.OK)
-  public void verifyEmail(@PathVariable("token") UUID token) {
+  @ResponseBody
+  public String verifyEmail(@PathVariable("token") UUID token) {
     EmailVerificationToken details = emailVerificationTokenRepository.findOne(token);
     verifyToken(details);
 
@@ -258,6 +260,12 @@ public class UserController {
 
     userReferenceDataService.putUser(user);
     emailVerificationTokenRepository.delete(token);
+
+    return messageSource.getMessage(
+        EMAIL_VERIFICATION_SUCCESS,
+        new Object[]{details.getEmailAddress()},
+        LocaleContextHolder.getLocale()
+    );
   }
 
   /**

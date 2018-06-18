@@ -15,18 +15,16 @@
 
 package org.openlmis.auth.i18n;
 
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.stereotype.Component;
-
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
-@Component
-public class ExposedMessageSourceImpl extends ReloadableResourceBundleMessageSource implements 
-    ExposedMessageSource {
+public class ExposedMessageSourceImpl
+    extends ReloadableResourceBundleMessageSource
+    implements ExposedMessageSource {
 
   protected Properties getAllProperties(Locale locale) {
     clearCacheIncludingAncestors();
