@@ -16,11 +16,8 @@
 
 package org.openlmis.auth.web;
 
-import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_SUCCESS;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_VERIFIED;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
@@ -28,19 +25,15 @@ import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
 import java.util.UUID;
 import javax.validation.Valid;
-import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.EmailVerificationTokenDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
-import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
-import org.openlmis.auth.service.EmailVerificationNotifier;
 import org.openlmis.auth.service.PasswordResetNotifier;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
@@ -65,9 +58,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -98,9 +89,6 @@ public class UserController {
   private PasswordResetTokenRepository passwordResetTokenRepository;
 
   @Autowired
-  private EmailVerificationTokenRepository emailVerificationTokenRepository;
-
-  @Autowired
   private UserReferenceDataService userReferenceDataService;
 
   @Autowired
@@ -111,9 +99,6 @@ public class UserController {
 
   @Autowired
   private UserDtoValidator userDtoValidator;
-
-  @Autowired
-  private EmailVerificationNotifier emailVerificationNotifier;
 
   @Autowired
   private PasswordResetNotifier passwordResetNotifier;
@@ -242,72 +227,6 @@ public class UserController {
     PasswordResetToken token = passwordResetNotifier.createPasswordResetToken(user);
 
     return token.getId();
-  }
-
-  /**
-   * Verify user email address.
-   */
-  @GetMapping(value = "/users/auth/verifyEmail/{token}")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public String verifyEmail(@PathVariable("token") UUID token) {
-    EmailVerificationToken details = emailVerificationTokenRepository.findOne(token);
-    verifyToken(details);
-
-    UserMainDetailsDto user = userReferenceDataService.findOne(details.getUser().getId());
-    user.setEmail(details.getEmailAddress());
-    user.setVerified(true);
-
-    userReferenceDataService.putUser(user);
-    emailVerificationTokenRepository.delete(token);
-
-    return messageSource.getMessage(
-        EMAIL_VERIFICATION_SUCCESS,
-        new Object[]{details.getEmailAddress()},
-        LocaleContextHolder.getLocale()
-    );
-  }
-
-  /**
-   * Get current pending verification email.
-   */
-  @GetMapping(value = "/users/auth/verifyEmail")
-  @ResponseBody
-  public EmailVerificationTokenDto getVerificationEmail(@RequestParam("userId") UUID userId) {
-    permissionService.canVerifyEmail(userId);
-    User user = userRepository.findOne(userId);
-    EmailVerificationToken token = emailVerificationTokenRepository.findOneByUser(user);
-    return null == token
-        ? null
-        : new EmailVerificationTokenDto(token.getEmailAddress(), token.getExpiryDate());
-  }
-
-  /**
-   * Generates token which can be used to verify user's email.
-   */
-  @RequestMapping(value = "/users/auth/verifyEmail", method = RequestMethod.POST)
-  @ResponseStatus(HttpStatus.OK)
-  public void sendVerificationEmail(@RequestParam(value = "userId") UUID userId) {
-    permissionService.canVerifyEmail(userId);
-
-    User user =  userRepository.findOne(userId);
-    UserMainDetailsDto referenceUser = userReferenceDataService.findOne(userId);
-
-    if (null == user || null == referenceUser) {
-      throw new ValidationMessageException(USER_NOT_FOUND);
-    }
-
-    EmailVerificationToken existsToken = emailVerificationTokenRepository.findOneByUser(user);
-
-    if (null == existsToken) {
-      if (referenceUser.hasEmail()) {
-        throw new ValidationMessageException(ERROR_VERIFY_EMAIL_USER_VERIFIED);
-      } else {
-        throw new ValidationMessageException(ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL);
-      }
-    }
-
-    emailVerificationNotifier.sendNotification(user, existsToken.getEmailAddress());
   }
 
   private void verifyToken(ExpirationToken token) {

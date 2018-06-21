@@ -190,36 +190,6 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void userShouldBeAbleToResendVerificationEmail() {
-    permissionService.canVerifyEmail(user.getId());
-
-    verify(authenticationHelper).getCurrentUser();
-    verify(authenticationHelper, never()).getRight(anyString());
-    verifyZeroInteractions(userReferenceDataService, apiKeySettings);
-  }
-
-  @Test
-  public void userWithoutRightShouldBeUnableToResendVerificationEmail() {
-    when(securityContext.getAuthentication()).thenReturn(userClient);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
-        .thenReturn(new ResultDto<>(false));
-
-    exception.expect(PermissionMessageException.class);
-    exception.expectMessage(new Message(ERROR_NO_FOLLOWING_PERMISSION, right.getName()).toString());
-
-    permissionService.canVerifyEmail(UUID.randomUUID());
-  }
-
-  @Test
-  public void userWithRightShouldBeUnableToResendVerificationEmail() {
-    when(securityContext.getAuthentication()).thenReturn(userClient);
-    when(userReferenceDataService.hasRight(user.getId(), right.getId()))
-        .thenReturn(new ResultDto<>(true));
-
-    permissionService.canVerifyEmail(UUID.randomUUID());
-  }
-
-  @Test
   public void shouldReturnTrueIfUserHasRight() {
     when(securityContext.getAuthentication()).thenReturn(userClient);
     when(userReferenceDataService.hasRight(user.getId(), right.getId()))

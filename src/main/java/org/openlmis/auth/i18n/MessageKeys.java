@@ -45,24 +45,10 @@ public abstract class MessageKeys {
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
       + ".authorization.noFollowingPermission";
 
-  public static final String ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL = ERROR_PREFIX
-      + ".users.verifyEmail.missingEmail";
-
-  public static final String ERROR_VERIFY_EMAIL_USER_VERIFIED = ERROR_PREFIX
-      + ".users.verifyEmail.userVerified";
-
   public static final String PASSWORD_RESET_EMAIL_SUBJECT = SERVICE_PREFIX
       + ".email.resetPassword.subject";
   public static final String PASSWORD_RESET_EMAIL_BODY = SERVICE_PREFIX
       + ".email.resetPassword.body";
-
-  public static final String EMAIL_VERIFICATION_EMAIL_SUBJECT = SERVICE_PREFIX
-      + ".email.verifyEmail.subject";
-  public static final String EMAIL_VERIFICATION_EMAIL_BODY = SERVICE_PREFIX
-      + ".email.verifyEmail.body";
-
-  public static final String EMAIL_VERIFICATION_SUCCESS = SERVICE_PREFIX
-      + ".email.verifyEmail.success";
 
   public static final String USERS_PASSWORD_RESET_INVALID_VALUE = USERS
       + ".passwordReset.invalidValue";

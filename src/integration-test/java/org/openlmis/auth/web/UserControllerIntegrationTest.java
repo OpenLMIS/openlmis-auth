@@ -29,22 +29,11 @@ import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.openlmis.auth.i18n.MessageKeys.EMAIL_VERIFICATION_SUCCESS;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_VERIFIED;
-import static org.openlmis.auth.i18n.MessageKeys.ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.service.ExpirationTokenNotifier.TOKEN_VALIDITY_HOURS;
-import static org.openlmis.auth.web.TestWebData.Fields.MESSAGE_KEY;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
@@ -55,8 +44,6 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.auth.DummyUserMainDetailsDto;
-import org.openlmis.auth.EmailVerificationTokenDataBuilder;
-import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.LocalizedMessageDto;
@@ -64,13 +51,9 @@ import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.exception.PermissionMessageException;
-import org.openlmis.auth.i18n.ExposedMessageSource;
-import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
-import org.openlmis.auth.service.EmailVerificationNotifier;
 import org.openlmis.auth.service.PermissionService;
-import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
@@ -80,8 +63,6 @@ import org.openlmis.util.NotificationRequest;
 import org.openlmis.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.HttpServerErrorException;
@@ -95,14 +76,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String CHANGE_PASS_URL = RESOURCE_URL + "/changePassword";
   private static final String RESET_TOKEN_PASS_URL = RESOURCE_URL + "/passwordResetToken";
   private static final String LOGOUT_URL = RESOURCE_URL + "/logout";
-  private static final String SEND_VERIFICATION_EMAIL_URL = RESOURCE_URL + "/verifyEmail";
-  private static final String VERIFY_EMAIL_URL = SEND_VERIFICATION_EMAIL_URL + "/{token}";
 
   private static final String TOKEN_URL = "/api/oauth/token";
 
-  private static final String PATH_PARAM_TOKEN = "token";
-
-  private static final String QUERY_PARAM_USER_ID = "userId";
 
   @Autowired
   private UserRepository userRepository;
@@ -111,22 +87,10 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private PasswordResetTokenRepository passwordResetTokenRepository;
 
   @MockBean
-  private EmailVerificationTokenRepository emailVerificationTokenRepository;
-
-  @MockBean
   private PermissionService permissionService;
-
-  @SpyBean
-  private UserService userService;
-
-  @SpyBean
-  private EmailVerificationNotifier emailVerificationNotifier;
 
   @MockBean
   private NotificationService notificationService;
-
-  @Autowired
-  private ExposedMessageSource messageSource;
 
   private User user;
   private UserMainDetailsDto admin = new DummyUserMainDetailsDto();
@@ -324,178 +288,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     passwordResetToken()
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
-  }
-
-  @Test
-  public void shouldVerifyEmail() {
-    EmailVerificationToken token = new EmailVerificationTokenDataBuilder()
-        .withUser(user)
-        .build();
-
-    given(emailVerificationTokenRepository.findOne(token.getId()))
-        .willReturn(token);
-
-    String expectedResponse = messageSource.getMessage(
-        EMAIL_VERIFICATION_SUCCESS,
-        new Object[]{token.getEmailAddress()},
-        LocaleContextHolder.getLocale());
-
-    String response = startRequest(USER_TOKEN)
-        .pathParam(PATH_PARAM_TOKEN, token.getId())
-        .when()
-        .get(VERIFY_EMAIL_URL)
-        .then()
-        .statusCode(HttpStatus.OK.value())
-        .extract()
-        .asString();
-
-    assertThat(response, is(expectedResponse));
-
-    assertThat(admin.getEmail(), is(token.getEmailAddress()));
-    assertThat(admin.isVerified(), is(true));
-
-    verify(userReferenceDataService).putUser(admin);
-    verify(emailVerificationTokenRepository).delete(token.getId());
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-  }
-
-  @Test
-  public void shouldReturnBadRequestIfTokenDoesNotExist() {
-    given(emailVerificationTokenRepository.findOne(any(UUID.class)))
-        .willReturn(null);
-
-    startRequest(USER_TOKEN)
-        .pathParam(PATH_PARAM_TOKEN, UUID.randomUUID())
-        .when()
-        .get(VERIFY_EMAIL_URL)
-        .then()
-        .statusCode(HttpStatus.BAD_REQUEST.value())
-        .body(MESSAGE_KEY, equalTo(ERROR_TOKEN_INVALID));
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-  }
-
-  @Test
-  public void shouldReturnBadRequestIfTokenExpired() {
-    EmailVerificationToken token = new EmailVerificationTokenDataBuilder()
-        .withExpiredDate()
-        .build();
-
-    given(emailVerificationTokenRepository.findOne(token.getId()))
-        .willReturn(token);
-
-    startRequest(USER_TOKEN)
-        .pathParam(PATH_PARAM_TOKEN, token.getId())
-        .when()
-        .get(VERIFY_EMAIL_URL)
-        .then()
-        .statusCode(HttpStatus.BAD_REQUEST.value())
-        .body(MESSAGE_KEY, equalTo(ERROR_TOKEN_EXPIRED));
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-  }
-
-  @Test
-  public void shouldGetPendingVerificationEmail() {
-    EmailVerificationToken token = new EmailVerificationTokenDataBuilder()
-        .withExpiredDate()
-        .build();
-
-    given(emailVerificationTokenRepository.findOneByUser(any(User.class)))
-        .willReturn(token);
-
-    startRequest(USER_TOKEN)
-        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
-        .when()
-        .get(SEND_VERIFICATION_EMAIL_URL)
-        .then()
-        .statusCode(HttpStatus.OK.value());
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-  }
-
-  @Test
-  public void shouldResendVerificationEmail() {
-    EmailVerificationToken token = new EmailVerificationTokenDataBuilder().build();
-
-    given(emailVerificationTokenRepository.findOneByUser(any(User.class))).willReturn(token);
-    doNothing().when(emailVerificationNotifier).sendNotification(any(User.class), anyString());
-
-    startRequest(USER_TOKEN)
-        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
-        .when()
-        .post(SEND_VERIFICATION_EMAIL_URL)
-        .then()
-        .statusCode(HttpStatus.OK.value());
-
-    verify(emailVerificationNotifier)
-        .sendNotification(any(User.class), eq(token.getEmailAddress()));
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-  }
-
-  @Test
-  public void shouldNotResendVerificationEmailIfUserHasNoPermissions() {
-    PermissionMessageException ex = buildUserManagerPermissionError();
-    doThrow(ex).when(permissionService).canVerifyEmail(admin.getId());
-
-    startRequest(USER_TOKEN)
-        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
-        .when()
-        .post(SEND_VERIFICATION_EMAIL_URL)
-        .then()
-        .statusCode(HttpStatus.FORBIDDEN.value())
-        .body(MESSAGE_KEY, is(ERROR_NO_FOLLOWING_PERMISSION));
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(userService);
-  }
-
-  @Test
-  public void shouldNotResendVerificationEmailIfUserNotFound() {
-    startRequest(USER_TOKEN)
-        .queryParam(QUERY_PARAM_USER_ID, UUID.randomUUID())
-        .when()
-        .post(SEND_VERIFICATION_EMAIL_URL)
-        .then()
-        .statusCode(HttpStatus.BAD_REQUEST.value())
-        .body(MESSAGE_KEY, equalTo(USER_NOT_FOUND));
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(userService);
-  }
-
-  @Test
-  public void shouldNotResendVerificationEmailIfUserHasNoEmail() {
-    admin.setEmail(null);
-
-    startRequest(USER_TOKEN)
-        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
-        .when()
-        .post(SEND_VERIFICATION_EMAIL_URL)
-        .then()
-        .statusCode(HttpStatus.BAD_REQUEST.value())
-        .body(MESSAGE_KEY, equalTo(ERROR_VERIFY_EMAIL_USER_WITHOUT_EMAIL));
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(userService);
-  }
-
-  @Test
-  public void shouldNotResendVerificationEmailIfUserEmailHasBeenVerified() {
-    admin.setVerified(true);
-
-    startRequest(USER_TOKEN)
-        .queryParam(QUERY_PARAM_USER_ID, admin.getId())
-        .when()
-        .post(SEND_VERIFICATION_EMAIL_URL)
-        .then()
-        .statusCode(HttpStatus.BAD_REQUEST.value())
-        .body(MESSAGE_KEY, equalTo(ERROR_VERIFY_EMAIL_USER_VERIFIED));
-
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verifyZeroInteractions(userService);
   }
 
   private void checkErrorResponseForPasswordReset(String password, String expectedMessage) {

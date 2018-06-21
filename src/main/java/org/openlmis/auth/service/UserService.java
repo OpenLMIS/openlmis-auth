@@ -16,11 +16,9 @@
 package org.openlmis.auth.service;
 
 
-import org.openlmis.auth.domain.EmailVerificationToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
-import org.openlmis.auth.repository.EmailVerificationTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +33,6 @@ public class UserService {
   @Autowired
   private UserReferenceDataService userReferenceDataService;
 
-  @Autowired
-  private EmailVerificationTokenRepository emailVerificationTokenRepository;
-
-  @Autowired
-  private EmailVerificationNotifier emailVerificationNotifier;
-
   /**
    * Creates a new user or updates an existing one.
    *
@@ -52,8 +44,6 @@ public class UserService {
   }
 
   private UserDto addUser(UserDto request) {
-    request.setVerified(false);
-
     User dbUser = User.newInstance(request);
     dbUser = userRepository.save(dbUser);
 
@@ -61,39 +51,17 @@ public class UserService {
     UserMainDetailsDto newReferenceDataUser = request.getReferenceDataUser();
     newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
 
-    if (request.hasEmailAddress() && request.isNotEmailVerified()) {
-      emailVerificationNotifier.sendNotification(dbUser, request.getEmailAddress());
-    }
-
     return new UserDto(dbUser, newReferenceDataUser);
   }
 
   private UserDto updateUser(UserDto request) {
-    boolean emailChanged = false;
-
     UserMainDetailsDto referenceDataUserToSave = request.getReferenceDataUser();
-    UserMainDetailsDto existingReferenceDataUser = userReferenceDataService
-        .findOne(request.getId());
-
-    if (request.hasEmailAddress()
-        && !referenceDataUserToSave.getEmail().equals(existingReferenceDataUser.getEmail())) {
-      referenceDataUserToSave.setEmail(existingReferenceDataUser.getEmail());
-      referenceDataUserToSave.setVerified(existingReferenceDataUser.isVerified());
-
-      emailChanged = true;
-    }
 
     User dbUser = userRepository.findOne(request.getId());
     dbUser.updateFrom(request);
 
     dbUser = userRepository.save(dbUser);
-    EmailVerificationToken token = emailVerificationTokenRepository.findOneByUser(dbUser);
     referenceDataUserToSave = userReferenceDataService.putUser(referenceDataUserToSave);
-
-    if (emailChanged
-        && (null == token || !token.getEmailAddress().equals(request.getEmailAddress()))) {
-      emailVerificationNotifier.sendNotification(dbUser, request.getEmailAddress());
-    }
 
     return new UserDto(dbUser, referenceDataUserToSave);
   }
