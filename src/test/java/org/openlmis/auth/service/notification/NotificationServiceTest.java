@@ -23,10 +23,14 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.auth.service.notification.NotificationChannelDto.EMAIL;
 
+import java.net.URI;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.openlmis.auth.UserDataBuilder;
+import org.openlmis.auth.domain.User;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.service.BaseCommunicationServiceTest;
 import org.openlmis.util.NotificationRequest;
@@ -35,22 +39,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpServerErrorException;
 
-import java.net.URI;
-
 public class NotificationServiceTest extends BaseCommunicationServiceTest {
+
+  private static final String SUBJECT = "subject";
+  private static final String PLAIN_CONTENT = "plainContent";
 
   @Captor
   private ArgumentCaptor<HttpEntity<NotificationRequest>> captor;
 
+  private User user = new UserDataBuilder().build();
+
   @Test
   public void shouldSendNotification() {
-    NotificationRequest request = new NotificationRequest("from", "to", "subject", "plainContent");
-
     NotificationService service = prepareService();
-    service.send(request);
+    service.notify(user, SUBJECT, PLAIN_CONTENT);
 
     verify(restTemplate)
-            .postForEntity(uriCaptor.capture(), captor.capture(), eq(NotificationRequest.class));
+            .postForEntity(uriCaptor.capture(), captor.capture(), eq(NotificationDto.class));
 
     URI uri = uriCaptor.getValue();
     String url = service.getServiceUrl() + service.getUrl();
@@ -59,28 +64,27 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
     HttpEntity entity = captor.getValue();
     Object body = entity.getBody();
 
-    assertThat(body, instanceOf(NotificationRequest.class));
+    assertThat(body, instanceOf(NotificationDto.class));
 
-    NotificationRequest sent = (NotificationRequest) body;
+    NotificationDto sent = (NotificationDto) body;
 
-    assertThat(sent.getFrom(), is(equalTo(request.getFrom())));
-    assertThat(sent.getTo(), is(equalTo(request.getTo())));
-    assertThat(sent.getSubject(), is(equalTo(request.getSubject())));
-    assertThat(sent.getContent(), is(equalTo(request.getContent())));
+    assertThat(sent.getUserId(), is(user.getId()));
+    assertThat(sent.getMessages().keySet().size(), is(1));
+
+    assertThat(sent.getMessages().get(EMAIL.toString()).getSubject(), is(SUBJECT));
+    assertThat(sent.getMessages().get(EMAIL.toString()).getBody(), is(PLAIN_CONTENT));
 
     assertAuthHeader(entity);
   }
 
   @Test(expected = HttpServerErrorException.class)
   public void shouldReturnFalseIfCannotSendNotification() {
-    NotificationRequest request = new NotificationRequest("from", "to", "subject", "plainContent");
-
     when(restTemplate
-            .postForEntity(any(URI.class), any(HttpEntity.class), eq(NotificationRequest.class)))
+            .postForEntity(any(URI.class), any(HttpEntity.class), eq(NotificationDto.class)))
             .thenThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY));
 
     NotificationService service = prepareService();
-    service.send(request);
+    service.notify(user, SUBJECT, PLAIN_CONTENT);
   }
 
   @Override

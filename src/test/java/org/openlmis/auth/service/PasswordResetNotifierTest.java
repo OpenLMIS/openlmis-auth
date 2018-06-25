@@ -79,7 +79,7 @@ public class PasswordResetNotifierTest extends ExpirationTokenNotifierTest<Passw
     // then
     verify(passwordResetTokenRepository).save(tokenCaptor.capture());
     verifyNotificationRequest(
-        email, PASSWORD_RESET_EMAIL_SUBJECT, PASSWORD_RESET_EMAIL_BODY
+        user, PASSWORD_RESET_EMAIL_SUBJECT, PASSWORD_RESET_EMAIL_BODY
     );
 
     PasswordResetToken token = tokenCaptor.getValue();

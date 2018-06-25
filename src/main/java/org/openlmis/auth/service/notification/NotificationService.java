@@ -15,42 +15,57 @@
 
 package org.openlmis.auth.service.notification;
 
+import static org.openlmis.auth.service.notification.NotificationChannelDto.EMAIL;
+
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Getter;
+import org.openlmis.auth.domain.User;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.util.RequestHelper;
-import org.openlmis.util.NotificationRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NotificationService extends BaseCommunicationService<NotificationRequest> {
+public class NotificationService extends BaseCommunicationService<NotificationDto> {
 
   @Getter
   @Value("${service.url}")
   private String serviceUrl;
 
   protected String getUrl() {
-    return "/api/notification";
+    return "/api/notifications";
   }
 
-  protected Class<NotificationRequest> getResultClass() {
-    return NotificationRequest.class;
+  protected Class<NotificationDto> getResultClass() {
+    return NotificationDto.class;
   }
 
-  protected Class<NotificationRequest[]> getArrayResultClass() {
-    return NotificationRequest[].class;
+  protected Class<NotificationDto[]> getArrayResultClass() {
+    return NotificationDto[].class;
   }
 
   /**
-    * Send a notification request.
-    *
-    * @param request details about notification.
-    */
-  public void send(NotificationRequest request) {
+   * Send an email notification.
+   *
+   * @param user    receiver of the notification
+   * @param subject subject of the email
+   * @param content content of the email
+   */
+  public void notify(User user, String subject, String content) {
     String url = getServiceUrl() + getUrl();
+
+    NotificationDto request = buildNotification(user, subject, content);
 
     restTemplate.postForEntity(RequestHelper.createUri(url),
             RequestHelper.createEntity(obtainAccessToken(), request),
-            NotificationRequest.class);
+            NotificationDto.class);
+  }
+
+  private NotificationDto buildNotification(User user, String subject, String content) {
+    Map<String, MessageDto> messages = new HashMap<>();
+    messages.put(EMAIL.toString(), new MessageDto(subject, content, true));
+
+    return new NotificationDto(user.getId(), messages);
   }
 }

@@ -37,15 +37,12 @@ public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordReset
    * Sends password reset email.
    *
    * @param user      the user whose password is being reset
-   * @param email     recipient's email address
    */
-  public void sendNotification(User user, String email) {
+  public void sendNotification(User user) {
     PasswordResetToken token = createPasswordResetToken(user);
 
     sendEmail(
-        user, email, token,
-        PASSWORD_RESET_EMAIL_SUBJECT, PASSWORD_RESET_EMAIL_BODY,
-        RESET_PASSWORD_URL
+        user, token, PASSWORD_RESET_EMAIL_SUBJECT, PASSWORD_RESET_EMAIL_BODY, RESET_PASSWORD_URL
     );
   }
 

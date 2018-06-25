@@ -59,7 +59,6 @@ import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.auth.web.TestWebData.Fields;
 import org.openlmis.auth.web.TestWebData.GrantTypes;
-import org.openlmis.util.NotificationRequest;
 import org.openlmis.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -104,7 +103,11 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     given(userReferenceDataService.putUser(any(UserMainDetailsDto.class)))
         .willReturn(admin);
 
-    willDoNothing().given(notificationService).send(any(NotificationRequest.class));
+    willDoNothing().given(notificationService).notify(
+        any(User.class),
+        any(String.class),
+        any(String.class)
+    );
 
     passwordResetTokenRepository.deleteAll();
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -260,7 +263,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   public void testForgotPasswordRollback() {
     willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
         .given(notificationService)
-        .send(any(NotificationRequest.class));
+        .notify(any(User.class), any(String.class), any(String.class));
 
     forgotPassword().statusCode(500);
 

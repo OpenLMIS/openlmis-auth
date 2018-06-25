@@ -15,7 +15,6 @@
 
 package org.openlmis.auth.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -26,8 +25,6 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.auth.DummyUserMainDetailsDto;
@@ -37,7 +34,6 @@ import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.ExpirationTokenRepository;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
-import org.openlmis.util.NotificationRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class ExpirationTokenNotifierTest<T extends ExpirationToken> {
@@ -50,9 +46,6 @@ public abstract class ExpirationTokenNotifierTest<T extends ExpirationToken> {
 
   @Mock
   private ExposedMessageSource messageSource;
-
-  @Captor
-  private ArgumentCaptor<NotificationRequest> notificationRequestCaptor;
 
   @Mock
   User user;
@@ -88,13 +81,7 @@ public abstract class ExpirationTokenNotifierTest<T extends ExpirationToken> {
     verify(repository).flush();
   }
 
-  void verifyNotificationRequest(String receiverEmail, String subject, String content) {
-    verify(notificationService).send(notificationRequestCaptor.capture());
-
-    NotificationRequest request = notificationRequestCaptor.getValue();
-    assertThat(request.getFrom()).isEqualTo(ExpirationTokenNotifier.MAIL_ADDRESS);
-    assertThat(request.getTo()).isEqualTo(receiverEmail);
-    assertThat(request.getSubject()).isEqualTo(subject);
-    assertThat(request.getContent()).isEqualTo(content);
+  void verifyNotificationRequest(User user, String subject, String content) {
+    verify(notificationService).notify(user, subject, content);
   }
 }
