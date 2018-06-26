@@ -189,7 +189,7 @@ public class UserController {
     }
 
     User user = userRepository.findOne(refDataUser.getId());
-    passwordResetNotifier.sendNotification(user, email);
+    passwordResetNotifier.sendNotification(user);
   }
 
   /**

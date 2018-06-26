@@ -44,8 +44,6 @@ public class PasswordResetNotifierTest extends ExpirationTokenNotifierTest<Passw
   @Captor
   private ArgumentCaptor<PasswordResetToken> tokenCaptor;
 
-  private String email = "example@test.org";
-
   @Override
   @Before
   public void setUp() {
@@ -74,7 +72,7 @@ public class PasswordResetNotifierTest extends ExpirationTokenNotifierTest<Passw
   @Test
   public void shouldSendNotification() {
     // when
-    notifier.sendNotification(user, email);
+    notifier.sendNotification(user);
 
     // then
     verify(passwordResetTokenRepository).save(tokenCaptor.capture());
