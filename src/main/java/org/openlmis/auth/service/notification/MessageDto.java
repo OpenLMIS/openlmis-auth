@@ -31,5 +31,4 @@ import lombok.ToString;
 public final class MessageDto {
   private String subject;
   private String body;
-  private Boolean important;
 }

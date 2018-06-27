@@ -33,4 +33,5 @@ import lombok.ToString;
 public final class NotificationDto {
   private UUID userId;
   private Map<String, MessageDto> messages;
+  private Boolean important;
 }

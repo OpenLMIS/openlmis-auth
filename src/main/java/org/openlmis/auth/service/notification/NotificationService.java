@@ -64,8 +64,8 @@ public class NotificationService extends BaseCommunicationService<NotificationDt
 
   private NotificationDto buildNotification(User user, String subject, String content) {
     Map<String, MessageDto> messages = new HashMap<>();
-    messages.put(EMAIL.toString(), new MessageDto(subject, content, true));
+    messages.put(EMAIL.toString(), new MessageDto(subject, content));
 
-    return new NotificationDto(user.getId(), messages);
+    return new NotificationDto(user.getId(), messages, true);
   }
 }
