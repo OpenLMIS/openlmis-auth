@@ -81,7 +81,6 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
         .antMatchers(
             "/api/users/auth/forgotPassword",
             "/api/users/auth/changePassword",
-            "/api/users/auth/verifyEmail/*",
             "/webjars/**",
             "/static/auth/docs/index.html",
             "/generated/api-definition.json"
