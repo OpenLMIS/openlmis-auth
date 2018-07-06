@@ -1,0 +1,3 @@
+clientid,clientsecret,authorities,authorizedgranttypes,resourceids,scope,accesstokenvalidity
+tableau-wdc,changeme,TRUSTED_CLIENT,implicit,,"read,write",
+api-key-client-20180307060858052,YXBpLWtleS1jbGllbnQtMjAxODAzMDcwNjA4NTgwNTI=,TRUSTED_CLIENT,client_credentials,,"read,write",0

@@ -54,13 +54,15 @@ dependencies {
     compile "org.slf4j:slf4j-ext:1.7.25"
     compile 'com.google.guava:guava:23.3-jre'
     compile 'commons-validator:commons-validator:1.6'
+    compile 'org.apache.commons:commons-csv:1.4'
+    compile 'org.apache.commons:commons-collections4:4.1'
+    compile 'commons-io:commons-io:2.5'
 
     testCompile 'io.rest-assured:rest-assured:3.0.0'
     testCompile 'io.rest-assured:json-schema-validator:3.0.0'
     testCompile 'io.rest-assured:spring-mock-mvc:3.0.0'
     testCompile "com.jayway.restassured:rest-assured:2.7.0"
     testCompile "guru.nidi.raml:raml-tester:0.8.9"
-
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"
@@ -88,12 +90,6 @@ sourceSets {
             srcDir file('src/integration-test/java')
         }
         resources.srcDir file('src/integration-test/resources')
-    }
-
-    main {
-        resources {
-            srcDirs "src/main/resources", "build/data"
-        }
     }
 }
 
@@ -191,11 +187,6 @@ tasks.withType(Pmd){
     }
 }
 
-task demoDataSeed(type:Exec) {
-    executable "./demo-data/demo_seed.sh"
-    args "demo-data", "build/data/demo-data", "demo-data/generator.js"
-}
-
 task checkApiIsRaml(type:Exec) {
     executable "raml-cop"
     args "src/main/resources/api-definition.yaml"
@@ -209,8 +200,6 @@ configure(checkApiIsRaml) {
 apply from: "documentation.gradle"
 
 processResources {
-    dependsOn demoDataSeed
-
     // we want the generated HTML spec file included in the output jar
     finalizedBy ramlToHtml
 

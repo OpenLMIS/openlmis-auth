@@ -75,13 +75,14 @@ https://github.com/OpenLMIS/openlmis-template-service/blob/master/README.md#inte
 See the Debugging section in the Service Template README at
 https://github.com/OpenLMIS/openlmis-template-service/blob/master/README.md#debugging.
 
+
 ## Production by Spring Profile
 
-By default when this service is started, it will clean it's schema in the database before migrating
-it.  This is meant for use during the normal development cycle.  For production data, this obviously
-is not desired as it would remove all of the production data.  To change the default clean & migrate
+By default when this service is started, it will clean its schema in the database before migrating
+it. This is meant for use during the normal development cycle. For production data, this obviously
+is not desired as it would remove all of the production data. To change the default clean & migrate
 behavior to just be a migrate behavior (which is still desired for production use), we use a Spring
-Profile named `production`.  To use this profile, it must be marked as Active.  The easiest way to
+Profile named `production`. To use this profile, it must be marked as Active. The easiest way to
 do so is to add to the .env file:
 
 ```java
@@ -93,9 +94,10 @@ expected use-case for this is when this service is deployed through the
 [Reference Distribution](https://github.com/openlmis/openlmis-ref-distro).
 
 ### Demo Data
-A basic set of demo data is included with this service, defined under `./demo-data/`.  This data may
-be optionally loaded by using the `demo-data` Spring Profile.  Setting this profile may be done by
-setting the `spring.profiles.active` environment variable.
+A basic set of demo data is included with this service, defined under 
+`./src/main/resources/db/demo-data/`.  This data may be optionally loaded by using the `demo-data` 
+Spring Profile.  Setting this profile may be done by setting the `spring.profiles.active` 
+environment variable.
 
 When building locally from the development environment, you may run:
 

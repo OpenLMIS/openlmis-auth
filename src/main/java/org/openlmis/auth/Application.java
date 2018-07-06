@@ -15,6 +15,7 @@
 
 package org.openlmis.auth;
 
+import org.flywaydb.core.api.callback.FlywayCallback;
 import org.openlmis.auth.i18n.ExposedMessageSourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ import java.util.Locale;
 @ImportResource("classpath*:/applicationContext.xml")
 public class Application {
 
-  private Logger logger = LoggerFactory.getLogger(Application.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
   @Value("${defaultLocale}")
   private Locale locale;
@@ -82,13 +83,16 @@ public class Application {
   @Bean
   @Profile("!production")
   public FlywayMigrationStrategy cleanMigrationStrategy() {
-    FlywayMigrationStrategy strategy = flyway -> {
-      logger.info("Using clean-migrate flyway strategy -- production profile not active");
+    return flyway -> {
+      LOGGER.info("Using clean-migrate flyway strategy -- production profile not active");
+      flyway.setCallbacks(flywayCallback());
       flyway.clean();
       flyway.migrate();
     };
-
-    return strategy;
   }
 
+  @Bean
+  public FlywayCallback flywayCallback() {
+    return new ExportSchemaFlywayCallback();
+  }
 }

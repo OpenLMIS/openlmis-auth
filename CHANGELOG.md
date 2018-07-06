@@ -10,6 +10,7 @@ Improvements and new functionality which are backwards-compatible:
 * [OLMIS-2923](https://openlmis.atlassian.net/browse/OLMIS-2923): Updated demo data loading approach
 * [OLMIS-4731](https://openlmis.atlassian.net/browse/OLMIS-4731): Enabled current user to change its password
 * [OLMIS-4905](https://openlmis.atlassian.net/browse/OLMIS-4905): Updated notification service to use v2 endpoint.
+* [OLMIS-4870](https://openlmis.atlassian.net/browse/OLMIS-4870): Move auth to new demo data strategy.
 
 Bug fixes that are backwards-compatible:
 * [OLMIS-4550](https://openlmis.atlassian.net/browse/OLMIS-4550): Set default content type to responses without it
