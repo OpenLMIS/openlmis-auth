@@ -18,9 +18,7 @@ package org.openlmis.auth.service;
 
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
-import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.repository.UserRepository;
-import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +27,6 @@ public class UserService {
 
   @Autowired
   private UserRepository userRepository;
-
-  @Autowired
-  private UserReferenceDataService userReferenceDataService;
 
   /**
    * Creates a new user or updates an existing one.
@@ -47,23 +42,24 @@ public class UserService {
     User dbUser = User.newInstance(request);
     dbUser = userRepository.save(dbUser);
 
-    request.setId(dbUser.getId());
-    UserMainDetailsDto newReferenceDataUser = request.getReferenceDataUser();
-    newReferenceDataUser = userReferenceDataService.putUser(newReferenceDataUser);
-
-    return new UserDto(dbUser, newReferenceDataUser);
+    return toDto(dbUser, request);
   }
 
   private UserDto updateUser(UserDto request) {
-    UserMainDetailsDto referenceDataUserToSave = request.getReferenceDataUser();
-
     User dbUser = userRepository.findOne(request.getId());
     dbUser.updateFrom(request);
 
     dbUser = userRepository.save(dbUser);
-    referenceDataUserToSave = userReferenceDataService.putUser(referenceDataUserToSave);
 
-    return new UserDto(dbUser, referenceDataUserToSave);
+    return toDto(dbUser, request);
+  }
+
+  private UserDto toDto(User user, UserDto request) {
+    UserDto response = new UserDto();
+    user.export(response);
+    response.setPassword(request.getPassword());
+
+    return response;
   }
 
 }

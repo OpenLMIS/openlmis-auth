@@ -15,7 +15,7 @@
 
 package org.openlmis.auth.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -23,68 +23,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public final class UserDto extends UserMainDetailsDto implements User.Importer {
-
-  @Getter
-  @Setter
+@EqualsAndHashCode
+@ToString
+public final class UserDto implements User.Importer, User.Exporter {
+  private UUID id;
+  private String username;
   private String password;
-
-  @Getter
-  @Setter
   private Boolean enabled;
-
-  /**
-   * Creates a new instance based on data from auth and reference data users.
-   */
-  public UserDto(User user, UserMainDetailsDto referenceDataUser) {
-    super(
-        referenceDataUser.getUsername(), referenceDataUser.getFirstName(),
-        referenceDataUser.getLastName(), referenceDataUser.getEmail(),
-        referenceDataUser.getJobTitle(), referenceDataUser.getPhoneNumber(),
-        referenceDataUser.getTimezone(), referenceDataUser.getHomeFacilityId(),
-        referenceDataUser.isVerified(), referenceDataUser.isActive(),
-        referenceDataUser.isLoginRestricted(), referenceDataUser.getAllowNotify(),
-        referenceDataUser.getExtraData(), referenceDataUser.getRoleAssignments()
-    );
-
-    setId(referenceDataUser.getId());
-    this.password = user.getPassword();
-    this.enabled = user.getEnabled();
-  }
-
-  public boolean hasEmailAddress() {
-    return hasEmail();
-  }
-
-  public String getEmailAddress() {
-    return getEmail();
-  }
-
-  public boolean isNotEmailVerified() {
-    return !isVerified();
-  }
-
-  /**
-   * Gets a reference data user data part of the given user request body.
-   */
-  @JsonIgnore
-  public UserMainDetailsDto getReferenceDataUser() {
-    String email = hasEmailAddress() ? getEmailAddress() : null;
-
-    UserMainDetailsDto data = new UserMainDetailsDto(
-        getUsername(), getFirstName(), getLastName(), email, getJobTitle(), getPhoneNumber(),
-        getTimezone(), getHomeFacilityId(), isVerified(), isActive(), isLoginRestricted(),
-        getAllowNotify(), getExtraData(), getRoleAssignments()
-    );
-    data.setId(getId());
-
-    return data;
-  }
-
 }

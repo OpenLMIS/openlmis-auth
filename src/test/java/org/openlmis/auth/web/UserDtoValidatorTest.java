@@ -18,25 +18,13 @@ package org.openlmis.auth.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_USER_NOT_FOUND;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
-import static org.openlmis.auth.web.UserDtoValidator.ACTIVE;
-import static org.openlmis.auth.web.UserDtoValidator.ALLOW_NOTIFY;
-import static org.openlmis.auth.web.UserDtoValidator.EMAIL;
 import static org.openlmis.auth.web.UserDtoValidator.ENABLED;
-import static org.openlmis.auth.web.UserDtoValidator.EXTRA_DATA;
-import static org.openlmis.auth.web.UserDtoValidator.HOME_FACILITY_ID;
-import static org.openlmis.auth.web.UserDtoValidator.JOB_TITLE;
-import static org.openlmis.auth.web.UserDtoValidator.LOGIN_RESTRICTED;
-import static org.openlmis.auth.web.UserDtoValidator.ROLE_ASSIGNMENTS;
-import static org.openlmis.auth.web.UserDtoValidator.TIMEZONE;
+import static org.openlmis.auth.web.UserDtoValidator.ID;
 import static org.openlmis.auth.web.UserDtoValidator.USERNAME;
-import static org.openlmis.auth.web.UserDtoValidator.VERIFIED;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import java.util.Locale;
 import java.util.UUID;
 import org.apache.commons.lang.RandomStringUtils;
@@ -49,7 +37,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
-import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.i18n.MessageKeys;
@@ -89,18 +76,20 @@ public class UserDtoValidatorTest {
     userMainDetailsDto = new DummyUserMainDetailsDto();
 
     user = new User();
+    user.setId(UUID.randomUUID());
     user.setUsername(userMainDetailsDto.getUsername());
     user.setEnabled(true);
 
-    request = new UserDto(user, userMainDetailsDto);
+    request = new UserDto();
+    user.export(request);
 
     errors = new BeanPropertyBindingResult(request, "request");
 
     when(permissionService.hasRight(USERS_MANAGE)).thenReturn(true);
     when(messageSource.getMessage(anyString(), any(Object[].class), any(Locale.class)))
         .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
-    when(userReferenceDataService.findOne(request.getId()))
-        .thenReturn(userMainDetailsDto);
+    when(userReferenceDataService.findOne(any(UUID.class)))
+        .thenReturn(new UserMainDetailsDto());
   }
 
   @Test
@@ -138,31 +127,9 @@ public class UserDtoValidatorTest {
   }
 
   @Test
-  public void shouldRejectWhenVerifiedFlagWasChanged() {
-    request.setVerified(!userMainDetailsDto.isVerified());
-
-    validator.validate(request, errors);
-
-    assertErrorMessage(errors, VERIFIED, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-  }
-
-  @Test
   public void shouldNotRejectIfUserHasNoRightForEditAndFieldsWereNotChanged() {
     prepareForValidateInvariants();
 
-    validator.validate(request, errors);
-
-    assertThat(errors.getErrorCount()).isEqualTo(0);
-  }
-
-  @Test
-  public void shouldNotRejectIfUserHasNoRightForEditAndBasicDetailsWereChanged() {
-    prepareForValidateInvariants();
-
-    request.setFirstName(RandomStringUtils.randomAlphanumeric(5));
-    request.setLastName(RandomStringUtils.randomAlphanumeric(5));
-    request.setEmail(RandomStringUtils.randomAlphanumeric(1) + request.getEmail());
-    request.setPhoneNumber(RandomStringUtils.randomNumeric(9));
     validator.validate(request, errors);
 
     assertThat(errors.getErrorCount()).isEqualTo(0);
@@ -173,84 +140,22 @@ public class UserDtoValidatorTest {
     prepareForValidateInvariants();
 
     request.setUsername(RandomStringUtils.randomAlphanumeric(10));
-    request.setJobTitle("test-job-title");
-    request.setTimezone("test-time-zone");
-    request.setHomeFacilityId(UUID.randomUUID());
-    request.setActive(!userMainDetailsDto.isActive());
-    request.setLoginRestricted(!userMainDetailsDto.isLoginRestricted());
-    request.setAllowNotify(!userMainDetailsDto.getAllowNotify());
-    request.setExtraData(ImmutableMap.of("a", "b"));
-    request.setRoleAssignments(Sets.newHashSet(new RoleAssignmentDto()));
     request.setEnabled(!user.getEnabled());
     validator.validate(request, errors);
 
-    assertThat(errors.getErrorCount()).isGreaterThanOrEqualTo(9);
+    assertThat(errors.getErrorCount()).isGreaterThanOrEqualTo(2);
     assertErrorMessage(errors, ENABLED, MessageKeys.ERROR_FIELD_IS_INVARIANT);
     assertErrorMessage(errors, USERNAME, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-    assertErrorMessage(errors, JOB_TITLE, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-    assertErrorMessage(errors, TIMEZONE, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-    assertErrorMessage(errors, HOME_FACILITY_ID, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-    assertErrorMessage(errors, ACTIVE, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-    assertErrorMessage(errors, LOGIN_RESTRICTED, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-    assertErrorMessage(errors, ALLOW_NOTIFY, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-    assertErrorMessage(errors, EXTRA_DATA, MessageKeys.ERROR_FIELD_IS_INVARIANT);
-    assertErrorMessage(errors, ROLE_ASSIGNMENTS, MessageKeys.ERROR_FIELD_IS_INVARIANT);
   }
 
   @Test
-  public void shouldRejectIfEmailIsDuplicated() {
-    request.setId(null);
-    doReturn(mock(UserMainDetailsDto.class))
-        .when(userReferenceDataService)
-        .findUserByEmail(request.getEmail());
+  public void shouldRejectIfReferenceDataUserDoesNotExist() {
+    when(userReferenceDataService.findOne(any(UUID.class)))
+        .thenReturn(null);
 
     validator.validate(request, errors);
 
-    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_DUPLICATED);
-  }
-
-  @Test
-  public void shouldNotRejectIfEmailIsDuplicatedAndIdsAreSame() {
-    UserMainDetailsDto old = new UserMainDetailsDto();
-    old.setId(request.getId());
-
-    doReturn(old)
-        .when(userReferenceDataService)
-        .findUserByEmail(request.getEmail());
-
-    validator.validate(request, errors);
-    assertThat(errors.hasFieldErrors(EMAIL)).isFalse();
-  }
-
-  @Test
-  public void shouldRejectIfEmailIsDuplicatedAndIdsAreDifferent() {
-    UserMainDetailsDto old = new UserMainDetailsDto();
-    old.setId(UUID.randomUUID());
-
-    doReturn(old)
-        .when(userReferenceDataService)
-        .findUserByEmail(request.getEmail());
-
-    validator.validate(request, errors);
-    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_DUPLICATED);
-  }
-
-  @Test
-  public void shouldNotRejectWhenEmailIsNull() {
-    request.setEmail(null);
-
-    validator.validate(request, errors);
-
-    assertThat(errors.hasFieldErrors(EMAIL)).isFalse();
-  }
-
-  @Test
-  public void shouldRejectWhenEmailIsInvalid() {
-    request.setEmail("invalid@email");
-
-    validator.validate(request, errors);
-
-    assertErrorMessage(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
+    assertErrorMessage(errors, ID, ERROR_USER_NOT_FOUND);
   }
 
   private void prepareForValidateInvariants() {

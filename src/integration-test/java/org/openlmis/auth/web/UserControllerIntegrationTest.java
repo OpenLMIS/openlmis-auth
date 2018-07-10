@@ -37,6 +37,7 @@ import static org.openlmis.auth.service.ExpirationTokenNotifier.TOKEN_VALIDITY_H
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
+import com.google.common.collect.ImmutableList;
 import com.jayway.restassured.response.ValidatableResponse;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import java.time.ZonedDateTime;
@@ -46,15 +47,15 @@ import org.junit.Test;
 import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.LocalizedMessageDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
-import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.notification.NotificationService;
+import org.openlmis.auth.service.notification.UserContactDetailsDto;
+import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
 import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.auth.web.TestWebData.Fields;
@@ -91,16 +92,19 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @MockBean
   private NotificationService notificationService;
 
+  @MockBean
+  private UserContactDetailsNotificationService userContactDetailsNotificationService;
+
   private User user;
+  private UserDto userDto = new UserDto();
+  private UserContactDetailsDto userContactDetailsDto = new UserContactDetailsDto();
   private UserMainDetailsDto admin = new DummyUserMainDetailsDto();
 
   @Before
   public void setUp() {
-    given(userReferenceDataService.findUserByEmail(admin.getEmail()))
-        .willReturn(admin);
+    given(userContactDetailsNotificationService.findByEmail(DummyUserMainDetailsDto.EMAIL))
+        .willReturn(ImmutableList.of(userContactDetailsDto));
     given(userReferenceDataService.findOne(admin.getId()))
-        .willReturn(admin);
-    given(userReferenceDataService.putUser(any(UserMainDetailsDto.class)))
         .willReturn(admin);
 
     willDoNothing().given(notificationService).notify(
@@ -115,11 +119,14 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     user = userRepository.findOne(admin.getId());
     user.setPassword(encoder.encode(DummyUserMainDetailsDto.PASSWORD));
     userRepository.save(user);
+
+    user.export(userDto);
+    userContactDetailsDto.setReferenceDataUserId(user.getId());
   }
 
   @Test
   public void shouldSaveUser() {
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserDto(user, admin), null)
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, userDto, null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(200);
   }
@@ -128,24 +135,10 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   public void shouldNotSaveUserWhenUserHasNoPermission() {
     PermissionMessageException ex = mockUserManagePermissionError();
 
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserDto(user, admin), null)
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, userDto, null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
-  }
-
-  @Test
-  public void shouldPassErrorMessageFromExternalServiceIfThereWereProblemsWithUserSave() {
-    LocalizedMessageDto localizedMessage = new LocalizedMessageDto("test.key", "test.message");
-    doThrow(new ExternalApiException(null, localizedMessage))
-        .when(userReferenceDataService)
-        .putUser(any(UserMainDetailsDto.class));
-
-    sendPostRequest(USER_TOKEN, RESOURCE_URL, new UserDto(user, admin), null)
-        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
-        .statusCode(400)
-        .body(Fields.MESSAGE_KEY, is("test.key"))
-        .body(Fields.MESSAGE, is("test.message"));
   }
 
   @Test

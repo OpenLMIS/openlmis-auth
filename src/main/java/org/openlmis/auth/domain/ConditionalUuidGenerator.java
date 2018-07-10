@@ -13,34 +13,20 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.auth.dto.referencedata;
+package org.openlmis.auth.domain;
 
-import com.google.common.collect.Sets;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.io.Serializable;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.id.UUIDGenerator;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class UserMainDetailsDto extends BaseDto {
-  private String username;
-  private String firstName;
-  private String lastName;
-  private String jobTitle;
-  private String timezone;
-  private UUID homeFacilityId;
-  private boolean active;
-  private boolean loginRestricted;
-  private Map<String, String> extraData;
-  private Set<RoleAssignmentDto> roleAssignments = Sets.newHashSet();
+public class ConditionalUuidGenerator extends UUIDGenerator {
+
+  @Override
+  public Serializable generate(SessionImplementor session, Object object) {
+    if ((((BaseEntity) object).getId()) == null) {
+      return super.generate(session, object);
+    } else {
+      return ((BaseEntity) object).getId();
+    }
+  }
 }

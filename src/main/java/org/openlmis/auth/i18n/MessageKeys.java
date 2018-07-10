@@ -67,9 +67,6 @@ public abstract class MessageKeys {
   public static final String ERROR_SEND_NOTIFICATION_FAILURE =
       ERROR_PREFIX + ".sendNotification.failure";
 
-  public static final String ERROR_EMAIL_INVALID = ERROR_PREFIX + ".users.email.invalid";
-  public static final String ERROR_EMAIL_DUPLICATED = ERROR_PREFIX + ".users.email.duplicated";
-
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

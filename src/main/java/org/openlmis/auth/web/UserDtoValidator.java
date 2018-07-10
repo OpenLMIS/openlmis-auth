@@ -15,17 +15,10 @@
 
 package org.openlmis.auth.web;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.openlmis.auth.service.PermissionService.USERS_MANAGE;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
-import org.openlmis.auth.dto.referencedata.RoleAssignmentDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.repository.UserRepository;
@@ -53,17 +46,8 @@ public class UserDtoValidator extends BaseValidator {
   private UserReferenceDataService userReferenceDataService;
 
   // User fields
+  static final String ID = "id";
   static final String USERNAME = "username";
-  static final String EMAIL = "email";
-  static final String JOB_TITLE = "jobTitle";
-  static final String TIMEZONE = "timezone";
-  static final String HOME_FACILITY_ID = "homeFacilityId";
-  static final String VERIFIED = "verified";
-  static final String ACTIVE = "active";
-  static final String LOGIN_RESTRICTED = "loginRestricted";
-  static final String ALLOW_NOTIFY = "allowNotify";
-  static final String EXTRA_DATA = "extraData";
-  static final String ROLE_ASSIGNMENTS = "roleAssignments";
   static final String ENABLED = "enabled";
 
   /**
@@ -93,21 +77,13 @@ public class UserDtoValidator extends BaseValidator {
     if (!errors.hasErrors()) {
       UserDto dto = (UserDto) target;
 
-      if (null != dto.getId()) {
-        UserMainDetailsDto reference = userReferenceDataService.findOne(dto.getId());
+      verifyReferenceDataUserId(dto, errors);
 
-        rejectIfInvariantWasChanged(errors, VERIFIED, reference.isVerified(), dto.isVerified());
-
-        if (!permissionService.hasRight(USERS_MANAGE)) {
-          validateInvariants(reference, dto, errors);
-        }
+      if (null != dto.getId() && !permissionService.hasRight(USERS_MANAGE)) {
+        validateInvariants(dto, errors);
       }
 
       verifyUsername(dto.getUsername(), errors);
-
-      if (isNotBlank(dto.getEmail())) {
-        verifyEmail(dto.getId(), dto.getEmail(), errors);
-      }
     }
   }
 
@@ -118,44 +94,20 @@ public class UserDtoValidator extends BaseValidator {
     }
   }
 
-  private void verifyEmail(UUID id, String email, Errors errors) {
-    if (!EmailValidator.getInstance().isValid(email)) {
-      rejectValue(errors, EMAIL, MessageKeys.ERROR_EMAIL_INVALID);
-    }
+  private void verifyReferenceDataUserId(UserDto dto, Errors errors) {
+    UserMainDetailsDto referenceDataUser = userReferenceDataService
+        .findOne(dto.getId());
 
-    // user email cannot be duplicated
-    UserMainDetailsDto reference = userReferenceDataService.findUserByEmail(email);
-
-    if (null != reference && (null == id || !id.equals(reference.getId()))) {
-      rejectValue(errors, EMAIL, MessageKeys.ERROR_EMAIL_DUPLICATED);
+    if (null == referenceDataUser) {
+      rejectValue(errors, ID, MessageKeys.ERROR_USER_NOT_FOUND);
     }
   }
 
-  private void validateInvariants(UserMainDetailsDto reference, UserDto dto, Errors errors) {
+  private void validateInvariants(UserDto dto, Errors errors) {
     User db = userRepository.findOne(dto.getId());
 
     rejectIfInvariantWasChanged(errors, ENABLED, db.getEnabled(), dto.getEnabled());
-
-    rejectIfInvariantWasChanged(errors, USERNAME, reference.getUsername(), dto.getUsername());
-    rejectIfInvariantWasChanged(errors, JOB_TITLE, reference.getJobTitle(), dto.getJobTitle());
-    rejectIfInvariantWasChanged(errors, TIMEZONE, reference.getTimezone(), dto.getTimezone());
-    rejectIfInvariantWasChanged(errors, HOME_FACILITY_ID,
-        reference.getHomeFacilityId(), dto.getHomeFacilityId());
-    rejectIfInvariantWasChanged(errors, ACTIVE, reference.isActive(), dto.isActive());
-    rejectIfInvariantWasChanged(errors, LOGIN_RESTRICTED,
-        reference.isLoginRestricted(), dto.isLoginRestricted());
-    rejectIfInvariantWasChanged(errors, ALLOW_NOTIFY,
-        reference.getAllowNotify(), dto.getAllowNotify());
-    rejectIfInvariantWasChanged(errors, EXTRA_DATA, reference.getExtraData(), dto.getExtraData());
-
-    Set<RoleAssignmentDto> oldRoleAssignments = Optional
-        .ofNullable(reference.getRoleAssignments())
-        .orElse(Collections.emptySet());
-    Set<RoleAssignmentDto> newRoleAssignments = Optional
-        .ofNullable(dto.getRoleAssignments())
-        .orElse(Collections.emptySet());
-
-    rejectIfInvariantWasChanged(errors, ROLE_ASSIGNMENTS, oldRoleAssignments, newRoleAssignments);
+    rejectIfInvariantWasChanged(errors, USERNAME, db.getUsername(), dto.getUsername());
   }
 
   private void rejectIfInvariantWasChanged(Errors errors, String field, Object oldValue,

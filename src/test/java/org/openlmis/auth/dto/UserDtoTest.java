@@ -15,19 +15,12 @@
 
 package org.openlmis.auth.dto;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
-import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.ToStringTestUtils;
-import org.openlmis.auth.domain.User;
-import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 
 public class UserDtoTest {
-  private UserMainDetailsDto admin = new DummyUserMainDetailsDto();
-  private UserDto request = new UserDto(new User(), admin);
 
   @Test
   public void equalsContract() {
@@ -40,57 +33,7 @@ public class UserDtoTest {
 
   @Test
   public void shouldImplementToString() {
-    ToStringTestUtils
-        .verify(UserDto.class,
-            new UserDto(new User(), new DummyUserMainDetailsDto()));
+    ToStringTestUtils.verify(UserDto.class, new UserDto());
   }
 
-  @Test
-  public void shouldGetReferenceDataUser() {
-    assertThat(request.getReferenceDataUser()).isEqualTo(admin);
-  }
-
-  @Test
-  public void shouldGetReferenceDataUserWithEmailAsNullIfEmailContainsBlankValue() {
-    request.setEmail("  ");
-
-    UserMainDetailsDto referenceDataUser = request.getReferenceDataUser();
-
-    assertThat(referenceDataUser).isEqualToIgnoringGivenFields(admin, "email");
-    assertThat(referenceDataUser.getEmail()).isNull();
-  }
-
-  @Test
-  public void shouldReturnTrueIfEmailAddressIsSet() {
-    assertThat(request.hasEmailAddress()).isTrue();
-  }
-
-  @Test
-  public void shouldReturnFalseIfEmailFieldIsBlank() {
-    request.setEmail(null);
-    assertThat(request.hasEmailAddress()).isFalse();
-
-    request.setEmail("");
-    assertThat(request.hasEmailAddress()).isFalse();
-
-    request.setEmail("     ");
-    assertThat(request.hasEmailAddress()).isFalse();
-  }
-
-  @Test
-  public void shouldReturnEmailAddress() {
-    assertThat(request.getEmailAddress()).isEqualTo(admin.getEmail());
-  }
-
-  @Test
-  public void shouldReturnTrueIfEmailWasNotVerified() {
-    request.setVerified(false);
-    assertThat(request.isNotEmailVerified()).isTrue();
-  }
-
-  @Test
-  public void shouldReturnFalseIfEmailWasVerified() {
-    request.setVerified(true);
-    assertThat(request.isNotEmailVerified()).isFalse();
-  }
 }

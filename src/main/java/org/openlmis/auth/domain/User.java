@@ -99,6 +99,17 @@ public class User extends BaseEntity implements UserDetails {
     return this.getEnabled();
   }
 
+  /**
+   * Export data of this object to the exporter instance.
+   */
+  public void export(Exporter exporter) {
+    exporter.setId(getId());
+    exporter.setUsername(username);
+    exporter.setPassword(password);
+    exporter.setEnabled(enabled);
+
+  }
+
   public interface Importer {
 
     UUID getId();
@@ -108,6 +119,18 @@ public class User extends BaseEntity implements UserDetails {
     String getPassword();
 
     Boolean getEnabled();
+
+  }
+
+  public interface Exporter {
+
+    void setId(UUID id);
+
+    void setUsername(String username);
+
+    void setPassword(String password);
+
+    void setEnabled(Boolean enabled);
 
   }
 

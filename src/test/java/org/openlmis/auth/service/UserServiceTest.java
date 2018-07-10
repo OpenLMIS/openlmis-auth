@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,17 +28,13 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.SaveAnswer;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
-import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.repository.UserRepository;
-import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
@@ -45,19 +42,12 @@ public class UserServiceTest {
   @Mock
   private UserRepository userRepository;
 
-  @Mock
-  private UserReferenceDataService userReferenceDataService;
-
   @InjectMocks
   private UserService userService;
 
-  private DummyUserMainDetailsDto referenceDataUser = new DummyUserMainDetailsDto();
-
   @Before
-  public void setUp() {
-    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(referenceDataUser);
-    when(userReferenceDataService.putUser(any(UserMainDetailsDto.class)))
-        .thenReturn(referenceDataUser);
+  public void setUp() throws Exception {
+    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<>());
   }
 
   @Test
@@ -67,7 +57,7 @@ public class UserServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    UserDto request = new UserDto(new User(), referenceDataUser);
+    UserDto request = new UserDto();
     request.setId(null);
 
     userService.saveUser(request);
@@ -88,7 +78,7 @@ public class UserServiceTest {
     given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserDto(new User(), referenceDataUser));
+    userService.saveUser(new UserDto());
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
@@ -105,20 +95,19 @@ public class UserServiceTest {
     oldUser.setUsername("user");
     oldUser.setPassword(oldUserPassword);
 
-    User newUser = mock(User.class);
+    User newUser = spy(User.class);
     when(newUser.getPassword()).thenReturn("newPassword");
 
     when(userRepository.findOne(any(UUID.class))).thenReturn(oldUser);
-    ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
-    given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserDto(newUser, referenceDataUser));
+    UserDto dto = new UserDto();
+    newUser.export(dto);
+
+    UserDto result = userService.saveUser(dto);
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
-
-    User result = argumentCaptor.getValue();
     assertThat(result.getPassword()).isNotEqualTo(oldUserPassword);
   }
 
@@ -133,17 +122,21 @@ public class UserServiceTest {
     oldUser.setId(oldUserId);
     oldUser.setPassword(oldUserPassword);
 
+    User newUser = new User();
+    newUser.setUsername("username2");
+    newUser.setId(oldUserId);
+    newUser.setPassword(oldUserPassword);
+
     when(userRepository.findOne(any(UUID.class))).thenReturn(oldUser);
-    ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
-    given(userRepository.save(argumentCaptor.capture())).willAnswer(new SaveAnswer<User>());
 
     // when
-    userService.saveUser(new UserDto(new User(), referenceDataUser));
+    UserDto dto = new UserDto();
+    newUser.export(dto);
+
+    UserDto result = userService.saveUser(dto);
 
     // then
     verify(userRepository, times(1)).save(any(User.class));
-
-    User result = argumentCaptor.getValue();
     assertThat(result.getPassword()).isEqualTo(oldUserPassword);
   }
 

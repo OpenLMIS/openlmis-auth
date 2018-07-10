@@ -23,13 +23,13 @@ import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VA
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
+import java.util.List;
 import java.util.UUID;
 import javax.validation.Valid;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
-import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
@@ -37,7 +37,8 @@ import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PasswordResetNotifier;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
-import org.openlmis.auth.service.referencedata.UserReferenceDataService;
+import org.openlmis.auth.service.notification.UserContactDetailsDto;
+import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
 import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.openlmis.util.PasswordResetRequest;
@@ -54,6 +55,7 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
@@ -89,9 +91,6 @@ public class UserController {
   private PasswordResetTokenRepository passwordResetTokenRepository;
 
   @Autowired
-  private UserReferenceDataService userReferenceDataService;
-
-  @Autowired
   private ExposedMessageSource messageSource;
 
   @Autowired
@@ -102,6 +101,9 @@ public class UserController {
 
   @Autowired
   private PasswordResetNotifier passwordResetNotifier;
+
+  @Autowired
+  private UserContactDetailsNotificationService userContactDetailsNotificationService;
 
   @InitBinder
   protected void initBinder(WebDataBinder binder) {
@@ -182,13 +184,13 @@ public class UserController {
   @RequestMapping(value = "/users/auth/forgotPassword", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   public void forgotPassword(@RequestParam(value = "email") String email) {
-    UserMainDetailsDto refDataUser = userReferenceDataService.findUserByEmail(email);
+    List<UserContactDetailsDto> found = userContactDetailsNotificationService.findByEmail(email);
 
-    if (refDataUser == null) {
+    if (CollectionUtils.isEmpty(found)) {
       throw new ValidationMessageException(USER_NOT_FOUND_BY_EMAIL);
     }
 
-    User user = userRepository.findOne(refDataUser.getId());
+    User user = userRepository.findOne(found.get(0).getReferenceDataUserId());
     passwordResetNotifier.sendNotification(user);
   }
 

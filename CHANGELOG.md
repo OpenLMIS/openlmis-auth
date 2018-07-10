@@ -2,8 +2,9 @@
 ==================
 
 Breaking changes:
-* [OLMIS-4896](https://openlmis.atlassian.net/browse/OLMIS-4896): Modified the user save endpoint to handle reference data user creation/update
-  * the request body contains more required fields
+* [OLMIS-4986](https://openlmis.atlassian.net/browse/OLMIS-4986): Changed the user resource structure
+  * role and referenceDataUserId fields have been removed
+  * the id field has the same value as the id field of user resource in the reference data service
 
 Improvements and new functionality which are backwards-compatible:
 * [OLMIS-4644](https://openlmis.atlassian.net/browse/OLMIS-4644): Added Jenkinsfile
