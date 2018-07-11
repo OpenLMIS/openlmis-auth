@@ -36,7 +36,6 @@ import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PasswordResetNotifier;
 import org.openlmis.auth.service.PermissionService;
-import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.UserContactDetailsDto;
 import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
 import org.openlmis.auth.util.Message;
@@ -74,9 +73,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class UserController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-
-  @Autowired
-  private UserService userService;
 
   @Autowired
   private UserRepository userRepository;
@@ -118,8 +114,7 @@ public class UserController {
   @RequestMapping(value = "/users/auth", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserDto saveUser(@RequestBody UserDto request,
-      BindingResult bindingResult) {
+  public UserDto saveUser(@RequestBody UserDto request, BindingResult bindingResult) {
     permissionService.canManageUsers(request.getId());
     LOGGER.debug("Creating or updating user");
 
@@ -129,7 +124,27 @@ public class UserController {
       throw new ValidationMessageException(bindingResult.getFieldError().getDefaultMessage());
     }
 
-    return userService.saveUser(request);
+    User existing = addOrUpdateUser(request);
+    return toDto(existing);
+  }
+
+  private User addOrUpdateUser(UserDto request) {
+    User dbUser = userRepository.findOne(request.getId());
+
+    if (null == dbUser) {
+      dbUser = User.newInstance(request);
+    } else {
+      dbUser.updateFrom(request);
+    }
+
+    return userRepository.save(dbUser);
+  }
+
+  private UserDto toDto(User existing) {
+    UserDto dto = new UserDto();
+    existing.export(dto);
+
+    return dto;
   }
 
   /**

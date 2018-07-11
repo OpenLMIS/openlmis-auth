@@ -118,6 +118,15 @@ public class UserDtoValidatorTest {
   }
 
   @Test
+  public void shouldRejectWhenIdIsNull() {
+    request.setId(null);
+
+    validator.validate(request, errors);
+
+    assertErrorMessage(errors, ID, MessageKeys.ERROR_FIELD_REQUIRED);
+  }
+
+  @Test
   public void shouldRejectWhenUsernameContainsWhitespace() {
     request.setUsername("user name");
 

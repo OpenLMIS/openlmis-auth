@@ -72,6 +72,7 @@ public class UserDtoValidator extends BaseValidator {
    */
   @Override
   public void validate(Object target, Errors errors) {
+    rejectIfEmptyOrWhitespace(errors, ID, MessageKeys.ERROR_FIELD_REQUIRED);
     rejectIfEmptyOrWhitespace(errors, USERNAME, MessageKeys.ERROR_FIELD_REQUIRED);
 
     if (!errors.hasErrors()) {
