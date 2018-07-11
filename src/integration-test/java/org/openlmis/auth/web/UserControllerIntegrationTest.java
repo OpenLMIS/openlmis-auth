@@ -126,6 +126,19 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldSaveUser() {
+    userDto.setId(UUID.randomUUID());
+    userDto.setUsername("newUserTest");
+
+    given(userReferenceDataService.findOne(userDto.getId()))
+        .willReturn(admin);
+
+    sendPostRequest(USER_TOKEN, RESOURCE_URL, userDto, null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
+        .statusCode(200);
+  }
+
+  @Test
+  public void shouldUpdateUser() {
     sendPostRequest(USER_TOKEN, RESOURCE_URL, userDto, null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(200);

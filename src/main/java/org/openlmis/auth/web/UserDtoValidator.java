@@ -80,8 +80,10 @@ public class UserDtoValidator extends BaseValidator {
 
       verifyReferenceDataUserId(dto, errors);
 
-      if (null != dto.getId() && !permissionService.hasRight(USERS_MANAGE)) {
-        validateInvariants(dto, errors);
+      User db = userRepository.findOne(dto.getId());
+
+      if (null != db && !permissionService.hasRight(USERS_MANAGE)) {
+        validateInvariants(db, dto, errors);
       }
 
       verifyUsername(dto.getUsername(), errors);
@@ -104,9 +106,7 @@ public class UserDtoValidator extends BaseValidator {
     }
   }
 
-  private void validateInvariants(UserDto dto, Errors errors) {
-    User db = userRepository.findOne(dto.getId());
-
+  private void validateInvariants(User db, UserDto dto, Errors errors) {
     rejectIfInvariantWasChanged(errors, ENABLED, db.getEnabled(), dto.getEnabled());
     rejectIfInvariantWasChanged(errors, USERNAME, db.getUsername(), dto.getUsername());
   }
