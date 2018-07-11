@@ -15,22 +15,32 @@
 
 package org.openlmis.auth;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.openlmis.auth.domain.User;
 
 public class UserDataBuilder {
   private static final AtomicInteger instanceNumber = new AtomicInteger();
 
+  private UUID id = UUID.randomUUID();
   private String username = "user" + instanceNumber.incrementAndGet();
   private boolean enabled = true;
+  private String password = null;
+
+  public UserDataBuilder withPassword(String password) {
+    this.password = password;
+    return this;
+  }
 
   /**
    * Builds instance of {@link User} without id.
    */
   public User build() {
     User user = new User();
+    user.setId(id);
     user.setUsername(username);
     user.setEnabled(enabled);
+    user.setPassword(password);
 
     return user;
   }

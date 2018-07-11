@@ -15,6 +15,8 @@
 
 package org.openlmis.auth.domain;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Collection;
 import java.util.UUID;
@@ -96,7 +98,7 @@ public class User extends BaseEntity implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return this.getEnabled();
+    return isTrue(getEnabled());
   }
 
   /**
