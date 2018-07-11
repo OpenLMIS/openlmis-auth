@@ -36,6 +36,7 @@ import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PasswordResetNotifier;
 import org.openlmis.auth.service.PermissionService;
+import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.UserContactDetailsDto;
 import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
 import org.openlmis.auth.util.Message;
@@ -76,6 +77,9 @@ public class UserController {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private UserService userService;
 
   @Autowired
   private Validator validator;
@@ -124,27 +128,7 @@ public class UserController {
       throw new ValidationMessageException(bindingResult.getFieldError().getDefaultMessage());
     }
 
-    User existing = addOrUpdateUser(request);
-    return toDto(existing);
-  }
-
-  private User addOrUpdateUser(UserDto request) {
-    User dbUser = userRepository.findOne(request.getId());
-
-    if (null == dbUser) {
-      dbUser = User.newInstance(request);
-    } else {
-      dbUser.updateFrom(request);
-    }
-
-    return userRepository.save(dbUser);
-  }
-
-  private UserDto toDto(User existing) {
-    UserDto dto = new UserDto();
-    existing.export(dto);
-
-    return dto;
+    return userService.saveUser(request);
   }
 
   /**
