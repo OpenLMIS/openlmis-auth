@@ -56,6 +56,7 @@ public class NotificationService extends BaseCommunicationService<NotificationDt
    */
   public void notify(User user, String subject, String content) {
     xlogger.entry(user, subject, content);
+    xlogger.exit();
 
     String url = getServiceUrl() + getUrl();
 
