@@ -51,7 +51,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public abstract class BaseCommunicationService<T> {
-  protected final XLogger xLogger = XLoggerFactory.getXLogger(NotificationService.class);
+  protected final XLogger xlogger = XLoggerFactory.getXLogger(NotificationService.class);
 
   protected RestOperations restTemplate = new RestTemplate();
 
@@ -122,7 +122,7 @@ public abstract class BaseCommunicationService<T> {
     } catch (HttpStatusCodeException ex) {
       // rest template will handle 404 as an exception, instead of returning null
       if (HttpStatus.NOT_FOUND == ex.getStatusCode()) {
-        xLogger.warn(
+        xlogger.warn(
                 "{} matching params does not exist. Params: {}",
                 getResultClass().getSimpleName(), parameters
         );
