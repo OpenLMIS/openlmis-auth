@@ -29,8 +29,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationService extends BaseCommunicationService<NotificationDto> {
 
-  
-
   @Getter
   @Value("${service.url}")
   private String serviceUrl;
@@ -55,8 +53,6 @@ public class NotificationService extends BaseCommunicationService<NotificationDt
    * @param content content of the email
    */
   public void notify(User user, String subject, String content) {
-    xLogger.entry(user, subject, content);
-
     String url = getServiceUrl() + getUrl();
 
     NotificationDto request = buildNotification(user, subject, content);

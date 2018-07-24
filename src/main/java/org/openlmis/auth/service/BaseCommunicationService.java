@@ -33,11 +33,10 @@ import org.openlmis.auth.dto.ResultDto;
 import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.exception.ServerException;
 import org.openlmis.auth.i18n.MessageKeys;
-import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.util.DynamicPageTypeReference;
 import org.openlmis.auth.util.DynamicResultDtoTypeReference;
-import org.slf4j.ext.XLogger;
-import org.slf4j.ext.XLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -51,7 +50,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public abstract class BaseCommunicationService<T> {
-  protected final XLogger xLogger = XLoggerFactory.getXLogger(NotificationService.class);
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected RestOperations restTemplate = new RestTemplate();
 
@@ -122,7 +121,7 @@ public abstract class BaseCommunicationService<T> {
     } catch (HttpStatusCodeException ex) {
       // rest template will handle 404 as an exception, instead of returning null
       if (HttpStatus.NOT_FOUND == ex.getStatusCode()) {
-        xLogger.warn(
+        logger.warn(
                 "{} matching params does not exist. Params: {}",
                 getResultClass().getSimpleName(), parameters
         );
