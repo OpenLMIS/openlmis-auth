@@ -55,7 +55,7 @@ public class NotificationService extends BaseCommunicationService<NotificationDt
    * @param content content of the email
    */
   public void notify(User user, String subject, String content) {
-    xlogger.entry(user, subject, content);
+    xLogger.entry(user, subject, content);
 
     String url = getServiceUrl() + getUrl();
 
