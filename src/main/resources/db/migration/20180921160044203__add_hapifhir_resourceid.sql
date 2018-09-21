@@ -1,1 +1,0 @@
- UPDATE auth.oAuth_client_details SET resourceids = resourceids || ',hapifhir';

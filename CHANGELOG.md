@@ -3,7 +3,6 @@
 
 Improvements:
 * [OLMIS-4295](https://openlmis.atlassian.net/browse/OLMIS-4295): Updated checkstyle to use newest google style.
-* [OLMIS-5382](https://openlmis.atlassian.net/browse/OLMIS-5382): Register a new resource id for the HAPI FHIR service.
 
 4.0.0 / 2018-08-16
 ==================
