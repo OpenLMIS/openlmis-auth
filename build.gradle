@@ -72,6 +72,26 @@ dependencies {
     testCompile "be.joengenduvel.java.verifiers:to-string:1.0.2"
 }
 
+idea {
+    project {
+        vcs = 'Git'
+        ipr.withXml { xmlFile ->
+            // enable 'Annotation Processors', source: https://gist.github.com/stephanos/8645809
+            xmlFile.asNode().component
+                    .find { it.@name == 'CompilerConfiguration' }['annotationProcessing'][0]
+                    .replaceNode {
+                annotationProcessing {
+                    profile(default: true, name: 'Default', useClasspath: 'true', enabled: true)
+                }
+            }
+        }
+    }
+    module {
+        sourceDirs -= file('src/integration-test/java')
+        testSourceDirs += file('src/integration-test/java')
+    }
+}
+
 flyway {
     url = "$System.env.DATABASE_URL"
     user = "$System.env.POSTGRES_USER"
