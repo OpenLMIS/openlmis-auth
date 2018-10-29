@@ -12,7 +12,7 @@ in production environments.
 Each .csv file contains demo data that corresponds to one database table.
 
 ## Users (auth.auth_users.csv)
-There are 20 user accounts:
+There are 22 user accounts:
 
 1. administrator (password=password)
 2. devadmin (password=password)
@@ -35,6 +35,7 @@ There are 20 user accounts:
 19. vsrmanager2 (password=password)
 20. vwclerk1 (password=password)
 21. vnurse1 (password=password)
+22. chaz (password=password)
 
 The [Reference Data service's demo data](https://github.com/OpenLMIS/openlmis-referencedata/tree/master/demo-data)
 connects these users to specific rights at facilities and programs.
