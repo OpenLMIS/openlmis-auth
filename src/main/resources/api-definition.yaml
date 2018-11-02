@@ -472,8 +472,8 @@ resourceTypes:
               securedBy: [basic]
               queryParameters:
                   token:
-                      displayName: access_token
-                      description: OAuth2 access token
+                      displayName: token
+                      description: OAuth2 token to be checked
                       type: string
                       required: true
                       repeat: false
