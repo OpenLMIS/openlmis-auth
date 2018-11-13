@@ -40,7 +40,6 @@ public class UserMainDetailsDto extends BaseDto {
   private String timezone;
   private UUID homeFacilityId;
   private boolean active;
-  private boolean loginRestricted;
   private Map<String, String> extraData;
   private Set<RoleAssignmentDto> roleAssignments = Sets.newHashSet();
 }

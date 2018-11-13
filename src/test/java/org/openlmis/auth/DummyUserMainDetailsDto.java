@@ -33,7 +33,7 @@ public final class DummyUserMainDetailsDto extends UserMainDetailsDto {
    * Creates new instance of dummy user dto.
    */
   public DummyUserMainDetailsDto() {
-    super(USERNAME, "Admin", "User", null, null, null, true, false, null,
+    super(USERNAME, "Admin", "User", null, null, null, true, null,
         getDummyRoleAssignments());
     setId(UUID.fromString(REFERENCE_ID));
   }

@@ -3,6 +3,7 @@
 
 Improvements:
 * [OLMIS-4295](https://openlmis.atlassian.net/browse/OLMIS-4295): Updated checkstyle to use newest google style.
+* [OLMIS-5668](https://openlmis.atlassian.net/browse/OLMIS-5668): Removed unused field from the UserMainDetailsDto class.
 
 4.0.0 / 2018-08-16
 ==================
