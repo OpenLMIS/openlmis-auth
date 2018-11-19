@@ -61,6 +61,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -129,6 +130,28 @@ public class UserController {
     }
 
     return userService.saveUser(request);
+  }
+
+  /**
+   * Gets a user by the given ID value. For security reasons the response does not contain password.
+   */
+  @RequestMapping(value = "/users/auth/{id}", method = RequestMethod.GET)
+  @ResponseStatus(value = HttpStatus.OK)
+  @ResponseBody
+  public UserDto getUser(@PathVariable("id") UUID id) {
+    permissionService.canManageUsers(id);
+    User user = userRepository.findOne(id);
+
+    if (null == user) {
+      throw new ValidationMessageException(USER_NOT_FOUND);
+    }
+
+    UserDto dto = new UserDto();
+    user.export(dto);
+
+    dto.setPassword(null);
+
+    return dto;
   }
 
   /**

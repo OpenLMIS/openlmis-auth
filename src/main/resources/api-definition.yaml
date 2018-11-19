@@ -205,6 +205,32 @@ resourceTypes:
                      body:
                          application/json:
                              schema: localizedMessage
+          /{id}:
+              get:
+                  is: [ secured ]
+                  description: Get a user by the given ID value.
+                  responses:
+                      200:
+                          description: >
+                            The given user exists and has been returned. WARNING: For security
+                            reasons the response does not contain password.
+                          body:
+                              application/json:
+                                  schema: user
+                      400:
+                          description: There were issues with getting the user.
+                          body:
+                              application/json:
+                                  schema: localizedMessage
+                      401:
+                          description: The request does not contain a token or the token might be invalid.
+                          body:
+                              application/json:
+                      403:
+                          description: The current logged user has no permission to perform the action.
+                          body:
+                              application/json:
+                                  schema: localizedMessage
           /passwordReset:
               post:
                   is: [ secured ]

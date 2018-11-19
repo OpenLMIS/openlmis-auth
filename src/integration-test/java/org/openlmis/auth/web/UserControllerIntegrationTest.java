@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -71,6 +72,7 @@ import org.springframework.web.client.HttpServerErrorException;
 public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private static final String RESOURCE_URL = "/api/users/auth";
+  private static final String ID_URL = RESOURCE_URL + "/{id}";
   private static final String RESET_PASS_URL = RESOURCE_URL + "/passwordReset";
   private static final String FORGOT_PASS_URL = RESOURCE_URL + "/forgotPassword";
   private static final String CHANGE_PASS_URL = RESOURCE_URL + "/changePassword";
@@ -152,6 +154,62 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
+  }
+
+  @Test
+  public void shouldGetUserById() {
+    startRequest(USER_TOKEN)
+        .pathParam(ID, userDto.getId())
+        .when()
+        .get(ID_URL)
+        .then()
+        .statusCode(200)
+        .body(ID, is(userDto.getId().toString()))
+        .body("username", is(userDto.getUsername()))
+        .body("password", is(nullValue()))
+        .body("enabled", is(userDto.getEnabled()));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldNotGetUserByIdIfUserDoesNotExist() {
+    startRequest(USER_TOKEN)
+        .pathParam(ID, UUID.randomUUID())
+        .when()
+        .get(ID_URL)
+        .then()
+        .statusCode(400)
+        .body(Fields.MESSAGE_KEY, containsString(USER_NOT_FOUND));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldNotGetUserByIdIfTokenIsMissing() {
+    startRequest()
+        .pathParam(ID, userDto.getId())
+        .when()
+        .get(ID_URL)
+        .then()
+        .statusCode(401);
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldNotGetUserByIdIfUserHasNoRight() {
+    PermissionMessageException ex = mockUserManagePermissionError();
+
+    startRequest(USER_TOKEN)
+        .pathParam(ID, userDto.getId())
+        .when()
+        .get(ID_URL)
+        .then()
+        .statusCode(403)
+        .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test

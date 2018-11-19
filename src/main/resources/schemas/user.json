@@ -13,7 +13,10 @@
       "title": "username"
     },
     "password": {
-      "type": "string",
+      "type": [
+        "null",
+        "string"
+      ],
       "title": "password"
     },
     "enabled": {
