@@ -1,5 +1,8 @@
-4.0.1 / WIP
+4.1.0 / WIP
 ==================
+
+Improvements and new functionality which are backwards-compatible:
+* [OLMIS-5668](https://openlmis.atlassian.net/browse/OLMIS-5668): Added endpoint to retrieve a user by ID value.  
 
 Improvements:
 * [OLMIS-4295](https://openlmis.atlassian.net/browse/OLMIS-4295): Updated checkstyle to use newest google style.
