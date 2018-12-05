@@ -31,6 +31,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.openlmis.auth.UserDataBuilder;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.service.BaseCommunicationServiceTest;
 import org.openlmis.util.NotificationRequest;
@@ -78,10 +79,20 @@ public class NotificationServiceTest extends BaseCommunicationServiceTest {
   }
 
   @Test(expected = HttpServerErrorException.class)
-  public void shouldReturnFalseIfCannotSendNotification() {
+  public void shouldThrowExceptionIfCannotSendNotification() {
     when(restTemplate
             .postForEntity(any(URI.class), any(HttpEntity.class), eq(NotificationDto.class)))
             .thenThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY));
+
+    NotificationService service = prepareService();
+    service.notify(user, SUBJECT, PLAIN_CONTENT);
+  }
+
+  @Test(expected = ExternalApiException.class)
+  public void shouldThrowExternalApiExceptionIfNotificationServiceReturnsBadRequestError() {
+    when(restTemplate
+        .postForEntity(any(URI.class), any(HttpEntity.class), eq(NotificationDto.class)))
+        .thenThrow(new HttpServerErrorException(HttpStatus.BAD_REQUEST));
 
     NotificationService service = prepareService();
     service.notify(user, SUBJECT, PLAIN_CONTENT);

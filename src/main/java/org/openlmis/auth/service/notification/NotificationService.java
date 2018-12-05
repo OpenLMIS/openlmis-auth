@@ -24,7 +24,9 @@ import org.openlmis.auth.domain.User;
 import org.openlmis.auth.service.BaseCommunicationService;
 import org.openlmis.auth.util.RequestHelper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 
 @Service
 public class NotificationService extends BaseCommunicationService<NotificationDto> {
@@ -57,9 +59,17 @@ public class NotificationService extends BaseCommunicationService<NotificationDt
 
     NotificationDto request = buildNotification(user, subject, content);
 
-    restTemplate.postForEntity(RequestHelper.createUri(url),
-            RequestHelper.createEntity(obtainAccessToken(), request),
-            NotificationDto.class);
+    try {
+      restTemplate.postForEntity(RequestHelper.createUri(url),
+              RequestHelper.createEntity(obtainAccessToken(), request),
+              NotificationDto.class);
+    } catch (HttpStatusCodeException ex) {
+      if (ex.getStatusCode() == HttpStatus.BAD_REQUEST) {
+        throw buildExternalApiException(ex);
+      }
+
+      throw ex;
+    }
   }
 
   private NotificationDto buildNotification(User user, String subject, String content) {

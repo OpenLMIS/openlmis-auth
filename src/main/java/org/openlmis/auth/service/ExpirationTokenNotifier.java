@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.client.RestClientException;
 
 public abstract class ExpirationTokenNotifier<T extends ExpirationToken> {
   public static final long TOKEN_VALIDITY_HOURS = 12;
@@ -81,7 +82,7 @@ public abstract class ExpirationTokenNotifier<T extends ExpirationToken> {
           messageSource.getMessage(subjectKey, subjectMsgArgs, LocaleContextHolder.getLocale()),
           messageSource.getMessage(bodyKey, bodyMsgArgs, LocaleContextHolder.getLocale())
       );
-    } catch (Exception exp) {
+    } catch (RestClientException exp) {
       logger.warn("Can't send request to the notification service", exp);
       throw new ServerException(exp, ERROR_SEND_NOTIFICATION_FAILURE);
     }
