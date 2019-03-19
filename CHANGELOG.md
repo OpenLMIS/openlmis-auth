@@ -1,3 +1,9 @@
+4.1.1 / WIP
+==================
+
+Improvements and new functionality which are backwards-compatible:
+* [OLMIS-4531](https://openlmis.atlassian.net/browse/OLMIS-4531): Added compressing HTTP POST responses.
+
 4.1.0 / 2018-12-12
 ==================
 
