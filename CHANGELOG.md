@@ -1,4 +1,4 @@
-4.1.1 / WIP
+4.1.2 / WIP
 ==================
 
 Improvements and new functionality which are backwards-compatible:
