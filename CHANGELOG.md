@@ -1,4 +1,4 @@
-4.1.2 / WIP
+4.1.2 / 2019-05-27
 ==================
 
 Improvements and new functionality which are backwards-compatible:
