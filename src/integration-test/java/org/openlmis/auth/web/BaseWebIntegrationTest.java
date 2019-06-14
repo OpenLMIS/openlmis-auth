@@ -17,6 +17,7 @@ package org.openlmis.auth.web;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.BDDMockito.given;
 import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.BEARER;
 import static org.openlmis.auth.web.TestWebData.Tokens.SERVICE_TOKEN;
@@ -34,10 +35,15 @@ import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import org.junit.runner.RunWith;
+import org.openlmis.auth.ClientDataBuilder;
 import org.openlmis.auth.OAuth2AuthenticationDataBuilder;
+import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.i18n.MessageService;
+import org.openlmis.auth.repository.ApiKeyRepository;
+import org.openlmis.auth.repository.ClientRepository;
 import org.openlmis.auth.security.AccessTokenEnhancer;
 import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.openlmis.auth.util.Message;
@@ -86,6 +92,12 @@ public abstract class BaseWebIntegrationTest {
 
   @MockBean
   UserReferenceDataService userReferenceDataService;
+
+  @MockBean
+  ApiKeyRepository apiKeyRepository;
+
+  @MockBean
+  ClientRepository clientRepository;
 
   /**
    * Initialize the REST Assured client. Done here and not in the constructor, so that randomPort is
@@ -151,6 +163,14 @@ public abstract class BaseWebIntegrationTest {
         .body("content.size()", is(numberOfElements))
         .body("totalElements", is(totalElements))
         .body("totalPages", is(totalPages));
+  }
+
+  Client mockUserClient() {
+    Client client = new ClientDataBuilder().buildUserClient();
+    given(clientRepository.findOneByClientId(client.getClientId()))
+        .willReturn(Optional.of(client));
+
+    return client;
   }
 
   @TestConfiguration

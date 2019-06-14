@@ -91,6 +91,7 @@ public class ApiKeyInitializerTest {
     OAuth2AccessToken token = tokenCaptor.getValue();
     assertThat(token, is(notNullValue()));
     assertThat(token.getValue(), is(apiKey.getToken().toString()));
+    assertThat(token.isExpired(), is(false));
 
     OAuth2Authentication authentication = authenticationCaptor.getValue();
     assertThat(authentication, is(notNullValue()));

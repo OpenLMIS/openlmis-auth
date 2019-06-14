@@ -46,6 +46,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.auth.DummyUserMainDetailsDto;
+import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
@@ -396,10 +397,11 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   private String login(String username, String password) {
+    Client client = mockUserClient();
     String token = startRequest()
         .auth()
         .preemptive()
-        .basic("user-client", "changeme")
+        .basic(client.getClientId(), client.getClientSecret())
         .queryParam(Fields.PASSWORD, GrantTypes.PASSWORD)
         .queryParam(Fields.USERNAME, username)
         .queryParam(Fields.GRANT_TYPE, password)
