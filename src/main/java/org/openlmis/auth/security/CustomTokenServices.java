@@ -33,13 +33,19 @@ public class CustomTokenServices extends DefaultTokenServices {
 
     Optional
         .ofNullable(token)
-        // ...tokens without the expiration date should be omitted.
-        .filter(elem -> null != elem.getExpiration())
-        // ...expired tokens should be omitted.
-        .filter(elem -> !elem.isExpired())
+        .filter(this::hasExpirationDate)
+        .filter(this::isNotExpired)
         .ifPresent(this::adjustExpirationDate);
 
     return token;
+  }
+
+  private boolean hasExpirationDate(OAuth2AccessToken token) {
+    return null != token.getExpiration();
+  }
+
+  private boolean isNotExpired(OAuth2AccessToken token) {
+    return !token.isExpired();
   }
 
   private void adjustExpirationDate(DefaultOAuth2AccessToken token) {
