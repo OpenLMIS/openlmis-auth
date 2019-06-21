@@ -3,6 +3,7 @@
 
 Improvements:
 * [OLMIS-4128](https://openlmis.atlassian.net/browse/OLMIS-4128): Change maximum page size to max integer.
+* [OLMIS-6129](https://openlmis.atlassian.net/browse/OLMIS-6129): Added package-lock.json file.
 
 Bug fixes that are backwards-compatible:
 * [OLMIS-6317](https://openlmis.atlassian.net/browse/OLMIS-6317): Service account tokens will not expire
