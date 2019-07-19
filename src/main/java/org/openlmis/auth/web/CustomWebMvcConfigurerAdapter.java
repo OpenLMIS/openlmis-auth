@@ -16,7 +16,10 @@
 package org.openlmis.auth.web;
 
 import java.util.List;
+
+import org.openlmis.auth.interceptor.MvcInterceptor;
 import org.openlmis.auth.util.Pagination;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
@@ -33,10 +36,14 @@ public class CustomWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
   @Value("${service.url}")
   private String serviceUrl;
 
+  @Autowired
+  private MvcInterceptor mvcInterceptor;
+
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     super.addInterceptors(registry);
     registry.addInterceptor(new DefaultContentTypeInterceptor());
+    registry.addInterceptor(mvcInterceptor);
   }
 
   @Override
@@ -63,4 +70,5 @@ public class CustomWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
     argumentResolvers.add(resolver);
     super.addArgumentResolvers(argumentResolvers);
   }
+
 }
