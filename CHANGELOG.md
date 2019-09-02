@@ -5,10 +5,10 @@ Improvements:
 * [OLMIS-4128](https://openlmis.atlassian.net/browse/OLMIS-4128): Change maximum page size to max integer.
 * [OLMIS-6129](https://openlmis.atlassian.net/browse/OLMIS-6129): Added package-lock.json file.
 * [OLMIS-6408](https://openlmis.atlassian.net/browse/OLMIS-6408): Added pageable validator.
-* [OLMIS-6548](https://openlmis.atlassian.net/browse/OLMIS-6548): Add translations for reset password error modal.
 
 Bug fixes that are backwards-compatible:
 * [OLMIS-6317](https://openlmis.atlassian.net/browse/OLMIS-6317): Service account tokens will not expire
+* [OLMIS-6548](https://openlmis.atlassian.net/browse/OLMIS-6548): Add translations for reset password error modal.
 
 4.1.2 / 2019-05-27
 ==================

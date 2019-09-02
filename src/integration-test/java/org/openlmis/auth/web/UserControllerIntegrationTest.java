@@ -48,6 +48,7 @@ import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.PasswordResetRequestDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.PermissionMessageException;
@@ -59,7 +60,6 @@ import org.openlmis.auth.service.notification.UserContactDetailsDto;
 import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
 import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
-import org.openlmis.auth.util.PasswordResetRequest;
 import org.openlmis.auth.web.TestWebData.Fields;
 import org.openlmis.auth.web.TestWebData.GrantTypes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +96,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private NotificationService notificationService;
   
   @MockBean
-  private PasswordResetRequestValidator passwordResetRequestValidator;
+  private PasswordResetRequestDtoValidator passwordResetRequestDtoValidator;
 
   @MockBean
   private UserContactDetailsNotificationService userContactDetailsNotificationService;
@@ -119,7 +119,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         any(String.class)
     );
     
-    willDoNothing().given(passwordResetRequestValidator).validate(any(Object.class), 
+    willDoNothing().given(passwordResetRequestDtoValidator).validate(any(Object.class), 
         any(Errors.class));
 
     passwordResetTokenRepository.deleteAll();
@@ -249,11 +249,11 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnBadRequestWhenUserNotFound() {
-    PasswordResetRequest passwordResetRequest = new PasswordResetRequest(
+    PasswordResetRequestDto passwordResetRequestDto = new PasswordResetRequestDto(
         "wrongUser", "newpassword1"
     );
 
-    sendPostRequest(USER_TOKEN, RESET_PASS_URL, passwordResetRequest, null)
+    sendPostRequest(USER_TOKEN, RESET_PASS_URL, passwordResetRequestDto, null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(400)
         .body(Fields.MESSAGE_KEY, equalTo(USER_NOT_FOUND));
@@ -348,11 +348,11 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   private ValidatableResponse passwordReset(String username, String password, String token) {
-    PasswordResetRequest passwordResetRequest = new PasswordResetRequest(
+    PasswordResetRequestDto passwordResetRequestDto = new PasswordResetRequestDto(
         username, password
     );
 
-    return sendPostRequest(token, RESET_PASS_URL, passwordResetRequest, null)
+    return sendPostRequest(token, RESET_PASS_URL, passwordResetRequestDto, null)
         .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 

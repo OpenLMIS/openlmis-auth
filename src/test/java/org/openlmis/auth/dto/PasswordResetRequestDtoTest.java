@@ -13,22 +13,26 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.auth.util;
+package org.openlmis.auth.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
+import org.openlmis.auth.ToStringTestUtils;
 
-@NoArgsConstructor
-@AllArgsConstructor
-public class PasswordResetRequest {
+public class PasswordResetRequestDtoTest {
 
-  @Getter
-  @Setter
-  private String username;
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(PasswordResetRequestDto.class)
+        .withRedefinedSuperclass()
+        .suppress(Warning.NONFINAL_FIELDS)
+        .verify();
+  }
 
-  @Getter
-  @Setter
-  private String newPassword;
+  @Test
+  public void shouldImplementToString() {
+    ToStringTestUtils.verify(PasswordResetRequestDto.class, new PasswordResetRequestDto());
+  }
 }

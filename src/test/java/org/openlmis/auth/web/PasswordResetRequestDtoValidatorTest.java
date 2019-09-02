@@ -27,15 +27,15 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.auth.dto.PasswordResetRequestDto;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.i18n.MessageKeys;
-import org.openlmis.auth.util.PasswordResetRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PasswordResetRequestValidatorTest {
+public class PasswordResetRequestDtoValidatorTest {
 
   private static final String USERNAME = "username";
   private static final String NEW_PASSWORD = "newPassword";
@@ -44,14 +44,14 @@ public class PasswordResetRequestValidatorTest {
   private ExposedMessageSource messageSource;
 
   @InjectMocks
-  private Validator validator = new PasswordResetRequestValidator();
+  private Validator validator = new PasswordResetRequestDtoValidator();
 
-  private PasswordResetRequest request;
+  private PasswordResetRequestDto request;
   private Errors errors;
 
   @Before
   public void setUp() throws Exception {
-    request = new PasswordResetRequest();
+    request = new PasswordResetRequestDto();
     request.setNewPassword("testpassword1");
     request.setUsername("testusername");
 

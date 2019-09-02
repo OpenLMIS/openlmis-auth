@@ -15,20 +15,23 @@
 
 package org.openlmis.auth.web;
 
+import org.openlmis.auth.dto.PasswordResetRequestDto;
 import org.openlmis.auth.i18n.MessageKeys;
-import org.openlmis.auth.util.PasswordResetRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 
 @Component
-public class PasswordResetRequestValidator extends BaseValidator {
+public class PasswordResetRequestDtoValidator extends BaseValidator {
 
   private static final String USERNAME = "username";
   private static final String NEW_PASSWORD = "newPassword";
+  private static final String REGEX_CONTAINS_NUMBER = "(?=.*[0-9]).+";
+  private static final String REGEX_CONTAINS_SPACES = "(?=\\S+$).+";
+  private static final String REGEX_SIZE_IS_BETWEEN_8_AND_16 = "^[a-zA-Z0-9]{8,16}$";
   
   @Override
   public boolean supports(Class<?> clazz) {
-    return PasswordResetRequest.class.equals(clazz);
+    return PasswordResetRequestDto.class.equals(clazz);
   }
 
   @Override
@@ -37,19 +40,19 @@ public class PasswordResetRequestValidator extends BaseValidator {
     rejectIfEmptyOrWhitespace(errors, NEW_PASSWORD, MessageKeys.ERROR_FIELD_REQUIRED);
     
     if (!errors.hasErrors()) {
-      PasswordResetRequest passwordResetRequest = (PasswordResetRequest) target;
-      verifyPassword(passwordResetRequest.getNewPassword(), errors);
+      PasswordResetRequestDto passwordResetRequestDto = (PasswordResetRequestDto) target;
+      verifyPassword(passwordResetRequestDto.getNewPassword(), errors);
     }
   }
 
   private void verifyPassword(String password, Errors errors) {
-    if (!password.matches("(?=.*[0-9]).+")) {
+    if (!password.matches(REGEX_CONTAINS_NUMBER)) {
       rejectValue(errors, NEW_PASSWORD, MessageKeys.USERS_PASSWORD_RESET_NOT_CONTAIN_NUMBER);
     }
-    if (!password.matches("(?=\\S+$).+")) {
+    if (!password.matches(REGEX_CONTAINS_SPACES)) {
       rejectValue(errors, NEW_PASSWORD, MessageKeys.USERS_PASSWORD_RESET_CONTAIN_SPACES);
     }
-    if (!password.matches("^[a-zA-Z0-9]{8,16}$")) {
+    if (!password.matches(REGEX_SIZE_IS_BETWEEN_8_AND_16)) {
       rejectValue(errors, NEW_PASSWORD, MessageKeys.USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH);
     }
   }

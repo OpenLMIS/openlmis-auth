@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.PasswordResetRequestDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
@@ -38,7 +39,6 @@ import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.UserContactDetailsDto;
 import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
 import org.openlmis.auth.util.PasswordChangeRequest;
-import org.openlmis.auth.util.PasswordResetRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +97,7 @@ public class UserController {
   private UserDtoValidator userDtoValidator;
   
   @Autowired
-  private PasswordResetRequestValidator passwordResetRequestValidator;
+  private PasswordResetRequestDtoValidator passwordResetRequestDtoValidator;
 
   @Autowired
   private PasswordResetNotifier passwordResetNotifier;
@@ -175,17 +175,17 @@ public class UserController {
    */
   @RequestMapping(value = "/users/auth/passwordReset", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
-  public void passwordReset(@RequestBody PasswordResetRequest passwordResetRequest,
+  public void passwordReset(@RequestBody PasswordResetRequestDto passwordResetRequestDto,
       BindingResult bindingResult) {
-    permissionService.canEditUserPassword(passwordResetRequest.getUsername());
+    permissionService.canEditUserPassword(passwordResetRequestDto.getUsername());
 
-    passwordResetRequestValidator.validate(passwordResetRequest, bindingResult);
+    passwordResetRequestDtoValidator.validate(passwordResetRequestDto, bindingResult);
     
     if (bindingResult.hasErrors()) {
       throw new ValidationMessageException(bindingResult.getFieldError().getDefaultMessage());
     }
 
-    String username = passwordResetRequest.getUsername();
+    String username = passwordResetRequestDto.getUsername();
     User user = userRepository.findOneByUsernameIgnoreCase(username);
 
     if (null == user) {
@@ -193,7 +193,7 @@ public class UserController {
     }
 
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    user.setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
+    user.setPassword(encoder.encode(passwordResetRequestDto.getNewPassword()));
     userRepository.save(user);
     LOGGER.debug("Password updated for user %s", username);
   }
