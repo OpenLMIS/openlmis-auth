@@ -49,10 +49,14 @@ public abstract class MessageKeys {
       + ".email.resetPassword.subject";
   public static final String PASSWORD_RESET_EMAIL_BODY = SERVICE_PREFIX
       + ".email.resetPassword.body";
-
-  public static final String USERS_PASSWORD_RESET_INVALID_VALUE = USERS
-      + ".passwordReset.invalidValue";
-
+  
+  public static final String USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH = USERS
+      + ".passwordReset.invalidPasswordLength";
+  public static final String USERS_PASSWORD_RESET_NOT_CONTAIN_NUMBER = USERS
+      + ".passwordReset.notContainNumber";
+  public static final String USERS_PASSWORD_RESET_CONTAIN_SPACES = USERS
+      + ".passwordReset.containSpaces";
+  
   public static final String USER_NOT_FOUND = USERS + ".notFound";
 
   public static final String USER_NOT_FOUND_BY_EMAIL = USERS + ".notFoundByEmail";

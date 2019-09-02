@@ -32,7 +32,6 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doThrow;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
-import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.service.ExpirationTokenNotifier.TOKEN_VALIDITY_HOURS;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
@@ -60,13 +59,14 @@ import org.openlmis.auth.service.notification.UserContactDetailsDto;
 import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
 import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
+import org.openlmis.auth.util.PasswordResetRequest;
 import org.openlmis.auth.web.TestWebData.Fields;
 import org.openlmis.auth.web.TestWebData.GrantTypes;
-import org.openlmis.util.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.Errors;
 import org.springframework.web.client.HttpServerErrorException;
 
 @SuppressWarnings("PMD.TooManyMethods")
@@ -94,6 +94,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @MockBean
   private NotificationService notificationService;
+  
+  @MockBean
+  private PasswordResetRequestValidator passwordResetRequestValidator;
 
   @MockBean
   private UserContactDetailsNotificationService userContactDetailsNotificationService;
@@ -115,6 +118,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         any(String.class),
         any(String.class)
     );
+    
+    willDoNothing().given(passwordResetRequestValidator).validate(any(Object.class), 
+        any(Errors.class));
 
     passwordResetTokenRepository.deleteAll();
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -230,27 +236,6 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
-  public void shouldReturnErrorMessageIfPasswordIsTooShort() {
-    checkErrorResponseForPasswordReset("1234567", "size must be between 8 and 16");
-  }
-
-  @Test
-  public void shouldReturnErrorMessageIfPasswordIsTooLong() {
-    checkErrorResponseForPasswordReset("sdokfsodpfjsaidjasj2akdsjk",
-        "size must be between 8 and 16");
-  }
-
-  @Test
-  public void shouldReturnErrorMessageIfPasswordDoesNotConstainNumber() {
-    checkErrorResponseForPasswordReset("vvvvvvvvvvv", "must contain at least 1 number");
-  }
-
-  @Test
-  public void shouldReturnErrorMessageIfPasswordContainsSpaces() {
-    checkErrorResponseForPasswordReset("1sample text", "must not contain spaces");
-  }
-
-  @Test
   public void shouldNotResetPasswordForOtherUserWithoutPermissions() {
     PermissionMessageException ex = buildUserManagerPermissionError();
     String differentUsername = "differentUser";
@@ -357,14 +342,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
   }
-
-  private void checkErrorResponseForPasswordReset(String password, String expectedMessage) {
-    passwordReset(password, USER_TOKEN)
-        .statusCode(400)
-        .body("messageKey", equalTo(USERS_PASSWORD_RESET_INVALID_VALUE))
-        .body("message", containsString(expectedMessage));
-  }
-
+  
   private ValidatableResponse passwordReset(String password, String token) {
     return passwordReset(DummyUserMainDetailsDto.USERNAME, password, token);
   }
