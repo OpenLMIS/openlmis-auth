@@ -30,6 +30,9 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_CONTAIN_SPACES;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH;
+import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_NOT_CONTAIN_NUMBER;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
@@ -51,7 +54,8 @@ public class MessageKeysTest {
 
     verifyValue(ERROR_USER_NOT_FOUND, "auth.error.authentication.userCanNotBeFound");
     verifyValue(ERROR_RIGHT_NOT_FOUND, "auth.error.authentication.rightCanNotBeFound");
-    verifyValue(ERROR_NO_FOLLOWING_PERMISSION, "auth.error.authorization.noFollowingPermission");
+    verifyValue(ERROR_NO_FOLLOWING_PERMISSION, 
+        "auth.error.authorization.noFollowingPermission");
 
     verifyValue(PASSWORD_RESET_EMAIL_SUBJECT, "auth.email.resetPassword.subject");
     verifyValue(PASSWORD_RESET_EMAIL_BODY, "auth.email.resetPassword.body");
@@ -61,6 +65,13 @@ public class MessageKeysTest {
     verifyValue(USER_NOT_FOUND_BY_EMAIL, "users.notFoundByEmail");
 
     verifyValue(USERS_LOGOUT_CONFIRMATION, "users.logout.confirmation");
+    
+    verifyValue(USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH, 
+        "users.passwordReset.invalidPasswordLength");
+    verifyValue(USERS_PASSWORD_RESET_CONTAIN_SPACES, 
+        "users.passwordReset.containSpaces");
+    verifyValue(USERS_PASSWORD_RESET_NOT_CONTAIN_NUMBER, 
+        "users.passwordReset.notContainNumber");
   }
 
   private void verifyValue(String actual, String expected) {

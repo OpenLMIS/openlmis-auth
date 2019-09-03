@@ -19,16 +19,15 @@ package org.openlmis.auth.web;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
-import static org.openlmis.auth.i18n.MessageKeys.USERS_PASSWORD_RESET_INVALID_VALUE;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
 import java.util.List;
 import java.util.UUID;
-import javax.validation.Valid;
 import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.PasswordResetRequestDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
@@ -39,9 +38,7 @@ import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.UserContactDetailsDto;
 import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
-import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
-import org.openlmis.util.PasswordResetRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +54,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -99,6 +95,9 @@ public class UserController {
 
   @Autowired
   private UserDtoValidator userDtoValidator;
+  
+  @Autowired
+  private PasswordResetRequestDtoValidator passwordResetRequestDtoValidator;
 
   @Autowired
   private PasswordResetNotifier passwordResetNotifier;
@@ -176,18 +175,17 @@ public class UserController {
    */
   @RequestMapping(value = "/users/auth/passwordReset", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
-  public void passwordReset(@RequestBody @Valid PasswordResetRequest passwordResetRequest,
+  public void passwordReset(@RequestBody PasswordResetRequestDto passwordResetRequestDto,
       BindingResult bindingResult) {
-    permissionService.canEditUserPassword(passwordResetRequest.getUsername());
+    permissionService.canEditUserPassword(passwordResetRequestDto.getUsername());
 
+    passwordResetRequestDtoValidator.validate(passwordResetRequestDto, bindingResult);
+    
     if (bindingResult.hasErrors()) {
-      FieldError fieldError = bindingResult.getFieldError();
-      throw new ValidationMessageException(
-          new Message(USERS_PASSWORD_RESET_INVALID_VALUE,
-              fieldError.getField(), fieldError.getDefaultMessage()));
+      throw new ValidationMessageException(bindingResult.getFieldError().getDefaultMessage());
     }
 
-    String username = passwordResetRequest.getUsername();
+    String username = passwordResetRequestDto.getUsername();
     User user = userRepository.findOneByUsernameIgnoreCase(username);
 
     if (null == user) {
@@ -195,7 +193,7 @@ public class UserController {
     }
 
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    user.setPassword(encoder.encode(passwordResetRequest.getNewPassword()));
+    user.setPassword(encoder.encode(passwordResetRequestDto.getNewPassword()));
     userRepository.save(user);
     LOGGER.debug("Password updated for user %s", username);
   }
