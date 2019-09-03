@@ -30,6 +30,7 @@ import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
@@ -44,6 +45,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
 import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.domain.PasswordResetToken;
@@ -52,6 +54,7 @@ import org.openlmis.auth.dto.PasswordResetRequestDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.PermissionMessageException;
+import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PermissionService;
@@ -66,6 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.client.HttpServerErrorException;
 
@@ -81,7 +85,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String LOGOUT_URL = RESOURCE_URL + "/logout";
 
   private static final String TOKEN_URL = "/api/oauth/token";
-
+  private static final String PASS_FIELD = "newPassword";
 
   @Autowired
   private UserRepository userRepository;
@@ -245,6 +249,15 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     passwordReset(differentUsername, "newpassword123", USER_TOKEN)
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
+  }
+
+  @Test
+  public void shouldReturnErrorMessageIfPasswordIsIncorrectSize() {
+    doAnswer(this::mockBindingResults).when(passwordResetRequestDtoValidator)
+        .validate(any(Object.class), any(BindingResult.class));
+
+    passwordReset("a", USER_TOKEN)
+        .statusCode(400);
   }
 
   @Test
@@ -414,5 +427,13 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     Message exMessage = new Message(ERROR_NO_FOLLOWING_PERMISSION, "USERS_MANAGE");
 
     return new PermissionMessageException(exMessage);
+  }
+
+  private Object mockBindingResults(InvocationOnMock invocation) {
+    BindingResult bindingResult = (BindingResult) invocation.getArguments()[1];
+    bindingResult.rejectValue(PASS_FIELD,
+        MessageKeys.USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH, "Password size must "
+            + "be between 8 and 16.");
+    return bindingResult;
   }
 }
