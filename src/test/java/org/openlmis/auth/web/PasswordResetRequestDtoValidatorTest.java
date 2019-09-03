@@ -38,7 +38,7 @@ import org.springframework.validation.Validator;
 public class PasswordResetRequestDtoValidatorTest {
 
   private static final String USERNAME = "username";
-  private static final String NEW_PASSWORD = "newPassword";
+  private static final String PASS_FIELD = "newPassword";
 
   @Mock
   private ExposedMessageSource messageSource;
@@ -83,7 +83,7 @@ public class PasswordResetRequestDtoValidatorTest {
 
     validator.validate(request, errors);
 
-    assertErrorMessage(errors, NEW_PASSWORD, MessageKeys.ERROR_FIELD_REQUIRED);
+    assertErrorMessage(errors, PASS_FIELD, MessageKeys.ERROR_FIELD_REQUIRED);
   }
 
   @Test
@@ -92,7 +92,7 @@ public class PasswordResetRequestDtoValidatorTest {
 
     validator.validate(request, errors);
 
-    assertErrorMessage(errors, NEW_PASSWORD, MessageKeys.USERS_PASSWORD_RESET_CONTAIN_SPACES);
+    assertErrorMessage(errors, PASS_FIELD, MessageKeys.USERS_PASSWORD_RESET_CONTAIN_SPACES);
   }
 
   @Test
@@ -101,7 +101,7 @@ public class PasswordResetRequestDtoValidatorTest {
 
     validator.validate(request, errors);
 
-    assertErrorMessage(errors, NEW_PASSWORD,
+    assertErrorMessage(errors, PASS_FIELD,
         MessageKeys.USERS_PASSWORD_RESET_NOT_CONTAIN_NUMBER);
   }
 
@@ -111,7 +111,7 @@ public class PasswordResetRequestDtoValidatorTest {
 
     validator.validate(request, errors);
 
-    assertErrorMessage(errors, NEW_PASSWORD,
+    assertErrorMessage(errors, PASS_FIELD,
         MessageKeys.USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH);
   }
 

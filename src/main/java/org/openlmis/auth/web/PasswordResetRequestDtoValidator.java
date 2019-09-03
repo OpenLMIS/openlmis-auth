@@ -24,7 +24,7 @@ import org.springframework.validation.Errors;
 public class PasswordResetRequestDtoValidator extends BaseValidator {
 
   private static final String USERNAME = "username";
-  private static final String NEW_PASSWORD = "newPassword";
+  private static final String PASS_FIELD = "newPassword";
   private static final String REGEX_CONTAINS_NUMBER = "(?=.*[0-9]).+";
   private static final String REGEX_CONTAINS_SPACES = "(?=\\S+$).+";
   private static final String REGEX_SIZE_IS_BETWEEN_8_AND_16 = "^[a-zA-Z0-9]{8,16}$";
@@ -37,7 +37,7 @@ public class PasswordResetRequestDtoValidator extends BaseValidator {
   @Override
   public void validate(Object target, Errors errors) {
     rejectIfEmptyOrWhitespace(errors, USERNAME, MessageKeys.ERROR_FIELD_REQUIRED);
-    rejectIfEmptyOrWhitespace(errors, NEW_PASSWORD, MessageKeys.ERROR_FIELD_REQUIRED);
+    rejectIfEmptyOrWhitespace(errors, PASS_FIELD, MessageKeys.ERROR_FIELD_REQUIRED);
     
     if (!errors.hasErrors()) {
       PasswordResetRequestDto passwordResetRequestDto = (PasswordResetRequestDto) target;
@@ -47,13 +47,13 @@ public class PasswordResetRequestDtoValidator extends BaseValidator {
 
   private void verifyPassword(String password, Errors errors) {
     if (!password.matches(REGEX_CONTAINS_NUMBER)) {
-      rejectValue(errors, NEW_PASSWORD, MessageKeys.USERS_PASSWORD_RESET_NOT_CONTAIN_NUMBER);
+      rejectValue(errors, PASS_FIELD, MessageKeys.USERS_PASSWORD_RESET_NOT_CONTAIN_NUMBER);
     }
     if (!password.matches(REGEX_CONTAINS_SPACES)) {
-      rejectValue(errors, NEW_PASSWORD, MessageKeys.USERS_PASSWORD_RESET_CONTAIN_SPACES);
+      rejectValue(errors, PASS_FIELD, MessageKeys.USERS_PASSWORD_RESET_CONTAIN_SPACES);
     }
     if (!password.matches(REGEX_SIZE_IS_BETWEEN_8_AND_16)) {
-      rejectValue(errors, NEW_PASSWORD, MessageKeys.USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH);
+      rejectValue(errors, PASS_FIELD, MessageKeys.USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH);
     }
   }
 }
