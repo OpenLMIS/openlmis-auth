@@ -182,7 +182,7 @@ public class UserController {
     passwordResetRequestDtoValidator.validate(passwordResetRequestDto, bindingResult);
     
     if (bindingResult.hasErrors()) {
-      throw new ValidationMessageException(bindingResult.getFieldError().getDefaultMessage());
+      throw new ValidationMessageException(bindingResult.getFieldError().getCode());
     }
 
     String username = passwordResetRequestDto.getUsername();
