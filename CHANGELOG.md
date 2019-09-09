@@ -1,4 +1,4 @@
-4.2.3 / WIP
+4.2.0 / WIP
 =================
 
 New functionality:
