@@ -1,5 +1,8 @@
-4.1.3 / WIP
+4.2.3 / WIP
 =================
+
+New functionality:
+* [OLMIS-6558](https://openlmis.atlassian.net/browse/OLMIS-6558): Add new environment variable - PUBLIC_URL and use to for email generated links
 
 Improvements:
 * [OLMIS-4128](https://openlmis.atlassian.net/browse/OLMIS-4128): Change maximum page size to max integer.

@@ -23,14 +23,19 @@ import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordResetToken> {
-  static final String RESET_PASSWORD_URL = System.getenv("BASE_URL") + "/#!/resetPassword/";
+
+  private static final String RESET_PASSWORD_URL = "/#!/resetPassword/";
 
   @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
+ 
+  @Value("${publicUrl}")
+  private String publicUrl;
 
   /**
    * Sends password reset email.
@@ -41,7 +46,7 @@ public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordReset
     PasswordResetToken token = createPasswordResetToken(user);
 
     sendEmail(
-        user, token, PASSWORD_RESET_EMAIL_SUBJECT, PASSWORD_RESET_EMAIL_BODY, RESET_PASSWORD_URL
+        user, token, PASSWORD_RESET_EMAIL_SUBJECT, PASSWORD_RESET_EMAIL_BODY, getResetPasswordUrl()
     );
   }
 
@@ -59,6 +64,11 @@ public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordReset
 
       return token;
     });
+  }
+
+
+  private String getResetPasswordUrl() {
+    return publicUrl + RESET_PASSWORD_URL;
   }
 
 }
