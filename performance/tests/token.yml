@@ -6,7 +6,7 @@ execution:
   - concurrency: 10
     hold-for: 2m
     scenario: get-user-token
-  - concurrency: 10
+  - concurrency: 5
     hold-for: 2m
     scenario: get-service-token
 
@@ -36,4 +36,4 @@ reporting:
     - module: passfail
       criteria:
         90% of users fail to get a token in time: p90 of GetUserToken>1500ms
-        90% of services fail to get a token in time: p90 of GetServiceToken>200ms
+        90% of services fail to get a token in time: p90 of GetServiceToken>100ms
