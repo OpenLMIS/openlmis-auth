@@ -77,13 +77,13 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   @MockBean
   private AccessTokenService accessTokenService;
 
-  @MockBean
+  @MockBean(name = "clientRepository")
   private ClientRepository clientRepository;
 
   @MockBean
   private ConsulCommunicationService consulCommunicationService;
 
-  @MockBean
+  @MockBean(name = "apiKeyRepository")
   private ApiKeyRepository apiKeyRepository;
 
   @MockBean
