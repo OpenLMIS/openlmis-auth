@@ -1,9 +1,3 @@
-4.2.1 / WIP
-=================
-
-Improvements which are backwards-compatible:
-* [OLMIS-6716](https://openlmis.atlassian.net/browse/OLMIS-6716): Updated Spring Boot version to 1.5.22.
-
 4.2.0 / 2019-10-17
 =================
 
