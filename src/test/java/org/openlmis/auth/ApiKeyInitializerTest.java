@@ -64,7 +64,7 @@ public class ApiKeyInitializerTest {
   @Captor
   private ArgumentCaptor<OAuth2Authentication> authenticationCaptor;
 
-  private Pageable pageable = new PageRequest(Pagination.DEFAULT_PAGE_NUMBER, 2000);
+  private Pageable pageable = PageRequest.of(Pagination.DEFAULT_PAGE_NUMBER, 2000);
 
   private ApiKey apiKey = new ApiKeyDataBuilder().build();
 
