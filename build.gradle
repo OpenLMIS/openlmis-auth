@@ -119,17 +119,6 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
-task flywayTest(type: Test) {
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = 'full'
-    }
-
-    include '**/migration/**'
-}
-
 task integrationTest(type: Test) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -137,15 +126,9 @@ task integrationTest(type: Test) {
         events "passed", "skipped", "failed"
         exceptionFormat = 'full'
     }
-    mustRunAfter test
     environment 'BASE_URL', "http://localhost"
-
-    exclude '**/migration/**'
 }
-
 check.dependsOn integrationTest
-
-flywayTest.mustRunAfter integrationTest
 integrationTest.mustRunAfter test
 
 tasks.withType(Test) {
