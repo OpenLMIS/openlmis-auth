@@ -39,7 +39,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-security"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-hibernate4"
-    compile "org.projectlombok:lombok:1.16.8"
+    compile "org.projectlombok:lombok"
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "org.postgresql:postgresql:42.0.0"
     compile "org.springframework.boot:spring-boot-starter-integration"
@@ -49,19 +49,19 @@ dependencies {
     compile "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.2.2.RELEASE"
     compile 'org.webjars.npm:api-console:3.0.17'
     compile 'org.openlmis:openlmis-service-util:3.0.0'
-    compile 'org.apache.commons:commons-lang3:3.5'
-    compile 'org.flywaydb:flyway-core:6.0.8'
+    compile 'org.apache.commons:commons-lang3'
+    compile 'org.flywaydb:flyway-core'
     compile 'org.hibernate:hibernate-java8'
-    compile "org.slf4j:slf4j-ext:1.7.25"
+    compile "org.slf4j:slf4j-ext"
     compile 'com.google.guava:guava:23.3-jre'
     compile 'commons-validator:commons-validator:1.6'
     compile 'org.apache.commons:commons-csv:1.4'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'commons-io:commons-io:2.5'
 
-    testCompile 'io.rest-assured:rest-assured:3.3.0'
-    testCompile 'io.rest-assured:json-schema-validator:3.3.0'
-    testCompile 'io.rest-assured:spring-mock-mvc:3.3.0'
+    testCompile 'io.rest-assured:rest-assured'
+    testCompile 'io.rest-assured:json-schema-validator'
+    testCompile 'io.rest-assured:spring-mock-mvc'
     testCompile "com.jayway.restassured:rest-assured:2.7.0"
     testCompile "guru.nidi.raml:raml-tester:0.8.15"
     testCompile "org.raml:raml-parser:0.8.37"
