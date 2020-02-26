@@ -19,4 +19,3 @@ docker-compose -f docker-compose.builder.yml run sonar
 docker-compose -f docker-compose.builder.yml down --volumes
 
 sudo rm -vrf .envrf .env
-sudo rm -rf $(pwd)/{*,.*}

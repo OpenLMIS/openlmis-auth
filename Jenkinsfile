@@ -172,6 +172,11 @@ pipeline {
                                 notifyAfterFailure()
                             }
                         }
+                        always {
+                            script {
+                                sh "sudo rm -rf ${WORKSPACE}/{*,.*}"
+                            }
+                        }
                     }
                 }
                 stage('Contract tests') {
