@@ -181,9 +181,9 @@ public class ApiKeyController {
     canManageApiKeys(profiler);
 
     profiler.start("FIND_API_KEY");
-    apiKeyRepository.findById(token).orElseThrow(
-        () -> new NotFoundException(ERROR_API_KEY_NOT_FOUND)
-    );
+    if (!apiKeyRepository.existsById(token)) {
+      throw new NotFoundException(ERROR_API_KEY_NOT_FOUND);
+    }
 
     profiler.start("READ_AUTHENTICATION");
     OAuth2Authentication authentication = tokenStore.readAuthentication(token.toString());

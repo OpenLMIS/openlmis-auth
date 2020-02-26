@@ -24,6 +24,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+/**
+ * This class provides pagination-related defaults and utility methods. It helps clients
+ * obtain a Page (courtesy of the getPage set of overridden methods) as well as work with
+ * existing pages (via the getPageNumber and getPageSize methods).
+ */
 public final class Pagination {
 
   /*
@@ -76,7 +81,7 @@ public final class Pagination {
    * See {@link #getPage(List, Pageable)}
    */
   public static <T> Page<T> getPage(List<T> originalList) {
-    return getPage(originalList, null);
+    return getPage(originalList, PageRequest.of(DEFAULT_PAGE_NUMBER, NO_PAGINATION));
   }
 
   /**
