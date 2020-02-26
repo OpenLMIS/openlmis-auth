@@ -103,7 +103,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     given(accessTokenService.obtainToken(anyString()))
         .willReturn(key.getToken());
 
-    given(apiKeyRepository.findById(key.getToken())).willReturn(Optional.of(key));
+    given(apiKeyRepository.existsById(key.getToken())).willReturn(true);
     given(apiKeyRepository.save(any(ApiKey.class)))
         .willAnswer(invocation -> invocation.getArguments()[0]);
 
@@ -263,8 +263,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnNotFoundIfKeyNotExistForDeleteApiKeyEndpoint() {
-    given(apiKeyRepository.findById(key.getToken()))
-        .willReturn(Optional.empty());
+    given(apiKeyRepository.existsById(key.getToken())).willReturn(false);
 
     String response = delete(USER_TOKEN)
         .statusCode(HttpStatus.NOT_FOUND.value())
