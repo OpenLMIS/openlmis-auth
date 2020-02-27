@@ -97,7 +97,7 @@ pipeline {
                         notifyAfterFailure()
                     }
                 }
-                always {
+                cleanup {
                     script {
                         sh "sudo rm -rf ${WORKSPACE}/{*,.*} || true"
                     }
@@ -177,7 +177,7 @@ pipeline {
                                 notifyAfterFailure()
                             }
                         }
-                        always {
+                        cleanup {
                             script {
                                 sh "sudo rm -rf ${WORKSPACE}/{*,.*} || true"
                             }
