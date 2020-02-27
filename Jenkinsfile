@@ -174,7 +174,7 @@ pipeline {
                         }
                         always {
                             script {
-                                sh "sudo rm -rf ${WORKSPACE}/{*,.*}"
+                                sh "sudo rm -rf ${WORKSPACE}/{*,.*} || true"
                             }
                         }
                     }
