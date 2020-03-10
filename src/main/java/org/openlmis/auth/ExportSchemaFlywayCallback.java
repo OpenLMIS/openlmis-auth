@@ -15,58 +15,48 @@
 
 package org.openlmis.auth;
 
-import static org.flywaydb.core.api.callback.Event.AFTER_MIGRATE;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.Connection;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import org.flywaydb.core.api.callback.BaseCallback;
-import org.flywaydb.core.api.callback.Context;
-import org.flywaydb.core.api.callback.Event;
+import org.flywaydb.core.api.callback.BaseFlywayCallback;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-public class ExportSchemaFlywayCallback extends BaseCallback {
+public class ExportSchemaFlywayCallback extends BaseFlywayCallback {
 
   private static final XLogger XLOGGER = XLoggerFactory
       .getXLogger(ExportSchemaFlywayCallback.class);
 
-  @Value("${spring.flyway.schemas}")
+  @Value("${flyway.schemas}")
   private String schemaName;
 
   @Override
-  public boolean supports(Event event, Context context) {
-    return AFTER_MIGRATE.equals(event);
-  }
+  public void afterMigrate(Connection connection) {
+    XLOGGER.entry(connection);
 
-  @Override
-  public void handle(Event event, Context context) {
-    if (AFTER_MIGRATE.equals(event)) {
-      XLOGGER.entry(context.getConnection());
+    XLOGGER.info("After migrations, exporting db schema");
 
-      XLOGGER.info("After migrations, exporting db schema");
+    int exitCode = 0;
+    try {
+      schemaName = Optional.ofNullable(schemaName).orElse("auth");
+      
+      Process proc = Runtime.getRuntime().exec("/app/export_schema.sh " + schemaName);
 
-      int exitCode = 0;
-      try {
-        schemaName = Optional.ofNullable(schemaName).orElse("auth");
+      StreamGobbler streamGobbler =
+          new StreamGobbler(proc.getInputStream(), XLOGGER::info);
+      Executors.newSingleThreadExecutor().submit(streamGobbler);
 
-        Process proc = Runtime.getRuntime().exec("/app/export_schema.sh " + schemaName);
-
-        StreamGobbler streamGobbler =
-            new StreamGobbler(proc.getInputStream(), XLOGGER::info);
-        Executors.newSingleThreadExecutor().submit(streamGobbler);
-
-        exitCode = proc.waitFor();
-      } catch (Exception ex) {
-        XLOGGER.warn("Exporting db schema failed with message: " + ex);
-      }
-
-      XLOGGER.exit(exitCode);
+      exitCode = proc.waitFor();
+    } catch (Exception ex) {
+      XLOGGER.warn("Exporting db schema failed with message: " + ex);
     }
+
+    XLOGGER.exit(exitCode);
   }
 
   private static class StreamGobbler implements Runnable {

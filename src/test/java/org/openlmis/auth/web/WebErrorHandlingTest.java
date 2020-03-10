@@ -66,7 +66,7 @@ public class WebErrorHandlingTest {
   public void setUp() {
     when(messageService.localize(any(Message.class)))
         .thenAnswer(invocation -> {
-          Message message = invocation.getArgument(0, Message.class);
+          Message message = invocation.getArgumentAt(0, Message.class);
           return message.localMessage(messageSource, ENGLISH_LOCALE);
         });
   }
@@ -79,7 +79,7 @@ public class WebErrorHandlingTest {
     when(exp.getResponseBodyAsString()).thenReturn("body");
 
     // when
-    mockMessage(ERROR_SEND_REQUEST, "400 BAD_REQUEST", "body");
+    mockMessage(ERROR_SEND_REQUEST, "400", "body");
     LocalizedMessage message = errorHandler.handleHttpStatusCodeException(exp);
 
     // then

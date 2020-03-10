@@ -214,8 +214,6 @@ resourceTypes:
                           description: >
                             The given user exists and has been returned. WARNING: For security
                             reasons the response does not contain password.
-                          headers:
-                              Keep-Alive:
                           body:
                               application/json:
                                   schema: user
@@ -226,14 +224,10 @@ resourceTypes:
                                   schema: localizedMessage
                       401:
                           description: The request does not contain a token or the token might be invalid.
-                          headers:
-                              Keep-Alive:
                           body:
                               application/json:
                       403:
                           description: The current logged user has no permission to perform the action.
-                          headers:
-                              Keep-Alive:
                           body:
                               application/json:
                                   schema: localizedMessage
@@ -390,19 +384,13 @@ resourceTypes:
           description: Returns all API Keys.
           responses:
               200:
-                  headers:
-                      Keep-Alive:
                   body:
                       application/json:
                           schema: apiKeyPage
               401:
-                  headers:
-                      Keep-Alive:
                   body:
                     application/json:
               403:
-                  headers:
-                      Keep-Alive:
                   body:
                       application/json:
                           schema: localizedMessage
@@ -411,8 +399,6 @@ resourceTypes:
           description: Create API Key.
           responses:
               201:
-                  headers:
-                      Keep-Alive:
                   body:
                       application/json:
                         schema: apiKey
@@ -421,13 +407,9 @@ resourceTypes:
                       application/json:
                           schema: localizedMessage
               401:
-                  headers:
-                      Keep-Alive:
                   body:
                       application/json:
               403:
-                  headers:
-                      Keep-Alive:
                   body:
                       application/json:
                           schema: localizedMessage
@@ -443,11 +425,7 @@ resourceTypes:
               description: "Completely removes API Key. This action is not recoverable."
               responses:
                   204:
-                      headers:
-                          Keep-Alive:
                   401:
-                      headers:
-                          Keep-Alive:
                       body:
                         application/json:
                   400:
@@ -455,14 +433,10 @@ resourceTypes:
                           application/json:
                               schema: localizedMessage
                   403:
-                      headers:
-                          Keep-Alive:
                       body:
                           application/json:
                               schema: localizedMessage
                   404:
-                      headers:
-                          Keep-Alive:
                       body:
                           application/json:
                               schema: localizedMessage
@@ -510,8 +484,6 @@ resourceTypes:
               responses:
                   200:
                       description: Authentication was successful.
-                      headers:
-                          Keep-Alive:
                       body:
                           application/json:
                               schema: token

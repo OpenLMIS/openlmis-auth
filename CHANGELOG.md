@@ -1,18 +1,3 @@
-4.3.0 / WIP
-=================
-
-New functionality added in a backwards-compatible manner:
-* [OLMIS-6761](https://openlmis.atlassian.net/browse/OLMIS-6761): Update Spring Boot version to 2.x:
-  * Spring Boot version is 2.2.2.
-  * Spring Security 5 has changed encoding of password storage to DelegatingPasswordEncoder. To be backwards-compatible, currently returning NoOpPasswordEncoder as default. Will probably need to migrate all passwords to new encoding and use a better encoder/decoder.
-  * Flyway is at 6.0.8, new mechanism for loading Spring Security for OAuth2 (matching Spring Boot version), new versions for REST Assured, RAML tester, RAML parser, PowerMock, Mockito (so tests will pass) and Java callback mechanism has changed to a general handle() method.
-  * Spring application properties for Flyway have changed.
-  * Fix repository method signatures (findOne is now findById, etc.); additionally they return Optional.
-  * Fix unit tests.
-  * Fix integration tests.
-  * Integration tests allow bean definition overriding, as it is not enabled by default now in Spring Boot 2.x.
-  * API definitions require "Keep-Alive" header for web integration tests.
-
 4.2.0 / 2019-10-17
 =================
 

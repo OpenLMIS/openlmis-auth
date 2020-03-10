@@ -15,22 +15,30 @@
 
 package org.openlmis.auth.web;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
 import static org.openlmis.auth.web.TestWebData.Fields;
 import static org.openlmis.auth.web.TestWebData.GrantTypes;
 import static org.openlmis.auth.web.TestWebData.Tokens.DURATION;
 
+import java.util.Collections;
 import java.util.Optional;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openlmis.auth.ApiKeyDataBuilder;
+import org.openlmis.auth.ApiKeyInitializer;
 import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.domain.ApiKey;
 import org.openlmis.auth.domain.Client;
+import org.openlmis.auth.util.Pagination;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 
 public class TokenIntegrationTest extends BaseWebIntegrationTest {
 
@@ -38,6 +46,9 @@ public class TokenIntegrationTest extends BaseWebIntegrationTest {
   public static void setUpClass() {
     System.setProperty("TOKEN_DURATION", String.valueOf(DURATION));
   }
+
+  @Autowired
+  private ApiKeyInitializer initializer;
 
   @Test
   public void shouldSetExpirationForTokens() {
@@ -67,24 +78,29 @@ public class TokenIntegrationTest extends BaseWebIntegrationTest {
     // given
     final ApiKey key = new ApiKeyDataBuilder().build();
     final Client keyClient = key.getClient();
+    final Client userClient = mockUserClient();
+
+    given(apiKeyRepository.findAll(any(Pageable.class)))
+        .willReturn(Pagination.getPage(Collections.singletonList(key)))
+        .willReturn(Pagination.getPage(Collections.emptyList()));
 
     given(clientRepository.findOneByClientId(keyClient.getClientId()))
         .willReturn(Optional.of(keyClient));
 
-    OAuth2AccessToken token = startRequest()
+    // we run API Key initializer to put test API Key to spring security
+    initializer.run();
+
+    // expect
+    startRequest()
         .auth()
         .preemptive()
-        .basic(keyClient.getClientId(), keyClient.getClientSecret())
-        .queryParam(Fields.GRANT_TYPE, "client_credentials")
+        .basic(userClient.getClientId(), userClient.getClientSecret())
+        .queryParam("token", key.getToken())
         .when()
-        .post("/api/oauth/token")
+        .post("api/oauth/check_token")
         .then()
         .statusCode(200)
-        .extract()
-        .as(OAuth2AccessToken.class);
-
-    assertNotNull(token);
-    assertEquals(OAuth2AccessToken.BEARER_TYPE.toLowerCase(), token.getTokenType());
-    assertNull(token.getExpiration());
+        .body(AccessTokenConverter.EXP, is(nullValue()))
+        .body(AccessTokenConverter.CLIENT_ID, is(keyClient.getClientId()));
   }
 }

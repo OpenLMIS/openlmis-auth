@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 public abstract class BaseCrudRepositoryIntegrationTest<T extends Identifiable> {
@@ -66,7 +66,7 @@ public abstract class BaseCrudRepositoryIntegrationTest<T extends Identifiable> 
     instance = repository.save(instance);
     assertInstance(instance);
 
-    Assert.assertTrue(repository.existsById(instance.getId()));
+    Assert.assertTrue(repository.exists(instance.getId()));
   }
 
   @Test
@@ -80,7 +80,7 @@ public abstract class BaseCrudRepositoryIntegrationTest<T extends Identifiable> 
 
     UUID id = instance.getId();
 
-    instance = repository.findById(id).orElse(null);
+    instance = repository.findOne(id);
     assertInstance(instance);
     Assert.assertEquals(id, instance.getId());
   }
@@ -97,7 +97,7 @@ public abstract class BaseCrudRepositoryIntegrationTest<T extends Identifiable> 
 
     UUID id = instance.getId();
 
-    repository.deleteById(id);
-    Assert.assertFalse(repository.existsById(id));
+    repository.delete(id);
+    Assert.assertFalse(repository.exists(id));
   }
 }

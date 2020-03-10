@@ -15,7 +15,6 @@
 
 package org.openlmis.auth.service;
 
-import java.util.Optional;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.repository.UserRepository;
@@ -35,17 +34,15 @@ public class UserService {
    * @return saved user.
    */
   public UserDto saveUser(UserDto request) {
-    User savedUser;
-    Optional<User> dbUser = userRepository.findById(request.getId());
-    
-    if (dbUser.isPresent()) {
-      savedUser = dbUser.get();
-      savedUser.updateFrom(request);
+    User dbUser = userRepository.findOne(request.getId());
+
+    if (null == dbUser) {
+      dbUser = User.newInstance(request);
     } else {
-      savedUser = User.newInstance(request);
+      dbUser.updateFrom(request);
     }
 
-    return toDto(userRepository.save(savedUser));
+    return toDto(userRepository.save(dbUser));
   }
 
   private UserDto toDto(User existing) {

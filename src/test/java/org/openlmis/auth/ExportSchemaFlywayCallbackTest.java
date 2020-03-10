@@ -15,14 +15,13 @@
 
 package org.openlmis.auth;
 
-import static org.flywaydb.core.api.callback.Event.AFTER_MIGRATE;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import org.apache.commons.io.IOUtils;
-import org.flywaydb.core.api.callback.Context;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +35,7 @@ public class ExportSchemaFlywayCallbackTest {
   private ExportSchemaFlywayCallback callback;
 
   @Mock
-  private Context mockContext;
+  private Connection mockConnection;
 
   @Mock
   private Runtime mockRuntime;
@@ -58,6 +57,6 @@ public class ExportSchemaFlywayCallbackTest {
   @Test
   public void afterMigrateShouldProcessStreams() {
 
-    callback.handle(AFTER_MIGRATE, mockContext);
+    callback.afterMigrate(mockConnection);
   }
 }

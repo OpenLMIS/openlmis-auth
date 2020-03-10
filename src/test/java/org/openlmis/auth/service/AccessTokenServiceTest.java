@@ -81,7 +81,7 @@ public class AccessTokenServiceTest {
 
     @Override
     public OAuth2AccessToken answer(InvocationOnMock invocation) {
-      OAuth2Authentication arg = invocation.getArgument(0, OAuth2Authentication.class);
+      OAuth2Authentication arg = invocation.getArgumentAt(0, OAuth2Authentication.class);
       assertThat(arg.getOAuth2Request().getClientId(), is(client.getClientId()));
       return new DefaultOAuth2AccessToken(TOKEN.toString());
     }

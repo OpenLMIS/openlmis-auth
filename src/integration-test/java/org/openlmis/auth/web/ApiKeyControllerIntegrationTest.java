@@ -32,7 +32,7 @@ import static org.openlmis.auth.web.TestWebData.Fields.MESSAGE_KEY;
 import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.SERVICE_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 import com.jayway.restassured.response.ValidatableResponse;
 import guru.nidi.ramltester.junit.RamlMatchers;
@@ -52,12 +52,13 @@ import org.openlmis.auth.dto.ApiKeyDto;
 import org.openlmis.auth.dto.ResultDto;
 import org.openlmis.auth.dto.RightDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
+import org.openlmis.auth.repository.ApiKeyRepository;
+import org.openlmis.auth.repository.ClientRepository;
 import org.openlmis.auth.service.AccessTokenService;
 import org.openlmis.auth.service.consul.ConsulCommunicationService;
 import org.openlmis.auth.util.AuthenticationHelper;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -77,7 +78,13 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   private AccessTokenService accessTokenService;
 
   @MockBean
+  private ClientRepository clientRepository;
+
+  @MockBean
   private ConsulCommunicationService consulCommunicationService;
+
+  @MockBean
+  private ApiKeyRepository apiKeyRepository;
 
   @MockBean
   private AuthenticationHelper authenticationHelper;
@@ -103,7 +110,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     given(accessTokenService.obtainToken(anyString()))
         .willReturn(key.getToken());
 
-    given(apiKeyRepository.existsById(key.getToken())).willReturn(true);
+    given(apiKeyRepository.findOne(key.getToken())).willReturn(key);
     given(apiKeyRepository.save(any(ApiKey.class)))
         .willAnswer(invocation -> invocation.getArguments()[0]);
 
@@ -187,7 +194,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldRetrieveOnePageOfApiKeys() {
     given(apiKeyRepository.findAll(any(Pageable.class)))
-        .willReturn(new PageImpl<>(Collections.singletonList(key), PageRequest.of(1, 1), 3));
+        .willReturn(new PageImpl<>(Collections.singletonList(key), null, 3));
 
     ValidatableResponse response = get(1, 1, USER_TOKEN).statusCode(HttpStatus.OK.value());
     checkPageBody(response, 1, 1, 1, 3, 3);
@@ -263,7 +270,8 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnNotFoundIfKeyNotExistForDeleteApiKeyEndpoint() {
-    given(apiKeyRepository.existsById(key.getToken())).willReturn(false);
+    given(apiKeyRepository.findOne(key.getToken()))
+        .willReturn(null);
 
     String response = delete(USER_TOKEN)
         .statusCode(HttpStatus.NOT_FOUND.value())
@@ -330,7 +338,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private ValidatableResponse post(String token) {
     return sendPostRequest(token, RESOURCE_URL, null, null)
-        .contentType(is(APPLICATION_JSON_VALUE));
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
   private ValidatableResponse get(int pageSize, String token) {

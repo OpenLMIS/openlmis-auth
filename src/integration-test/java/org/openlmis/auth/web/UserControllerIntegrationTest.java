@@ -36,7 +36,7 @@ import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.service.ExpirationTokenNotifier.TOKEN_VALIDITY_HOURS;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 import com.google.common.collect.ImmutableList;
 import com.jayway.restassured.response.ValidatableResponse;
@@ -129,7 +129,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     passwordResetTokenRepository.deleteAll();
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    user = userRepository.findById(admin.getId()).orElse(null);
+    user = userRepository.findOne(admin.getId());
     user.setPassword(encoder.encode(DummyUserMainDetailsDto.PASSWORD));
     userRepository.save(user);
 
@@ -146,14 +146,14 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .willReturn(admin);
 
     sendPostRequest(USER_TOKEN, RESOURCE_URL, userDto, null)
-        .contentType(is(APPLICATION_JSON_VALUE))
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(200);
   }
 
   @Test
   public void shouldUpdateUser() {
     sendPostRequest(USER_TOKEN, RESOURCE_URL, userDto, null)
-        .contentType(is(APPLICATION_JSON_VALUE))
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(200);
   }
 
@@ -162,7 +162,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     PermissionMessageException ex = mockUserManagePermissionError();
 
     sendPostRequest(USER_TOKEN, RESOURCE_URL, userDto, null)
-        .contentType(is(APPLICATION_JSON_VALUE))
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
   }
@@ -226,16 +226,14 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   @Test
   public void shouldResetPassword() {
     String password = userRepository
-        .findById(admin.getId())
-        .orElse(null)
+        .findOne(admin.getId())
         .getPassword();
     assertNotNull(password);
 
     passwordReset("test1234", USER_TOKEN).statusCode(200);
 
     String newPassword = userRepository
-        .findById(admin.getId())
-        .orElse(null)
+        .findOne(admin.getId())
         .getPassword();
     assertNotNull(newPassword);
     assertNotEquals(password, newPassword);
@@ -269,7 +267,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     );
 
     sendPostRequest(USER_TOKEN, RESET_PASS_URL, passwordResetRequestDto, null)
-        .contentType(is(APPLICATION_JSON_VALUE))
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE))
         .statusCode(400)
         .body(Fields.MESSAGE_KEY, equalTo(USER_NOT_FOUND));
   }
@@ -288,7 +286,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   public void testForgotPassword() {
     forgotPassword().statusCode(200);
 
-    User found = userRepository.findById(admin.getId()).orElse(null);
+    User found = userRepository.findOne(admin.getId());
     assertNotNull(found);
 
     PasswordResetToken token = passwordResetTokenRepository.findOneByUser(found);
@@ -297,14 +295,14 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     PasswordChangeRequest request = new PasswordChangeRequest(token.getId(), "test");
     changePassword(request).statusCode(200);
 
-    User changedUser = userRepository.findById(admin.getId()).orElse(null);
+    User changedUser = userRepository.findOne(admin.getId());
     assertNotNull(changedUser);
     assertNotEquals(changedUser.getPassword(), found.getPassword());
   }
 
   @Test
   public void shouldCreateNewTokenAfterEachForgotPasswordRequest() {
-    User user1 = userRepository.findById(admin.getId()).orElse(null);
+    User user1 = userRepository.findOne(admin.getId());
     assertNotNull(user1);
 
     PasswordResetToken token1 = new PasswordResetToken();
@@ -315,7 +313,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
     forgotPassword().statusCode(200);
 
-    User user2 = userRepository.findById(admin.getId()).orElse(null);
+    User user2 = userRepository.findOne(admin.getId());
     assertNotNull(user2);
     assertEquals(user1.getId(), user2.getId());
 
@@ -332,7 +330,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
     forgotPassword().statusCode(500);
 
-    User found = userRepository.findById(admin.getId()).orElse(null);
+    User found = userRepository.findOne(admin.getId());
     assertNotNull(found);
 
     PasswordResetToken token = passwordResetTokenRepository.findOneByUser(found);
@@ -345,15 +343,13 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(200)
         .extract().as(UUID.class);
 
-    PasswordResetToken token = passwordResetTokenRepository.findById(tokenId).orElse(null);
+    PasswordResetToken token = passwordResetTokenRepository.findOne(tokenId);
     assertNotNull(token);
   }
 
   @Test
   public void shouldNotCreatePasswordResetTokenWhenUserHasNoPermission() {
-    PermissionMessageException ex = buildUserManagerPermissionError();
-
-    doThrow(ex).when(permissionService).canManageUsers(null);
+    PermissionMessageException ex = mockUserManagePermissionError();
 
     passwordResetToken()
         .statusCode(403)
@@ -369,23 +365,26 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         username, password
     );
 
-    return sendPostRequest(token, RESET_PASS_URL, passwordResetRequestDto, null);
+    return sendPostRequest(token, RESET_PASS_URL, passwordResetRequestDto, null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
   private ValidatableResponse forgotPassword() {
     return sendPostRequest(null, FORGOT_PASS_URL, null,
-        of(Fields.EMAIL, DummyUserMainDetailsDto.EMAIL));
+        of(Fields.EMAIL, DummyUserMainDetailsDto.EMAIL))
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
   private ValidatableResponse changePassword(PasswordChangeRequest request) {
-    return sendPostRequest(null, CHANGE_PASS_URL, request, null);
+    return sendPostRequest(null, CHANGE_PASS_URL, request, null)
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
   private ValidatableResponse passwordResetToken() {
     return sendPostRequest(
         USER_TOKEN, RESET_TOKEN_PASS_URL, null,
         of(Fields.USER_ID, DummyUserMainDetailsDto.REFERENCE_ID))
-        .contentType(is(APPLICATION_JSON_VALUE));
+        .contentType(is(APPLICATION_JSON_UTF8_VALUE));
   }
 
   private String login(String username, String password) {

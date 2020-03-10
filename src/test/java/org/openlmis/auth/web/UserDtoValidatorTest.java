@@ -26,7 +26,6 @@ import static org.openlmis.auth.web.UserDtoValidator.ID;
 import static org.openlmis.auth.web.UserDtoValidator.USERNAME;
 
 import java.util.Locale;
-import java.util.Optional;
 import java.util.UUID;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
@@ -88,7 +87,7 @@ public class UserDtoValidatorTest {
 
     when(permissionService.hasRight(USERS_MANAGE)).thenReturn(true);
     when(messageSource.getMessage(anyString(), any(Object[].class), any(Locale.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0, String.class));
+        .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
     when(userReferenceDataService.findOne(any(UUID.class)))
         .thenReturn(new UserMainDetailsDto());
   }
@@ -170,8 +169,8 @@ public class UserDtoValidatorTest {
 
   private void prepareForValidateInvariants() {
     when(permissionService.hasRight(USERS_MANAGE)).thenReturn(false);
-    when(userRepository.findById(request.getId()))
-        .thenReturn(Optional.of(user));
+    when(userRepository.findOne(request.getId()))
+        .thenReturn(user);
   }
 
   private void assertErrorMessage(Errors errors, String field, String expectedMessage) {

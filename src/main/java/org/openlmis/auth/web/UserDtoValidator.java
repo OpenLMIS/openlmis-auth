@@ -80,7 +80,7 @@ public class UserDtoValidator extends BaseValidator {
 
       verifyReferenceDataUserId(dto, errors);
 
-      User db = userRepository.findById(dto.getId()).orElse(null);
+      User db = userRepository.findOne(dto.getId());
 
       if (null != db && !permissionService.hasRight(USERS_MANAGE)) {
         validateInvariants(db, dto, errors);

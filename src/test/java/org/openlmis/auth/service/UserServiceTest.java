@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +51,8 @@ public class UserServiceTest {
   @Test
   public void shouldCreateNewUser() {
     // given
-    when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+    when(userRepository.findOne(any(UUID.class))).thenReturn(null);
+    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
     User user = new UserDataBuilder().build();
@@ -71,9 +71,11 @@ public class UserServiceTest {
     // given
     User oldUser = mock(User.class);
     UUID oldUserId = UUID.randomUUID();
+    when(oldUser.getUsername()).thenReturn("user");
     when(oldUser.getId()).thenReturn(oldUserId);
 
-    when(userRepository.findById(any(UUID.class))).thenReturn(Optional.of(oldUser));
+    when(userRepository.findOne(any(UUID.class))).thenReturn(oldUser);
+    given(userRepository.save(any(User.class))).willAnswer(new SaveAnswer<User>());
 
     // when
     User user = new UserDataBuilder().build();

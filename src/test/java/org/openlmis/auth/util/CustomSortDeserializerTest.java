@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.junit.Test;
 import org.springframework.data.domain.Sort;
 
@@ -60,7 +59,6 @@ public class CustomSortDeserializerTest {
   }
 
   @AllArgsConstructor
-  @NoArgsConstructor
   private static class TestObject {
 
     private Sort sort;

@@ -24,6 +24,7 @@ import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
 import java.util.List;
 import java.util.UUID;
+import org.openlmis.auth.domain.ExpirationToken;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.PasswordResetRequestDto;
@@ -138,9 +139,11 @@ public class UserController {
   @ResponseBody
   public UserDto getUser(@PathVariable("id") UUID id) {
     permissionService.canManageUsers(id);
-    User user = userRepository.findById(id).orElseThrow(
-        () -> new ValidationMessageException(USER_NOT_FOUND)
-    );
+    User user = userRepository.findOne(id);
+
+    if (null == user) {
+      throw new ValidationMessageException(USER_NOT_FOUND);
+    }
 
     UserDto dto = new UserDto();
     user.export(dto);
@@ -175,7 +178,7 @@ public class UserController {
   public void passwordReset(@RequestBody PasswordResetRequestDto passwordResetRequestDto,
       BindingResult bindingResult) {
     permissionService.canEditUserPassword(passwordResetRequestDto.getUsername());
-    
+
     passwordResetRequestDtoValidator.validate(passwordResetRequestDto, bindingResult);
     
     if (bindingResult.hasErrors()) {
@@ -207,9 +210,7 @@ public class UserController {
       throw new ValidationMessageException(USER_NOT_FOUND_BY_EMAIL);
     }
 
-    User user = userRepository.findById(found.get(0).getReferenceDataUserId()).orElseThrow(
-        () -> new ValidationMessageException(USER_NOT_FOUND)
-    );
+    User user = userRepository.findOne(found.get(0).getReferenceDataUserId());
     passwordResetNotifier.sendNotification(user);
   }
 
@@ -222,13 +223,9 @@ public class UserController {
       @RequestBody PasswordChangeRequest passwordChangeRequest) {
 
     PasswordResetToken token =
-        passwordResetTokenRepository.findById(passwordChangeRequest.getToken()).orElseThrow(
-            () -> new ValidationMessageException(ERROR_TOKEN_INVALID)
-        );
+        passwordResetTokenRepository.findOne(passwordChangeRequest.getToken());
 
-    if (token.isExpired()) {
-      throw new ValidationMessageException(ERROR_TOKEN_EXPIRED);
-    }
+    verifyToken(token);
 
     User user = token.getUser();
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -247,12 +244,20 @@ public class UserController {
   public UUID generatePasswordResetToken(
       @RequestParam(value = "userId") UUID referenceDataUserId) {
     permissionService.canManageUsers(null);
-    User user = userRepository.findById(referenceDataUserId).orElseThrow(
-        () -> new ValidationMessageException(USER_NOT_FOUND)
-    );
+    User user = userRepository.findOne(referenceDataUserId);
 
     PasswordResetToken token = passwordResetNotifier.createPasswordResetToken(user);
 
     return token.getId();
+  }
+
+  private void verifyToken(ExpirationToken token) {
+    if (token == null) {
+      throw new ValidationMessageException(ERROR_TOKEN_INVALID);
+    }
+
+    if (token.isExpired()) {
+      throw new ValidationMessageException(ERROR_TOKEN_EXPIRED);
+    }
   }
 }
