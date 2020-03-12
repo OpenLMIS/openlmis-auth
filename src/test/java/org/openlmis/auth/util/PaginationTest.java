@@ -29,6 +29,32 @@ import org.springframework.data.domain.PageRequest;
 public class PaginationTest {
 
   @Test
+  public void getPageIterableReturnsTheCorrectPage() {
+    int page = 1;
+    int size = 3;
+    PageRequest pageRequest = PageRequest.of(page, size);
+
+    Page<Integer> pagedList = Pagination.getPage((Iterable<Integer>) getList(), pageRequest);
+
+    List<Integer> pagedListContent = pagedList.getContent();
+
+    assertThat(pagedListContent.size()).isEqualTo(3);
+
+    assertThat(pagedListContent.get(0)).isEqualTo(3);
+    assertThat(pagedListContent.get(1)).isEqualTo(4);
+    assertThat(pagedListContent.get(2)).isEqualTo(5);
+  }
+  
+  @Test
+  public void getPageGetsAllValuesWhenPageableNotSpecified() {
+    Page<Integer> pagedList = Pagination.getPage(getList());
+
+    List<Integer> pagedListContent = pagedList.getContent();
+
+    assertThat(pagedListContent.size()).isEqualTo(10);
+  }
+
+  @Test
   public void getPageReturnsTheCorrectPage() {
     int page = 1;
     int size = 3;
