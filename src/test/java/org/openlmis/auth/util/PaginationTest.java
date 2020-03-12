@@ -16,6 +16,8 @@
 package org.openlmis.auth.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.openlmis.auth.util.Pagination.DEFAULT_PAGE_NUMBER;
+import static org.openlmis.auth.util.Pagination.NO_PAGINATION;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,16 @@ import org.springframework.data.domain.PageRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaginationTest {
+
+  @Test
+  public void getPageNumberReturnsDefaultWhenPageableIsNull() {
+    assertThat(Pagination.getPageNumber(null)).isEqualTo(DEFAULT_PAGE_NUMBER);
+  }
+
+  @Test
+  public void getPageSizeReturnsDefaultWhenPageableIsNull() {
+    assertThat(Pagination.getPageSize(null)).isEqualTo(NO_PAGINATION);
+  }
 
   @Test
   public void getPageIterableReturnsTheCorrectPage() {
