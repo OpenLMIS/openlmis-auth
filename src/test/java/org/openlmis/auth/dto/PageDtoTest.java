@@ -15,9 +15,20 @@
 
 package org.openlmis.auth.dto;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.google.common.collect.Lists;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Function;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 public class PageDtoTest {
 
@@ -28,5 +39,42 @@ public class PageDtoTest {
         .suppress(Warning.NONFINAL_FIELDS) // fields cannot be final
         .verify();
   }
+  
+  @Test
+  public void shouldCreateInstanceFromAnotherPage() {
+    String value = RandomStringUtils.randomAlphanumeric(10);
+    PageDto<String> pageDto = new PageDto<>(getPage(value));
 
+    assertThat(pageDto.hasContent()).isTrue();
+    assertThat(pageDto.hasNext()).isFalse();
+    assertThat(pageDto.hasPrevious()).isFalse();
+    assertThat(pageDto.nextPageable()).isNull();
+    assertThat(pageDto.previousPageable()).isEqualTo(PageRequest.of(0, 10));
+
+    Iterator<String> iterator = pageDto.iterator();
+    assertThat(iterator.hasNext()).isTrue();
+    assertThat(iterator.next()).isEqualTo(value);
+    assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Test
+  public void shouldConvertContentToOtherType() {
+    Function<String, Integer> converter = Integer::valueOf;
+    String value = "10";
+
+    Page<Integer> pageDto = new PageDto<>(getPage(value)).map(converter);
+
+    assertThat(pageDto.getContent())
+        .isNotEmpty()
+        .hasSize(1)
+        .contains(10);
+  }
+
+  private Page<String> getPage(String value) {
+    Pageable pageable = PageRequest.of(0, 10);
+
+    List<String> values = Lists.newArrayList(value);
+
+    return new PageImpl<>(values, pageable, 1);
+  }
 }
