@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
 
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -49,6 +50,7 @@ public class PasswordResetNotifierTest extends ExpirationTokenNotifierTest<Passw
   public void setUp() {
     super.setUp();
 
+    when(user.getId()).thenReturn(UUID.randomUUID());
     when(passwordResetTokenRepository.findOneByUser(user)).thenReturn(null);
     when(passwordResetTokenRepository.save(any(PasswordResetToken.class)))
         .thenAnswer(new SaveAnswer<>());

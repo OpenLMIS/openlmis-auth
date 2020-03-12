@@ -181,9 +181,7 @@ public class ApiKeyController {
     canManageApiKeys(profiler);
 
     profiler.start("FIND_API_KEY");
-    ApiKey apiKey = apiKeyRepository.findOne(token);
-
-    if (null == apiKey) {
+    if (!apiKeyRepository.existsById(token)) {
       throw new NotFoundException(ERROR_API_KEY_NOT_FOUND);
     }
 
@@ -205,7 +203,7 @@ public class ApiKeyController {
     tokenStore.removeAccessToken(new DefaultOAuth2AccessToken(token.toString()));
 
     profiler.start("REMOVE_API_KEY");
-    apiKeyRepository.delete(token);
+    apiKeyRepository.deleteById(token);
 
     profiler.start("REMOVE_CLIENT");
     clientRepository.delete(client);

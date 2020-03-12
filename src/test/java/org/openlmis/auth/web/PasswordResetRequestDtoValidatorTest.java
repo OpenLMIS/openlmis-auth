@@ -58,7 +58,7 @@ public class PasswordResetRequestDtoValidatorTest {
     errors = new BeanPropertyBindingResult(request, "request");
 
     when(messageSource.getMessage(anyString(), any(Object[].class), any(Locale.class)))
-        .thenAnswer(invocation -> invocation.getArgumentAt(0, String.class));
+        .thenAnswer(invocation -> invocation.getArgument(0, String.class));
   }
 
   @Test

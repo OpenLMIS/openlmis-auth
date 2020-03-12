@@ -22,7 +22,7 @@ import static org.openlmis.auth.web.TestWebData.Tokens.API_KEY_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.BEARER;
 import static org.openlmis.auth.web.TestWebData.Tokens.SERVICE_TOKEN;
 import static org.openlmis.auth.web.TestWebData.Tokens.USER_TOKEN;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.RestAssured;
@@ -50,10 +50,10 @@ import org.openlmis.auth.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -66,7 +66,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = "spring.main.allow-bean-definition-overriding=true")
 @ActiveProfiles("test")
 @DirtiesContext
 public abstract class BaseWebIntegrationTest {
@@ -134,7 +135,7 @@ public abstract class BaseWebIntegrationTest {
     }
 
     return request
-        .contentType(APPLICATION_JSON_UTF8_VALUE)
+        .contentType(APPLICATION_JSON_VALUE)
         .when()
         .post(url)
         .then();
