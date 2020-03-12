@@ -16,7 +16,6 @@
 package org.openlmis.auth.web;
 
 import java.util.List;
-
 import org.openlmis.auth.interceptor.MvcInterceptor;
 import org.openlmis.auth.util.Pagination;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +27,10 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class CustomWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
+public class CustomWebMvcConfigurerAdapter implements WebMvcConfigurer {
 
   @Value("${service.url}")
   private String serviceUrl;
@@ -41,7 +40,6 @@ public class CustomWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    super.addInterceptors(registry);
     registry.addInterceptor(new DefaultContentTypeInterceptor());
     registry.addInterceptor(mvcInterceptor);
   }
@@ -50,14 +48,12 @@ public class CustomWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
   public void addViewControllers(ViewControllerRegistry registry) {
     registry.addViewController("/auth/docs").setViewName("redirect:" + serviceUrl + "/auth/docs/");
     registry.addViewController("/auth/docs/").setViewName("forward:/auth/docs/index.html");
-    super.addViewControllers(registry);
   }
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     registry.addResourceHandler("/auth/webjars/**")
         .addResourceLocations("classpath:/META-INF/resources/webjars/");
-    super.addResourceHandlers(registry);
   }
 
   @Override
@@ -68,7 +64,6 @@ public class CustomWebMvcConfigurerAdapter extends WebMvcConfigurerAdapter {
         Pagination.DEFAULT_PAGE_NUMBER,
         Pagination.NO_PAGINATION));
     argumentResolvers.add(resolver);
-    super.addArgumentResolvers(argumentResolvers);
   }
 
 }
