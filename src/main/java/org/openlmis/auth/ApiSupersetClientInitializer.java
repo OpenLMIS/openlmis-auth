@@ -60,7 +60,7 @@ public class ApiSupersetClientInitializer implements CommandLineRunner {
     } else if (!client.isPresent()) {
       clientRepository.saveAndFlush(new Client(supersetClientId, supersetClientSecret,
               "TRUSTED_CLIENT", supersetClientRedirectUri, "authorization_code", "read,write",
-              null, "hapifhir,notification,diagnostics,cce,auth,requisition,referencedata,report,"
+              "hapifhir,notification,diagnostics,cce,auth,requisition,referencedata,report,"
                       + "stockmanagement,fulfillment,reference-ui"));
     }
   }

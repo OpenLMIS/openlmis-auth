@@ -106,11 +106,11 @@ public class Client {
    * Creates new instance of {@link Client} with registeredRedirectUris.
    */
   public Client(String clientId, String clientSecret, String authorities,
-                String registeredRedirectUris, String authorizedGrantTypes, String scope,
-                Integer accessTokenValiditySeconds, String resourceIds) {
+                String registeredRedirectUris, String authorizedGrantTypes,
+                String scope, String resourceIds) {
     this(
           clientId, clientSecret, scope, resourceIds, authorizedGrantTypes,
-            registeredRedirectUris, null, authorities, accessTokenValiditySeconds,null,
+            registeredRedirectUris, null, authorities, null, null,
             null, null
     );
   }
