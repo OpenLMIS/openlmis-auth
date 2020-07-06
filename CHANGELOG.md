@@ -1,3 +1,9 @@
+4.3.1 / WIP
+=================
+
+Improvements:
+* [OLMIS-6879](https://openlmis.atlassian.net/browse/OLMIS-6879): Added Superset client registration.
+
 4.3.0 / 2020-04-14
 =================
 

@@ -54,6 +54,18 @@ public class ClientDataBuilder {
   }
 
   /**
+   * Creates a new instance of {@link Client} as service client.
+   */
+  public Client buildSupersetClient() {
+    this.clientId = "superset";
+    this.authorizedGrantTypes = "authorization_code";
+    this.clientSecret = "changeMe";
+    this.accessTokenValiditySeconds = null;
+
+    return build();
+  }
+
+  /**
    * Creates a new instance of {@link Client} as API Key client.
    */
   public Client buildApiKeyClient() {
