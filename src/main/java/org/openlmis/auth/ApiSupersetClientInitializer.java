@@ -16,6 +16,8 @@
 package org.openlmis.auth;
 
 import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,12 @@ public class ApiSupersetClientInitializer implements CommandLineRunner {
   @Value("${auth.server.clientId.superset.redirectUri}")
   private String supersetClientRedirectUri;
 
+  private static final String AUTHORIZED_GRANT_TYPES = "authorization_code";
+  private static final String AUTHORITIES = "TRUSTED_CLIENT";
+  private static final String SCOPE = "read,write";
+  private static final String RESOURCE_IDS = "hapifhir,notification,diagnostics,cce,auth,"
+          + "requisition,referencedata,report,stockmanagement,fulfillment,reference-ui";
+
   /**
    * This method is part of CommandLineRunner and is called automatically by Spring.
    * @param args Main method arguments.
@@ -58,20 +66,18 @@ public class ApiSupersetClientInitializer implements CommandLineRunner {
       client.get().setClientSecret(supersetClientSecret);
       clientRepository.saveAndFlush(client.get());
     } else if (!client.isPresent()) {
-      clientRepository.saveAndFlush(new Client(supersetClientId, supersetClientSecret,
-              "TRUSTED_CLIENT", supersetClientRedirectUri, "authorization_code", "read,write",
-              "hapifhir,notification,diagnostics,cce,auth,requisition,referencedata,report,"
-                      + "stockmanagement,fulfillment,reference-ui"));
+      clientRepository.saveAndFlush(new Client(supersetClientId, supersetClientSecret, AUTHORITIES,
+              supersetClientRedirectUri, AUTHORIZED_GRANT_TYPES, SCOPE, RESOURCE_IDS));
     }
   }
 
   private boolean clientSholudBeUpdated(Client client) {
-    return !client.getClientSecret().equals(supersetClientSecret)
-            || !client.getRegisteredRedirectUris().equals(supersetClientRedirectUri);
+    return !StringUtils.equals(client.getClientSecret(), supersetClientSecret)
+            || !StringUtils.equals(client.getRegisteredRedirectUris(), supersetClientRedirectUri);
   }
 
   private boolean hasDefinedProperties() {
-    return supersetClientId != null && !supersetClientId.isEmpty()
-            && supersetClientSecret != null && !supersetClientSecret.isEmpty();
+    return StringUtils.isNotBlank(supersetClientId)
+            && StringUtils.isNotBlank(supersetClientSecret);
   }
 }
