@@ -1,3 +1,9 @@
+4.3.3 / WIP
+------------------
+
+Breaking changes:
+* [OLMIS-7472](https://openlmis.atlassian.net/browse/OLMIS-7472): Use postgres v12
+
 4.3.2 / 2021-10-29
 ------------------
 Improvements:
