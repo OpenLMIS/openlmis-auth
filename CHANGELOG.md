@@ -8,6 +8,7 @@ Breaking changes:
 ------------------
 Improvements:
 * [OLMIS-6983](https://openlmis.atlassian.net/browse/OLMIS-6983): Sonar analysis and contract tests runs only for snapshots
+* [OLMIS-7568](https://openlmis.atlassian.net/browse/OLMIS-7568): Use openlmis/dev:7
 
 4.3.1 / 2020-11-16
 =================
