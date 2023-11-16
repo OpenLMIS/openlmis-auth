@@ -7,8 +7,6 @@ build/
 out/
 .idea/
 .env
-gradle/
-gradlew*
 node_modules/
 demo-data/*.sql
 .tx/
