@@ -68,7 +68,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = "spring.main.allow-bean-definition-overriding=true")
-@ActiveProfiles("test")
+@ActiveProfiles("test", "test-run")
 @DirtiesContext
 public abstract class BaseWebIntegrationTest {
   private static final String BASE_URL = System.getenv("BASE_URL");
