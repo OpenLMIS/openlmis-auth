@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "test-run"})
 @Transactional
 public abstract class BaseCrudRepositoryIntegrationTest<T extends Identifiable> {
 
