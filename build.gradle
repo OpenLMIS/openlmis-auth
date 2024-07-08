@@ -39,7 +39,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-security"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-hibernate4"
-    compile "org.projectlombok:lombok:1.18.22"
+    compile "org.projectlombok:lombok"
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "org.postgresql:postgresql:42.0.0"
     compile "org.springframework.boot:spring-boot-starter-integration"
@@ -59,6 +59,8 @@ dependencies {
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'commons-io:commons-io:2.5'
 
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
     testCompile 'io.rest-assured:rest-assured'
     testCompile 'io.rest-assured:json-schema-validator'
     testCompile 'io.rest-assured:spring-mock-mvc'
@@ -71,6 +73,8 @@ dependencies {
     testCompile "org.powermock:powermock-module-junit4:2.0.4"
     testCompile "nl.jqno.equalsverifier:equalsverifier:2.4"
     testCompile "be.joengenduvel.java.verifiers:to-string:1.0.2"
+
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
 
 idea {
