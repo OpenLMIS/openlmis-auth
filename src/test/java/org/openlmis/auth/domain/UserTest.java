@@ -40,6 +40,7 @@ public class UserTest {
     importer.setId(UUID.randomUUID());
     importer.setPassword("password");
     importer.setEnabled(true);
+    importer.setLockedOut(false);
   }
 
   @Test

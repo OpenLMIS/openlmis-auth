@@ -22,6 +22,10 @@
     "enabled": {
       "type": "boolean",
       "title": "enabled"
+    },
+    "lockedOut": {
+      "type": "boolean",
+      "title": "lockedOut"
     }
   },
   "required": [

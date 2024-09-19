@@ -31,26 +31,25 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.StringUtils;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "auth_users")
 @JsonIgnoreProperties(value = { "authorities" }, ignoreUnknown = true)
 public class User extends BaseEntity implements UserDetails {
   private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
 
-  @Getter
-  @Setter
   @Column(nullable = false, unique = true)
   private String username;
 
-  @Getter
-  @Setter
   @Column
   private String password;
 
-  @Getter
-  @Setter
   @Column
   private Boolean enabled;
+
+  @Column
+  private boolean lockedOut;
 
   /**
    * Creates new instance of {@link User} based on passed data.
@@ -69,6 +68,7 @@ public class User extends BaseEntity implements UserDetails {
   public void updateFrom(Importer importer) {
     username = importer.getUsername();
     enabled = importer.getEnabled();
+    lockedOut = importer.isLockedOut();
 
     String newPassword = importer.getPassword();
     if (StringUtils.hasText(newPassword)) {
@@ -109,6 +109,7 @@ public class User extends BaseEntity implements UserDetails {
     exporter.setUsername(username);
     exporter.setPassword(password);
     exporter.setEnabled(enabled);
+    exporter.setLockedOut(lockedOut);
 
   }
 
@@ -122,6 +123,7 @@ public class User extends BaseEntity implements UserDetails {
 
     Boolean getEnabled();
 
+    boolean isLockedOut();
   }
 
   public interface Exporter {
@@ -134,6 +136,7 @@ public class User extends BaseEntity implements UserDetails {
 
     void setEnabled(Boolean enabled);
 
+    void setLockedOut(boolean lockedOut);
   }
 
 }
