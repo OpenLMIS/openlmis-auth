@@ -23,6 +23,7 @@ import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
@@ -204,13 +205,18 @@ public class UserController {
     List<UserContactDetailsDto> found = userContactDetailsNotificationService.findByEmail(email);
 
     if (CollectionUtils.isEmpty(found)) {
-      throw new ValidationMessageException(USER_NOT_FOUND_BY_EMAIL);
+      LOGGER.error("User with provided email does not exist.",
+          new ValidationMessageException(USER_NOT_FOUND_BY_EMAIL));
+      return;
     }
 
-    User user = userRepository.findById(found.get(0).getReferenceDataUserId()).orElseThrow(
-        () -> new ValidationMessageException(USER_NOT_FOUND)
-    );
-    passwordResetNotifier.sendNotification(user);
+    Optional<User> optionalUser = userRepository.findById(found.get(0).getReferenceDataUserId());
+    if (!optionalUser.isPresent()) {
+      LOGGER.error("User with ID {} does not exist.", found.get(0).getReferenceDataUserId(),
+          new ValidationMessageException(USER_NOT_FOUND));
+    } else {
+      passwordResetNotifier.sendNotification(optionalUser.get());
+    }
   }
 
   /**
