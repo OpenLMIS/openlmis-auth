@@ -33,6 +33,7 @@ import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.service.PasswordResetRegistryService;
 import org.openlmis.auth.service.PasswordResetNotifier;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
@@ -104,6 +105,9 @@ public class UserController {
 
   @Autowired
   private UserContactDetailsNotificationService userContactDetailsNotificationService;
+
+  @Autowired
+  private PasswordResetRegistryService passwordResetRegistryService;
 
   @InitBinder
   protected void initBinder(WebDataBinder binder) {
@@ -215,6 +219,7 @@ public class UserController {
       LOGGER.error("User with ID {} does not exist.", found.get(0).getReferenceDataUserId(),
           new ValidationMessageException(USER_NOT_FOUND));
     } else {
+      passwordResetRegistryService.checkPasswordResetAttemptLimit(optionalUser.get());
       passwordResetNotifier.sendNotification(optionalUser.get());
     }
   }
