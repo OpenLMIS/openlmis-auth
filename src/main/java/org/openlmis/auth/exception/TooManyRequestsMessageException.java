@@ -15,9 +15,9 @@
 
 package org.openlmis.auth.exception;
 
-public class TooManyRequestsException extends BaseMessageException {
+public class TooManyRequestsMessageException extends BaseMessageException {
 
-  public TooManyRequestsException(String messageKey) {
+  public TooManyRequestsMessageException(String messageKey) {
     super(messageKey);
   }
 

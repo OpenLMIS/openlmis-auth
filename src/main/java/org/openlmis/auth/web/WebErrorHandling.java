@@ -26,6 +26,7 @@ import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.exception.NotFoundException;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.exception.ServerException;
+import org.openlmis.auth.exception.TooManyRequestsMessageException;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.util.Message;
 import org.springframework.http.HttpStatus;
@@ -129,6 +130,20 @@ public class WebErrorHandling extends AbstractErrorHandling {
   public LocalizedMessageDto handleExternalApiException(ExternalApiException ex) {
     logger.error("An external api error occurred", ex);
     return ex.getMessageLocalized();
+  }
+
+  /**
+   * Handles too many requests exception exception.
+   *
+   * @param ex the too many requests exception
+   * @return the user-oriented error message.
+   */
+  @ExceptionHandler(TooManyRequestsMessageException.class)
+  @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+  @ResponseBody
+  public Message.LocalizedMessage handleTooManyRequestsMessageException(
+      TooManyRequestsMessageException ex) {
+    return getLocalizedMessage(ex.asMessage());
   }
 
 }

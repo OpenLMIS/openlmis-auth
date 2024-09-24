@@ -22,7 +22,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import org.openlmis.auth.domain.PasswordResetRegistry;
 import org.openlmis.auth.domain.User;
-import org.openlmis.auth.exception.TooManyRequestsException;
+import org.openlmis.auth.exception.TooManyRequestsMessageException;
 import org.openlmis.auth.repository.PasswordResetRegistryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,25 +60,20 @@ public class PasswordResetRegistryService {
         long secondsSinceLastAttempt =
             Duration.between(registry.getLastAttemptDate(), now).getSeconds();
         if (secondsSinceLastAttempt < lockoutTime) {
-          throw new TooManyRequestsException(ERROR_TOO_MANY_REQUESTS);
+          throw new TooManyRequestsMessageException(ERROR_TOO_MANY_REQUESTS);
         } else {
           registry.resetCounter();
-          //registry.setAttemptCounter(0);
-          //registry.setBlocked(false);
-          //registry.setLastCounterResetDate(now);
+          registry.setBlocked(false);
         }
       }
 
       long secondsSinceFirstAttempt =
           Duration.between(registry.getLastCounterResetDate(), now).getSeconds();
       if (secondsSinceFirstAttempt > maxTimeForAttempts) {
-        registry.setAttemptCounter(0);
-        registry.setLastCounterResetDate(now);
+        registry.resetCounter();
       }
 
       registry.incrementCounter();
-      //registry.setAttemptCounter(registry.getAttemptCounter() + 1);
-      //registry.setLastAttemptDate(now);
 
       if (registry.getAttemptCounter() >= maxAttempt) {
         registry.setBlocked(true);

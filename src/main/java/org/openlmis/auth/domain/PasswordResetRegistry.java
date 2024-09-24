@@ -52,16 +52,21 @@ public class PasswordResetRegistry extends BaseEntity {
   @Column(name = "blocked")
   private Boolean blocked;
 
-  public PasswordResetRegistry (User user) {
+  public PasswordResetRegistry(User user) {
     this.user = user;
   }
 
+  /**
+   * Resets the attempt counter and updates the last counter reset date and last attempt date.
+   */
   public void resetCounter() {
     this.setAttemptCounter(0);
     this.setLastCounterResetDate(ZonedDateTime.now());
-    this.setLastAttemptDate(ZonedDateTime.now());
   }
 
+  /**
+   * Increments the attempt counter and updates the last attempt date.
+   */
   public void incrementCounter() {
     this.setAttemptCounter(this.getAttemptCounter() + 1);
     this.setLastAttemptDate(ZonedDateTime.now());
