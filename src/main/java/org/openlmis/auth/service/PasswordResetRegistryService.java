@@ -15,9 +15,14 @@
 
 package org.openlmis.auth.service;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOO_MANY_REQUESTS;
+
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import org.openlmis.auth.domain.PasswordResetRegistry;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.exception.TooManyRequestsException;
 import org.openlmis.auth.repository.PasswordResetRegistryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,29 +43,55 @@ public class PasswordResetRegistryService {
   @Autowired
   private PasswordResetRegistryRepository passwordResetRegistryRepository;
 
-  public void checkPasswordResetAttemptLimit(User user) {
-    Optional<PasswordResetRegistry> attemptOpt = passwordResetRegistryRepository.findByUser(user);
-    if (attemptOpt.isPresent()) {
-      PasswordResetRegistry attempt = attemptOpt.get();
+  /**
+   * Checks whether the user has exceeded the limit of attempts to send a password reset request.
+   *
+   * @param user @param user the User attempting a password reset
+   */
+  public void checkPasswordResetLimit(User user) {
+    Optional<PasswordResetRegistry> registryOpt = passwordResetRegistryRepository.findByUser(user);
+    ZonedDateTime now = ZonedDateTime.now();
 
-      /*
-      * is locked out?
-      * if yes, check if still should be (if time between new() and last attempt is more or less tha lockout time
-      *   if still should be, throw exception
-      *   if shouldn't be anymore, delete the registry
-      * is not locked out?
-      * increment counter
-      * Now, we have that mechanism, that if user tries to reset password too many times in specific time range (maxTimeForAttempts)
-      * we have to block him.
-      * So, after first attempt (createdDate in entity) he can't try more than 'maxAttempt' in 'maxTimeForAttempts' time.
-      * If time between 'createdDate' in PasswordResetRegistry and now() is bigger than maxTimeForAttempts i think we should
-      * reset it, i mean, we have to count down the time again, so maybe delete attempt?
-      * If he didn't cross the maxAttempts, just return
-      * if he did cross the maxAttempts and this time range is less than maxTimeForAttempts, also throw the same exception as above
-      *
-      * */
+    PasswordResetRegistry registry;
+    if (registryOpt.isPresent()) {
+      registry = registryOpt.get();
+
+      if (Boolean.TRUE.equals(registry.getBlocked())) {
+        long secondsSinceLastAttempt =
+            Duration.between(registry.getLastAttemptDate(), now).getSeconds();
+        if (secondsSinceLastAttempt < lockoutTime) {
+          throw new TooManyRequestsException(ERROR_TOO_MANY_REQUESTS);
+        } else {
+          registry.resetCounter();
+          //registry.setAttemptCounter(0);
+          //registry.setBlocked(false);
+          //registry.setLastCounterResetDate(now);
+        }
+      }
+
+      long secondsSinceFirstAttempt =
+          Duration.between(registry.getLastCounterResetDate(), now).getSeconds();
+      if (secondsSinceFirstAttempt > maxTimeForAttempts) {
+        registry.setAttemptCounter(0);
+        registry.setLastCounterResetDate(now);
+      }
+
+      registry.incrementCounter();
+      //registry.setAttemptCounter(registry.getAttemptCounter() + 1);
+      //registry.setLastAttemptDate(now);
+
+      if (registry.getAttemptCounter() >= maxAttempt) {
+        registry.setBlocked(true);
+      }
+    } else {
+      PasswordResetRegistry newRegistry = new PasswordResetRegistry(user);
+      newRegistry.setAttemptCounter(1);
+      newRegistry.setLastAttemptDate(now);
+      newRegistry.setLastCounterResetDate(now);
+
+      registry = newRegistry;
     }
-    // create new or something?
+    passwordResetRegistryRepository.save(registry);
   }
 
 }

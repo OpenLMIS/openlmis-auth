@@ -30,6 +30,8 @@ public abstract class MessageKeys {
   public static final String ERROR_SEND_REQUEST = ERROR + ".sendRequest";
   public static final String ERROR_IO = ERROR_PREFIX + ".io";
 
+  public static final String ERROR_TOO_MANY_REQUESTS = ERROR_PREFIX + ".tooManyRequests";
+
   public static final String ERROR_TOKEN_INVALID = ERROR_PREFIX + ".token.invalid";
   public static final String ERROR_TOKEN_EXPIRED = ERROR_PREFIX + ".token.expired";
   public static final String ERROR_TOKEN_REQUIRED = ERROR_PREFIX + ".token.required";

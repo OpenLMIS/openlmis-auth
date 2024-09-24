@@ -15,12 +15,12 @@
 
 package org.openlmis.auth.domain;
 
+import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -44,12 +44,27 @@ public class PasswordResetRegistry extends BaseEntity {
   private ZonedDateTime lastAttemptDate = ZonedDateTime.now();
 
   @Column(nullable = false, columnDefinition = "timestamp with time zone")
-  private ZonedDateTime createdDate = ZonedDateTime.now();
+  private ZonedDateTime lastCounterResetDate = ZonedDateTime.now();
 
   @Column(name = "attemptcounter")
   private Integer attemptCounter = 0;
 
   @Column(name = "blocked")
   private Boolean blocked;
+
+  public PasswordResetRegistry (User user) {
+    this.user = user;
+  }
+
+  public void resetCounter() {
+    this.setAttemptCounter(0);
+    this.setLastCounterResetDate(ZonedDateTime.now());
+    this.setLastAttemptDate(ZonedDateTime.now());
+  }
+
+  public void incrementCounter() {
+    this.setAttemptCounter(this.getAttemptCounter() + 1);
+    this.setLastAttemptDate(ZonedDateTime.now());
+  }
 
 }
