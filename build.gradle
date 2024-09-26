@@ -58,6 +58,7 @@ dependencies {
     compile 'org.apache.commons:commons-csv:1.4'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'commons-io:commons-io:2.5'
+    compile 'com.nulab-inc:zxcvbn:1.9.0'
 
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
 

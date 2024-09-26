@@ -56,7 +56,11 @@ public abstract class MessageKeys {
       + ".passwordReset.notContainNumber";
   public static final String USERS_PASSWORD_RESET_CONTAIN_SPACES = USERS
       + ".passwordReset.containSpaces";
-  
+  public static final String USERS_PASSWORD_CONTAIN_USER_DETAILS = USERS
+      + ".passwordReset.containUserDetails";
+  public static final String USERS_PASSWORD_TOO_WEAK = USERS
+      + ".passwordReset.tooWeak";
+
   public static final String USER_NOT_FOUND = USERS + ".notFound";
 
   public static final String USER_NOT_FOUND_BY_EMAIL = USERS + ".notFoundByEmail";
