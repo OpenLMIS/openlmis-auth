@@ -13,27 +13,16 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.auth.dto;
+package org.openlmis.auth.repository;
 
+import java.util.Optional;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import org.openlmis.auth.domain.User;
+import org.openlmis.auth.domain.UnsuccessfulAuthenticationAttempt;
+import org.springframework.data.repository.CrudRepository;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-public final class UserDto implements User.Importer, User.Exporter {
-  private UUID id;
-  private String username;
-  private String password;
-  private Boolean enabled;
-  private boolean lockedOut;
+public interface UnsuccessfulAuthenticationAttemptRepository
+    extends CrudRepository<UnsuccessfulAuthenticationAttempt, UUID> {
+
+  Optional<UnsuccessfulAuthenticationAttempt> findByUserId(UUID userId);
+
 }

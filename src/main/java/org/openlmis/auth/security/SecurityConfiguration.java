@@ -90,7 +90,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
    */
   @Bean
   public AuthenticationProvider authenticator() {
-    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    DaoAuthenticationProvider provider = new OlmisAuthenticationProvider();
     provider.setUserDetailsService(userDetailsService);
     provider.setPasswordEncoder(new BCryptPasswordEncoder());
     return provider;

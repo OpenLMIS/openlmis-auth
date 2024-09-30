@@ -26,9 +26,15 @@ public class UserDataBuilder {
   private String username = "user" + instanceNumber.incrementAndGet();
   private boolean enabled = true;
   private String password = null;
+  private boolean lockedOut = false;
 
   public UserDataBuilder withPassword(String password) {
     this.password = password;
+    return this;
+  }
+
+  public UserDataBuilder asLockedOut(boolean lockedOut) {
+    this.lockedOut = lockedOut;
     return this;
   }
 
@@ -41,6 +47,7 @@ public class UserDataBuilder {
     user.setUsername(username);
     user.setEnabled(enabled);
     user.setPassword(password);
+    user.setLockedOut(lockedOut);
 
     return user;
   }
