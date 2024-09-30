@@ -18,6 +18,7 @@ package org.openlmis.auth.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.util.Locale;
@@ -26,10 +27,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.auth.dto.PasswordResetRequestDto;
+import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.i18n.ExposedMessageSource;
 import org.openlmis.auth.i18n.MessageKeys;
+import org.openlmis.auth.service.referencedata.UserReferenceDataService;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -43,11 +46,18 @@ public class PasswordResetRequestDtoValidatorTest {
   @Mock
   private ExposedMessageSource messageSource;
 
+  @Mock
+  private UserReferenceDataService userReferenceDataService;
+
+  @Mock
+  private PasswordStrengthValidator passwordStrengthValidator;
+
   @InjectMocks
   private Validator validator = new PasswordResetRequestDtoValidator();
 
   private PasswordResetRequestDto request;
   private Errors errors;
+  private UserMainDetailsDto userMainDetails;
 
   @Before
   public void setUp() throws Exception {
@@ -55,10 +65,18 @@ public class PasswordResetRequestDtoValidatorTest {
     request.setNewPassword("testpassword1");
     request.setUsername("testusername");
 
+    userMainDetails = new UserMainDetailsDto();
+    userMainDetails.setUsername(request.getUsername());
+    userMainDetails.setFirstName("testfirstname");
+    userMainDetails.setLastName("testlastname");
+
     errors = new BeanPropertyBindingResult(request, "request");
 
     when(messageSource.getMessage(anyString(), any(Object[].class), any(Locale.class)))
         .thenAnswer(invocation -> invocation.getArgument(0, String.class));
+    when(userReferenceDataService.findUser(request.getUsername()))
+        .thenReturn(userMainDetails);
+    doNothing().when(passwordStrengthValidator).verifyPasswordStrength(anyString());
   }
 
   @Test
@@ -115,6 +133,32 @@ public class PasswordResetRequestDtoValidatorTest {
         MessageKeys.USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH);
   }
 
+  @Test
+  public void shouldRejectWhenPasswordContainsUsername() {
+    request.setNewPassword("testusername1");
+
+    validator.validate(request, errors);
+
+    assertErrorMessage(errors, PASS_FIELD, MessageKeys.USERS_PASSWORD_CONTAIN_USER_DETAILS);
+  }
+
+  @Test
+  public void shouldRejectWhenPasswordContainsFirstName() {
+    request.setNewPassword("testfirstname1");
+
+    validator.validate(request, errors);
+
+    assertErrorMessage(errors, PASS_FIELD, MessageKeys.USERS_PASSWORD_CONTAIN_USER_DETAILS);
+  }
+
+  @Test
+  public void shouldRejectWhenPasswordContainsLastName() {
+    request.setNewPassword("testlastname1");
+
+    validator.validate(request, errors);
+
+    assertErrorMessage(errors, PASS_FIELD, MessageKeys.USERS_PASSWORD_CONTAIN_USER_DETAILS);
+  }
 
   private void assertErrorMessage(Errors errors, String field, String expectedMessage) {
     assertThat(errors.hasFieldErrors(field)).as(
