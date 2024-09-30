@@ -21,7 +21,10 @@ import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
 import java.time.ZonedDateTime;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.exception.ExternalApiException;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordResetToken> {
 
+  private final Logger logger = LoggerFactory.getLogger(getClass());
   private static final String RESET_PASSWORD_URL = "/#!/resetPassword/";
 
   @Autowired
@@ -45,9 +49,14 @@ public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordReset
   public void sendNotification(User user) {
     PasswordResetToken token = createPasswordResetToken(user);
 
-    sendEmail(
-        user, token, PASSWORD_RESET_EMAIL_SUBJECT, PASSWORD_RESET_EMAIL_BODY, getResetPasswordUrl()
-    );
+    try {
+      sendEmail(
+          user, token, PASSWORD_RESET_EMAIL_SUBJECT,
+          PASSWORD_RESET_EMAIL_BODY, getResetPasswordUrl()
+      );
+    } catch (ExternalApiException ex) {
+      logger.error("An exception occurred in the notification service", ex);
+    }
   }
 
   /**
