@@ -57,6 +57,7 @@ import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
+import org.openlmis.auth.service.PasswordResetRegistryService;
 import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.notification.NotificationService;
 import org.openlmis.auth.service.notification.UserContactDetailsDto;
@@ -104,6 +105,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @MockBean
   private UserContactDetailsNotificationService userContactDetailsNotificationService;
+
+  @MockBean
+  private PasswordResetRegistryService passwordResetRegistryService;
 
   private User user;
   private UserDto userDto = new UserDto();
@@ -310,6 +314,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     PasswordResetToken token1 = new PasswordResetToken();
     token1.setUser(user1);
     token1.setExpiryDate(ZonedDateTime.now().plusHours(TOKEN_VALIDITY_HOURS));
+    willDoNothing().given(passwordResetRegistryService)
+        .checkPasswordResetLimit(any(User.class));
 
     passwordResetTokenRepository.save(token1);
 
