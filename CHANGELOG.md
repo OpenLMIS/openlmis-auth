@@ -1,3 +1,15 @@
+4.3.4 / WIP
+------------------
+Improvements:
+* Change schemaSpy version
+* [OLMIS-7895](https://openlmis.atlassian.net/browse/OLMIS-7895): Add demo data for BUQ and TB Monthly
+* [OIS-14](https://openlmis.atlassian.net/browse/OIS-14): Upgrade Transifex API version
+* [OIS-48](https://openlmis.atlassian.net/browse/OIS-48): Update service base images to versions without known vulnerabilities
+* [OIS-46](https://openlmis.atlassian.net/browse/OIS-46): Introduce login lockout mechanism
+* [OIS-55](https://openlmis.atlassian.net/browse/OIS-55): Introduce more secure password policy
+* [OIS-56](https://openlmis.atlassian.net/browse/OIS-56): Reset password functionality: system does not inform user whether email was correct
+* [OIS-57](https://openlmis.atlassian.net/browse/OIS-57): Introduce password reset lockout
+
 4.3.3 / 2022-04-21
 ------------------
 
