@@ -1,4 +1,4 @@
-4.3.4 / WIP
+4.3.4 / 31.10.2024
 ------------------
 Improvements:
 * Change schemaSpy version
