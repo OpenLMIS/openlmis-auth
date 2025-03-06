@@ -22,15 +22,22 @@ import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.PasswordResetRequestDto;
+import org.openlmis.auth.dto.UserAuthDetailsResponseDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
+import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PasswordResetNotifier;
@@ -44,7 +51,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
@@ -54,9 +63,11 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -115,7 +126,8 @@ public class UserController {
   }
 
   /**
-   * Custom endpoint for creating and updating users. Encrypts password with BCryptPasswordEncoder.
+   * Custom endpoint for creating and updating single user.
+   * Encrypts password with BCryptPasswordEncoder.
    *
    * @return saved user.
    */
@@ -133,6 +145,47 @@ public class UserController {
     }
 
     return userService.saveUser(request);
+  }
+
+  /**
+   * Custom endpoint for creating and updating multiple users.
+   * Encrypts password with BCryptPasswordEncoder.
+   *
+   * @return saved list of users.
+   */
+  @RequestMapping(value = "/users/auth/batch", method = RequestMethod.POST)
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserAuthDetailsResponseDto saveUsers(@RequestBody List<UserDto> users) {
+    List<UserAuthDetailsResponseDto.UserAuthResponse> successfulResults = new ArrayList<>();
+    List<UserAuthDetailsResponseDto.FailedUserDetailsResponse> failedResults = new ArrayList<>();
+
+    for (UserDto dto : users) {
+      try {
+        BindingResult bindingResult = new BeanPropertyBindingResult(dto, "userDto");
+        permissionService.canManageUsers(dto.getId());
+
+        userDtoValidator.validate(dto, bindingResult);
+        List<String> errors;
+        if (bindingResult.hasErrors()) {
+          errors = bindingResult.getAllErrors().stream()
+              .map(DefaultMessageSourceResolvable::getDefaultMessage)
+              .collect(Collectors.toList());
+          failedResults.add(
+              new UserAuthDetailsResponseDto.FailedUserDetailsResponse(dto.getId(), errors));
+        } else {
+          userService.saveUser(dto);
+          successfulResults.add(new UserAuthDetailsResponseDto.UserAuthResponse(dto.getId()));
+        }
+      } catch (Exception ex) {
+        failedResults.add(new UserAuthDetailsResponseDto.FailedUserDetailsResponse(
+            dto.getId(),
+            Collections.singletonList(
+                MessageKeys.ERROR_SAVING_BATCH_AUTH_DETAILS)));
+      }
+    }
+
+    return new UserAuthDetailsResponseDto(successfulResults, failedResults);
   }
 
   /**
@@ -265,5 +318,19 @@ public class UserController {
     PasswordResetToken token = passwordResetNotifier.createPasswordResetToken(user);
 
     return token.getId();
+  }
+
+  /**
+   * Deletes auth users.
+   *
+   * @param userIds user ids for which auth users will be deleted
+   * @return empty content
+   */
+  @DeleteMapping(value = "users/auth/batch")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponseEntity<Void> deleteAuthUsersByIds(@RequestBody Set<UUID> userIds) {
+    userRepository.deleteByUserIds(userIds);
+
+    return ResponseEntity.noContent().build();
   }
 }
