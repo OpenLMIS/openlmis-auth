@@ -19,14 +19,10 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@ToString
-@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -36,8 +32,6 @@ public class UserAuthDetailsResponseDto {
 
   private List<FailedUserDetailsResponse> failedResults;
 
-  @ToString
-  @EqualsAndHashCode
   @NoArgsConstructor
   @AllArgsConstructor
   @Getter
@@ -46,7 +40,6 @@ public class UserAuthDetailsResponseDto {
     private UUID referenceDataUserId;
   }
 
-  @ToString
   @NoArgsConstructor
   @AllArgsConstructor
   @Getter
