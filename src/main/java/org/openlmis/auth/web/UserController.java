@@ -23,12 +23,10 @@ import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND_BY_EMAIL;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
@@ -37,7 +35,6 @@ import org.openlmis.auth.dto.UserAuthDetailsResponseDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.exception.ValidationMessageException;
 import org.openlmis.auth.i18n.ExposedMessageSource;
-import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PasswordResetNotifier;
@@ -51,9 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
@@ -63,7 +58,6 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
@@ -161,28 +155,7 @@ public class UserController {
     List<UserAuthDetailsResponseDto.FailedUserDetailsResponse> failedResults = new ArrayList<>();
 
     for (UserDto dto : users) {
-      try {
-        BindingResult bindingResult = new BeanPropertyBindingResult(dto, "userDto");
-        permissionService.canManageUsers(dto.getId());
-
-        userDtoValidator.validate(dto, bindingResult);
-        List<String> errors;
-        if (bindingResult.hasErrors()) {
-          errors = bindingResult.getAllErrors().stream()
-              .map(DefaultMessageSourceResolvable::getDefaultMessage)
-              .collect(Collectors.toList());
-          failedResults.add(
-              new UserAuthDetailsResponseDto.FailedUserDetailsResponse(dto.getId(), errors));
-        } else {
-          userService.saveUser(dto);
-          successfulResults.add(new UserAuthDetailsResponseDto.UserAuthResponse(dto.getId()));
-        }
-      } catch (Exception ex) {
-        failedResults.add(new UserAuthDetailsResponseDto.FailedUserDetailsResponse(
-            dto.getId(),
-            Collections.singletonList(
-                MessageKeys.ERROR_SAVING_BATCH_AUTH_DETAILS)));
-      }
+      userService.saveAuthUserDetails(dto, successfulResults, failedResults);
     }
 
     return new UserAuthDetailsResponseDto(successfulResults, failedResults);
@@ -324,13 +297,10 @@ public class UserController {
    * Deletes auth users.
    *
    * @param userIds user ids for which auth users will be deleted
-   * @return empty content
    */
   @DeleteMapping(value = "users/auth/batch")
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity<Void> deleteAuthUsersByIds(@RequestBody Set<UUID> userIds) {
-    userRepository.deleteByUserIds(userIds);
-
-    return ResponseEntity.noContent().build();
+  public void deleteAuthUsersByIds(@RequestBody Set<UUID> userIds) {
+    userService.deleteByUserIds(userIds);
   }
 }
