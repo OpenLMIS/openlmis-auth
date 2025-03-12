@@ -15,6 +15,7 @@
 
 package org.openlmis.auth.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.openlmis.auth.domain.User;
+import org.openlmis.auth.dto.SaveBatchResultDto;
 import org.openlmis.auth.dto.UserAuthDetailsResponseDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.i18n.MessageKeys;
@@ -39,9 +41,6 @@ public class UserService {
 
   @Autowired
   private UserRepository userRepository;
-
-  @Autowired
-  private PermissionService permissionService;
 
   @Autowired
   private UserDtoValidator userDtoValidator;
@@ -70,16 +69,14 @@ public class UserService {
    * Saves auth user details.
    *
    * @param userDto user contact details object
-   * @param successfulResults list with success results
-   * @param failedResults list with failed results
+   * @return {@link SaveBatchResultDto} object with saving results
    */
-  public void saveAuthUserDetails(UserDto userDto,
-      List<UserAuthDetailsResponseDto.UserAuthResponse> successfulResults,
-      List<UserAuthDetailsResponseDto.FailedUserDetailsResponse> failedResults) {
+  public SaveBatchResultDto<UserAuthDetailsResponseDto.UserAuthResponse> saveAuthUserDetails(
+      UserDto userDto) {
+    List<UserAuthDetailsResponseDto.UserAuthResponse> successfulResults = new ArrayList<>();
+    List<UserAuthDetailsResponseDto.UserAuthResponse> failedResults = new ArrayList<>();
     try {
       BindingResult bindingResult = new BeanPropertyBindingResult(userDto, "userDto");
-      permissionService.canManageUsers(userDto.getId());
-
       userDtoValidator.validate(userDto, bindingResult);
       List<String> errors;
       if (bindingResult.hasErrors()) {
@@ -99,6 +96,8 @@ public class UserService {
           userDto.getId(),
           Collections.singletonList(errorMessage)));
     }
+
+    return new SaveBatchResultDto<>(successfulResults, failedResults);
   }
 
   /**

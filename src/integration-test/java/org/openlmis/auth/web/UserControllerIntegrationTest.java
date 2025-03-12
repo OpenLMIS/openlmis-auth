@@ -32,7 +32,6 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
@@ -399,7 +398,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
             .extract()
             .as(UserAuthDetailsResponseDto.class);
 
-    verify(permissionService, times(2)).canManageUsers(any());
+    verify(permissionService).canManageUsers(any());
     assertEquals(2, response.getSuccessfulResults().size());
     assertEquals(0, response.getFailedResults().size());
   }
@@ -434,7 +433,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
           .extract()
           .as(UserAuthDetailsResponseDto.class);
 
-    verify(permissionService, times(2)).canManageUsers(any());
+    verify(permissionService).canManageUsers(any());
     assertEquals(1, response.getSuccessfulResults().size());
     assertEquals(1, response.getFailedResults().size());
   }

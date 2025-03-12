@@ -31,6 +31,7 @@ import java.util.UUID;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.PasswordResetRequestDto;
+import org.openlmis.auth.dto.SaveBatchResultDto;
 import org.openlmis.auth.dto.UserAuthDetailsResponseDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.exception.ValidationMessageException;
@@ -151,11 +152,14 @@ public class UserController {
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public UserAuthDetailsResponseDto saveUsers(@RequestBody List<UserDto> users) {
+    permissionService.canManageUsers(null);
     List<UserAuthDetailsResponseDto.UserAuthResponse> successfulResults = new ArrayList<>();
-    List<UserAuthDetailsResponseDto.FailedUserDetailsResponse> failedResults = new ArrayList<>();
-
+    List<UserAuthDetailsResponseDto.UserAuthResponse> failedResults = new ArrayList<>();
     for (UserDto dto : users) {
-      userService.saveAuthUserDetails(dto, successfulResults, failedResults);
+      SaveBatchResultDto<UserAuthDetailsResponseDto.UserAuthResponse> result =
+           userService.saveAuthUserDetails(dto);
+      successfulResults.addAll(result.getSuccessfulResults());
+      failedResults.addAll(result.getFailedResults());
     }
 
     return new UserAuthDetailsResponseDto(successfulResults, failedResults);

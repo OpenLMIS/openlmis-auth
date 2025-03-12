@@ -16,40 +16,14 @@
 package org.openlmis.auth.dto;
 
 import java.util.List;
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Setter
-public class UserAuthDetailsResponseDto {
-  private List<UserAuthResponse> successfulResults;
-
-  private List<UserAuthResponse> failedResults;
-
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Getter
-  @Setter
-  public static class UserAuthResponse {
-    private UUID referenceDataUserId;
-  }
-
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Getter
-  @Setter
-  public static class FailedUserDetailsResponse extends UserAuthResponse {
-    private List<String> errors;
-
-    public FailedUserDetailsResponse(UUID referenceDataUserId, List<String> errors) {
-      super(referenceDataUserId);
-      this.errors = errors;
-    }
-  }
+public class SaveBatchResultDto<T> {
+  private List<T> successfulResults;
+  private List<T> failedResults;
 }
