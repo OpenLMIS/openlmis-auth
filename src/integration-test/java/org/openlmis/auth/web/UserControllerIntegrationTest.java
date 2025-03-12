@@ -32,6 +32,8 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.auth.i18n.MessageKeys.USER_NOT_FOUND;
 import static org.openlmis.auth.service.ExpirationTokenNotifier.TOKEN_VALIDITY_HOURS;
@@ -42,6 +44,10 @@ import com.google.common.collect.ImmutableList;
 import com.jayway.restassured.response.ValidatableResponse;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +57,7 @@ import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.PasswordResetRequestDto;
+import org.openlmis.auth.dto.UserAuthDetailsResponseDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.PermissionMessageException;
@@ -78,6 +85,7 @@ import org.springframework.web.client.HttpServerErrorException;
 public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private static final String RESOURCE_URL = "/api/users/auth";
+  private static final String BATCH_RESOURCE_URL = RESOURCE_URL + "/batch";
   private static final String ID_URL = RESOURCE_URL + "/{id}";
   private static final String RESET_PASS_URL = RESOURCE_URL + "/passwordReset";
   private static final String FORGOT_PASS_URL = RESOURCE_URL + "/forgotPassword";
@@ -365,7 +373,93 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(403)
         .body(Fields.MESSAGE, equalTo(getMessage(ex.asMessage())));
   }
-  
+
+  @Test
+  public void shouldSaveUsers() {
+    UserDto user1 = new UserDto();
+    user1.setId(UUID.randomUUID());
+    user1.setUsername("john1");
+
+    UserDto user2 = new UserDto();
+    user2.setId(UUID.randomUUID());
+    user2.setUsername("john2");
+
+    when(userReferenceDataService.findOne(any())).thenReturn(new UserMainDetailsDto());
+
+    List<UserDto> requestBody = Arrays.asList(user1, user2);
+
+    UserAuthDetailsResponseDto response = startRequest(USER_TOKEN)
+        .header("Content-Type", "application/json")
+        .body(requestBody)
+        .given()
+        .post(BATCH_RESOURCE_URL)
+            .then()
+            .statusCode(200)
+            .extract()
+            .as(UserAuthDetailsResponseDto.class);
+
+    verify(permissionService).canManageUsers(any());
+    assertEquals(2, response.getSuccessfulResults().size());
+    assertEquals(0, response.getFailedResults().size());
+  }
+
+  @Test
+  public void shouldNotSaveUsersWithEmptyUsername() {
+    UserDto user1 = new UserDto();
+    user1.setId(UUID.randomUUID());
+    user1.setUsername("john3");
+    userRepository.save(User.newInstance(user1));
+
+    UserDto user2 = new UserDto();
+    user2.setId(UUID.randomUUID());
+    user2.setUsername("john4");
+    userRepository.save(User.newInstance(user2));
+
+    when(userReferenceDataService.findOne(any())).thenReturn(new UserMainDetailsDto());
+
+    User savedUser1 = userRepository.findOneByUsernameIgnoreCase("john3");
+    savedUser1.setUsername(null);
+    User savedUser2 = userRepository.findOneByUsernameIgnoreCase("john4");
+
+    List<UserDto> requestBody = Arrays.asList(convertToDto(savedUser1), convertToDto(savedUser2));
+
+    UserAuthDetailsResponseDto response = startRequest(USER_TOKEN)
+        .header("Content-Type", "application/json")
+        .body(requestBody)
+        .given()
+        .post(BATCH_RESOURCE_URL)
+          .then()
+          .statusCode(200)
+          .extract()
+          .as(UserAuthDetailsResponseDto.class);
+
+    verify(permissionService).canManageUsers(any());
+    assertEquals(1, response.getSuccessfulResults().size());
+    assertEquals(1, response.getFailedResults().size());
+  }
+
+  @Test
+  public void shouldDeleteAuthDetails() {
+    User userToCreate = new User();
+    userToCreate.setUsername("john");
+    User savedUser = userRepository.save(userToCreate);
+
+    User user = userRepository.findOneByUsernameIgnoreCase("john");
+    assertNotNull(user);
+
+    Set<UUID> idsToRemove = new HashSet<>();
+    idsToRemove.add(savedUser.getId());
+
+    startRequest(USER_TOKEN)
+        .header("Content-Type", "application/json")
+        .body(idsToRemove)
+        .given()
+        .delete(BATCH_RESOURCE_URL);
+
+    User userAfterRemoving = userRepository.findOneByUsernameIgnoreCase("john");
+    assertNull(userAfterRemoving);
+  }
+
   private ValidatableResponse passwordReset(String password, String token) {
     return passwordReset(DummyUserMainDetailsDto.USERNAME, password, token);
   }
@@ -442,5 +536,12 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         MessageKeys.USERS_PASSWORD_RESET_INVALID_PASSWORD_LENGTH, "Password size must "
             + "be between 8 and 16.");
     return bindingResult;
+  }
+
+  private UserDto convertToDto(User user) {
+    UserDto dto = new UserDto();
+    dto.setId(user.getId());
+    dto.setUsername(user.getUsername());
+    return dto;
   }
 }

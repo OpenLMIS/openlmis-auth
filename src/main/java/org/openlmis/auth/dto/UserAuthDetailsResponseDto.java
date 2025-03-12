@@ -13,23 +13,43 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.auth.repository;
+package org.openlmis.auth.dto;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
-import org.openlmis.auth.domain.User;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
-public interface UserRepository extends CrudRepository<User, UUID> {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-  User findOneByUsernameIgnoreCase(@Param("username") String username);
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class UserAuthDetailsResponseDto {
+  private List<UserAuthResponse> successfulResults;
 
-  @Modifying
-  @Query(value = "DELETE FROM auth.auth_users au "
-      + "WHERE au.id IN (:userIds)",
-      nativeQuery = true)
-  void deleteByUserIds(@Param("userIds") Set<UUID> userIds);
+  private List<UserAuthResponse> failedResults;
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Getter
+  @Setter
+  public static class UserAuthResponse {
+    private UUID referenceDataUserId;
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Getter
+  @Setter
+  public static class FailedUserDetailsResponse extends UserAuthResponse {
+    private List<String> errors;
+
+    public FailedUserDetailsResponse(UUID referenceDataUserId, List<String> errors) {
+      super(referenceDataUserId);
+      this.errors = errors;
+    }
+  }
 }

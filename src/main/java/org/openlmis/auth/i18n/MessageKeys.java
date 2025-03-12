@@ -83,6 +83,9 @@ public abstract class MessageKeys {
   public static final String ERROR_SIZE_NOT_POSITIVE =
        ERROR_PREFIX + ".pageable.size.notPositive";
 
+  public static final String ERROR_SAVING_BATCH_AUTH_DETAILS =
+      ERROR_PREFIX + ".save.batch.auth.details";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

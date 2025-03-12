@@ -13,23 +13,17 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.auth.repository;
+package org.openlmis.auth.dto;
 
-import java.util.Set;
-import java.util.UUID;
-import org.openlmis.auth.domain.User;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-public interface UserRepository extends CrudRepository<User, UUID> {
-
-  User findOneByUsernameIgnoreCase(@Param("username") String username);
-
-  @Modifying
-  @Query(value = "DELETE FROM auth.auth_users au "
-      + "WHERE au.id IN (:userIds)",
-      nativeQuery = true)
-  void deleteByUserIds(@Param("userIds") Set<UUID> userIds);
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+public class SaveBatchResultDto<T> {
+  private List<T> successfulResults;
+  private List<T> failedResults;
 }
