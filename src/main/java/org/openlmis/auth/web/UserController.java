@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
@@ -301,13 +302,17 @@ public class UserController {
   /**
    * Gets all user auth details.
    *
-   * @return all auth user details
+   * @return all auth user details dto objects
    */
   @GetMapping(value = "/users/auth/batch")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<User> getAllAuthUsers() {
-    return userService.findAll();
+  public List<UserDto> getAllAuthUsers() {
+    List<User> users = userService.findAll();
+
+    return users.stream()
+        .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEnabled()))
+        .collect(Collectors.toList());
   }
 
   /**

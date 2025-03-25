@@ -463,7 +463,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldGetAuthUsers() {
-    List<User> actual = startRequest(USER_TOKEN)
+    List<UserDto> actual = startRequest(USER_TOKEN)
         .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
         .when()
         .get(BATCH_RESOURCE_URL)
@@ -471,7 +471,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .statusCode(200)
         .extract()
         .body()
-        .as(new TypeRef<List<User>>() {}.getTypeAsClass());
+        .as(new TypeRef<List<UserDto>>() {}.getTypeAsClass());
 
     assertEquals(1, actual.size());
   }
