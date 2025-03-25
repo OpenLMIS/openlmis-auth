@@ -43,6 +43,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import com.google.common.collect.ImmutableList;
 import com.jayway.restassured.response.ValidatableResponse;
 import guru.nidi.ramltester.junit.RamlMatchers;
+import io.restassured.mapper.TypeRef;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -92,9 +93,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String CHANGE_PASS_URL = RESOURCE_URL + "/changePassword";
   private static final String RESET_TOKEN_PASS_URL = RESOURCE_URL + "/passwordResetToken";
   private static final String LOGOUT_URL = RESOURCE_URL + "/logout";
-
   private static final String TOKEN_URL = "/api/oauth/token";
   private static final String PASS_FIELD = "newPassword";
+  private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
   @Autowired
   private UserRepository userRepository;
@@ -389,7 +390,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     List<UserDto> requestBody = Arrays.asList(user1, user2);
 
     UserAuthDetailsResponseDto response = startRequest(USER_TOKEN)
-        .header("Content-Type", "application/json")
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
         .body(requestBody)
         .given()
         .post(BATCH_RESOURCE_URL)
@@ -424,7 +425,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     List<UserDto> requestBody = Arrays.asList(convertToDto(savedUser1), convertToDto(savedUser2));
 
     UserAuthDetailsResponseDto response = startRequest(USER_TOKEN)
-        .header("Content-Type", "application/json")
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
         .body(requestBody)
         .given()
         .post(BATCH_RESOURCE_URL)
@@ -451,13 +452,28 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     idsToRemove.add(savedUser.getId());
 
     startRequest(USER_TOKEN)
-        .header("Content-Type", "application/json")
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
         .body(idsToRemove)
         .given()
         .delete(BATCH_RESOURCE_URL);
 
     User userAfterRemoving = userRepository.findOneByUsernameIgnoreCase("john");
     assertNull(userAfterRemoving);
+  }
+
+  @Test
+  public void shouldGetAuthUsers() {
+    List<User> actual = startRequest(USER_TOKEN)
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
+        .when()
+        .get(BATCH_RESOURCE_URL)
+        .then()
+        .statusCode(200)
+        .extract()
+        .body()
+        .as(new TypeRef<List<User>>() {}.getTypeAsClass());
+
+    assertEquals(1, actual.size());
   }
 
   private ValidatableResponse passwordReset(String password, String token) {
