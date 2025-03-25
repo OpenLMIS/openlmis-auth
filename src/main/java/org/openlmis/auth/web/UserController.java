@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
@@ -63,6 +64,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -298,11 +300,27 @@ public class UserController {
   }
 
   /**
+   * Gets all user auth details.
+   *
+   * @return all auth user details dto objects
+   */
+  @GetMapping(value = "/users/auth/batch")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public List<UserDto> getAllAuthUsers() {
+    List<User> users = userService.findAll();
+
+    return users.stream()
+        .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEnabled()))
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Deletes auth users.
    *
    * @param userIds user ids for which auth users will be deleted
    */
-  @DeleteMapping(value = "users/auth/batch")
+  @DeleteMapping(value = "/users/auth/batch")
   @ResponseStatus(HttpStatus.OK)
   public void deleteAuthUsersByIds(@RequestBody Set<UUID> userIds) {
     userService.deleteByUserIds(userIds);

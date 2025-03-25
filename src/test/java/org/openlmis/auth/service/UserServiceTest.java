@@ -15,12 +15,15 @@
 
 package org.openlmis.auth.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.Before;
@@ -88,4 +91,13 @@ public class UserServiceTest {
     verify(oldUser).updateFrom(request);
   }
 
+  @Test
+  public void shouldFindAllAuthUsers() {
+    when(userRepository.findAll()).thenReturn(Arrays.asList(new User(), new User()));
+
+    List<User> result = userService.findAll();
+
+    assertEquals(2, result.size());
+    verify(userRepository).findAll();
+  }
 }
