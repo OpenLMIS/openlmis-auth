@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.SaveBatchResultDto;
 import org.openlmis.auth.dto.UserAuthDetailsResponseDto;
@@ -98,6 +100,17 @@ public class UserService {
     }
 
     return new SaveBatchResultDto<>(successfulResults, failedResults);
+  }
+
+  /**
+   * Gets user auth details.
+   *
+   * @return user auth details
+   */
+  @Transactional
+  public List<User> findAll() {
+    return StreamSupport.stream(userRepository.findAll().spliterator(), false)
+        .collect(Collectors.toList());
   }
 
   /**
