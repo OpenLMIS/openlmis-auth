@@ -16,8 +16,8 @@
 package org.openlmis.auth.service.consul;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -84,8 +84,7 @@ public class ConsulCommunicationServiceTest {
     verify(clientRepository, atLeastOnce()).save(eq(client));
 
     Set<String> expectedResources = new HashSet<>(validServices);
-    Set<String> clientResources = Sets.newHashSet(
-        client.getResourceIds().split(SERVICE_SEPARATOR));
+    Set<String> clientResources = Sets.newHashSet(client.getResourceIds().split(SERVICE_SEPARATOR));
 
     assertEquals(expectedResources, clientResources);
   }
@@ -95,8 +94,8 @@ public class ConsulCommunicationServiceTest {
     // given
     mockConfigurationSettings();
 
-    ServicesListDto expectedBody = generateServicesList(
-        Collections.singletonList("referencedata"), Collections.singletonList("random-service"));
+    ServicesListDto expectedBody = generateServicesList(Collections.singletonList("referencedata"),
+        Collections.singletonList("random-service"));
     mockExternalResponse(expectedBody);
 
     Client client = new Client();
@@ -133,7 +132,8 @@ public class ConsulCommunicationServiceTest {
         .willReturn(expectedResponse);
   }
 
-  private ServicesListDto generateServicesList(List<String> valid, List<String> invalid) {
+  private ServicesListDto generateServicesList(List<String> valid,
+      List<String> invalid) {
     ServicesListDto services = new ServicesListDto();
     String serviceTag = configurationSettingService.getConsulServiceTag();
 

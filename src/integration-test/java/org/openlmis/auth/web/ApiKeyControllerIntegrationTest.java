@@ -19,9 +19,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_API_KEY_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_FOUND;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_CLIENT_NOT_SUPPORTED;
@@ -100,8 +100,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     given(tokenStore.readAuthentication(key.getToken().toString()))
         .willReturn(new OAuth2AuthenticationDataBuilder().withClientId(CLIENT_ID).build());
 
-    given(accessTokenService.obtainToken(anyString()))
-        .willReturn(key.getToken());
+    given(accessTokenService.obtainToken(anyString())).willReturn(key.getToken());
 
     given(apiKeyRepository.existsById(key.getToken())).willReturn(true);
     given(apiKeyRepository.save(any(ApiKey.class)))
@@ -117,10 +116,8 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldCreateApiKey() {
-    ApiKeyDto response = post(USER_TOKEN)
-        .statusCode(HttpStatus.CREATED.value())
-        .extract()
-        .as(ApiKeyDto.class);
+    ApiKeyDto response =
+        post(USER_TOKEN).statusCode(HttpStatus.CREATED.value()).extract().as(ApiKeyDto.class);
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
 
@@ -134,10 +131,8 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     given(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .willReturn(new ResultDto<>(false));
 
-    String response = post(USER_TOKEN)
-        .statusCode(HttpStatus.FORBIDDEN.value())
-        .extract()
-        .path(MESSAGE_KEY);
+    String response =
+        post(USER_TOKEN).statusCode(HttpStatus.FORBIDDEN.value()).extract().path(MESSAGE_KEY);
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     assertThat(response, is(equalTo(ERROR_NO_FOLLOWING_PERMISSION)));
@@ -145,11 +140,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnUnauthorizedWithoutAuthorizationForCreateApiKeyEndpoint() {
-    restAssured
-        .given()
-        .when()
-        .post(RESOURCE_URL)
-        .then()
+    restAssured.given().when().post(RESOURCE_URL).then()
         .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
@@ -157,8 +148,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotAllowToCreateApiKeyByAnotherApiKey() {
-    post(API_KEY_TOKEN)
-        .statusCode(HttpStatus.BAD_REQUEST.value())
+    post(API_KEY_TOKEN).statusCode(HttpStatus.BAD_REQUEST.value())
         .body(MESSAGE_KEY, equalTo(ERROR_CLIENT_NOT_SUPPORTED));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
@@ -166,8 +156,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotAllowToCreateApiKeyByService() {
-    post(SERVICE_TOKEN)
-        .statusCode(HttpStatus.BAD_REQUEST.value())
+    post(SERVICE_TOKEN).statusCode(HttpStatus.BAD_REQUEST.value())
         .body(MESSAGE_KEY, equalTo(ERROR_CLIENT_NOT_SUPPORTED));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
@@ -200,10 +189,8 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     given(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .willReturn(new ResultDto<>(false));
 
-    String response = get(10, USER_TOKEN)
-        .statusCode(HttpStatus.FORBIDDEN.value())
-        .extract()
-        .path(MESSAGE_KEY);
+    String response =
+        get(10, USER_TOKEN).statusCode(HttpStatus.FORBIDDEN.value()).extract().path(MESSAGE_KEY);
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     assertThat(response, is(equalTo(ERROR_NO_FOLLOWING_PERMISSION)));
@@ -211,20 +198,14 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldReturnUnauthorizedWithoutAuthorizationForGetApiKeysEndpoint() {
-    restAssured
-        .given()
-        .when()
-        .get(RESOURCE_URL)
-        .then()
-        .statusCode(HttpStatus.UNAUTHORIZED.value());
+    restAssured.given().when().get(RESOURCE_URL).then().statusCode(HttpStatus.UNAUTHORIZED.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
   public void shouldNotAllowToRetrieveApiKeysByAnotherApiKey() {
-    get(10, API_KEY_TOKEN)
-        .statusCode(HttpStatus.FORBIDDEN.value())
+    get(10, API_KEY_TOKEN).statusCode(HttpStatus.FORBIDDEN.value())
         .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
@@ -252,10 +233,8 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
     given(userReferenceDataService.hasRight(user.getId(), right.getId()))
         .willReturn(new ResultDto<>(false));
 
-    String response = delete(USER_TOKEN)
-        .statusCode(HttpStatus.FORBIDDEN.value())
-        .extract()
-        .path(MESSAGE_KEY);
+    String response =
+        delete(USER_TOKEN).statusCode(HttpStatus.FORBIDDEN.value()).extract().path(MESSAGE_KEY);
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     assertThat(response, is(equalTo(ERROR_NO_FOLLOWING_PERMISSION)));
@@ -265,10 +244,8 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
   public void shouldReturnNotFoundIfKeyNotExistForDeleteApiKeyEndpoint() {
     given(apiKeyRepository.existsById(key.getToken())).willReturn(false);
 
-    String response = delete(USER_TOKEN)
-        .statusCode(HttpStatus.NOT_FOUND.value())
-        .extract()
-        .path(MESSAGE_KEY);
+    String response =
+        delete(USER_TOKEN).statusCode(HttpStatus.NOT_FOUND.value()).extract().path(MESSAGE_KEY);
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     assertThat(response, is(equalTo(ERROR_API_KEY_NOT_FOUND)));
@@ -276,11 +253,9 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotAllowToRemoveKeyIfThereIsNoAuthentication() {
-    given(tokenStore.readAuthentication(key.getToken().toString()))
-        .willReturn(null);
+    given(tokenStore.readAuthentication(key.getToken().toString())).willReturn(null);
 
-    delete(USER_TOKEN)
-        .statusCode(HttpStatus.BAD_REQUEST.value())
+    delete(USER_TOKEN).statusCode(HttpStatus.BAD_REQUEST.value())
         .body(MESSAGE_KEY, equalTo(ERROR_TOKEN_INVALID));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
@@ -288,11 +263,9 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotAllowToRemoveKeyIfThereIsNoClient() {
-    given(clientRepository.findOneByClientId(CLIENT_ID))
-        .willReturn(Optional.empty());
+    given(clientRepository.findOneByClientId(CLIENT_ID)).willReturn(Optional.empty());
 
-    delete(USER_TOKEN)
-        .statusCode(HttpStatus.NOT_FOUND.value())
+    delete(USER_TOKEN).statusCode(HttpStatus.NOT_FOUND.value())
         .body(MESSAGE_KEY, equalTo(ERROR_CLIENT_NOT_FOUND));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
@@ -300,8 +273,7 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldNotAllowToRemoveApiKeyByAnotherApiKey() {
-    delete(API_KEY_TOKEN)
-        .statusCode(HttpStatus.FORBIDDEN.value())
+    delete(API_KEY_TOKEN).statusCode(HttpStatus.FORBIDDEN.value())
         .body(MESSAGE_KEY, equalTo(ERROR_NO_FOLLOWING_PERMISSION));
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
@@ -309,48 +281,36 @@ public class ApiKeyControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Test
   public void shouldAllowToRemoveApiKeyByService() {
-    delete(SERVICE_TOKEN)
-        .statusCode(HttpStatus.NO_CONTENT.value());
+    delete(SERVICE_TOKEN).statusCode(HttpStatus.NO_CONTENT.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
   public void shouldReturnUnauthorizedWithoutAuthorizationForDeleteApiKeyEndpoint() {
-    restAssured
-        .given()
-        .pathParam(TOKEN, key.getToken())
-        .when()
-        .delete(TOKEN_URL)
-        .then()
+    restAssured.given().pathParam(TOKEN, key.getToken()).when().delete(TOKEN_URL).then()
         .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   private ValidatableResponse post(String token) {
-    return sendPostRequest(token, RESOURCE_URL, null, null)
-        .contentType(is(APPLICATION_JSON_VALUE));
+    return sendPostRequest(token, RESOURCE_URL, null, null).contentType(is(APPLICATION_JSON_VALUE));
   }
 
-  private ValidatableResponse get(int pageSize, String token) {
+  private ValidatableResponse get(int pageSize,
+      String token) {
     return get(pageSize, 0, token);
   }
 
-  private ValidatableResponse get(int pageSize, int page, String token) {
-    return startRequest(token)
-        .queryParam("page", page)
-        .queryParam("size", pageSize)
-        .when()
-        .get(RESOURCE_URL)
-        .then();
+  private ValidatableResponse get(int pageSize,
+      int page,
+      String token) {
+    return startRequest(token).queryParam("page", page).queryParam("size", pageSize).when()
+        .get(RESOURCE_URL).then();
   }
 
   private ValidatableResponse delete(String token) {
-    return startRequest(token)
-        .pathParam(TOKEN, key.getToken())
-        .when()
-        .delete(TOKEN_URL)
-        .then();
+    return startRequest(token).pathParam(TOKEN, key.getToken()).when().delete(TOKEN_URL).then();
   }
 }
