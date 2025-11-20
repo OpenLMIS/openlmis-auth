@@ -1,6 +1,9 @@
 Upcoming Version (WIP)
 ------------------
 
+Changes:
+* Upgrade PostgreSQL JDBC driver to 42.6.2 for PostgreSQL 14 compatibility
+
 4.3.5 / 2025-03-31
 ------------------
 
