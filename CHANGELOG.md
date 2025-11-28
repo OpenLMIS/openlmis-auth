@@ -1,17 +1,20 @@
+Upcoming Version (WIP)
+=================
+
 4.4.0 / 2025-11-27
-------------------
+=================
 
 Changes:
 * Upgrade PostgreSQL JDBC driver to 42.6.2 for PostgreSQL 14 compatibility
 
 4.3.5 / 2025-03-31
-------------------
+=================
 
 Improvements:
 * [OLMIS-8065](https://openlmis.atlassian.net/browse/OLMIS-8065): Add batch APIs needed for user import functionality
 
 4.3.4 / 2024-10-31
-------------------
+=================
 Improvements:
 * Change schemaSpy version
 * [OLMIS-7895](https://openlmis.atlassian.net/browse/OLMIS-7895): Add demo data for BUQ and TB Monthly
@@ -23,7 +26,7 @@ Improvements:
 * [OIS-57](https://openlmis.atlassian.net/browse/OIS-57): Introduce password reset lockout
 
 4.3.3 / 2022-04-21
-------------------
+=================
 
 Breaking changes:
 * [OLMIS-7472](https://openlmis.atlassian.net/browse/OLMIS-7472): Upgrade postgres to v12
@@ -33,7 +36,7 @@ Improvements:
 * [OLMIS-7568](https://openlmis.atlassian.net/browse/OLMIS-7568): Use openlmis/service-base:6.1
 
 4.3.2 / 2021-10-29
-------------------
+=================
 Improvements:
 * [OLMIS-6983](https://openlmis.atlassian.net/browse/OLMIS-6983): Sonar analysis and contract tests runs only for snapshots
 * [OLMIS-7568](https://openlmis.atlassian.net/browse/OLMIS-7568): Use openlmis/dev:7
