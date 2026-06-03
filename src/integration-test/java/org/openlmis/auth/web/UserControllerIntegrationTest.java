@@ -516,7 +516,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
   }
 
   @Test
-  public void shouldFilterAuthUsersByLockoutState() {
+  public void shouldReturnLockedUsersWhenFilteringByLockedOutTrue() {
     User locked = saveLockedUser();
 
     UserDto[] lockedUsers = startRequest(USER_TOKEN)
@@ -531,6 +531,11 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
     assertNotNull(findById(lockedUsers, locked.getId()));
     assertTrue(Arrays.stream(lockedUsers).allMatch(UserDto::isLockedOut));
+  }
+
+  @Test
+  public void shouldNotReturnLockedUsersWhenFilteringByLockedOutFalse() {
+    User locked = saveLockedUser();
 
     UserDto[] unlockedUsers = startRequest(USER_TOKEN)
         .queryParam(LOCKED_OUT_PARAM, "false")
