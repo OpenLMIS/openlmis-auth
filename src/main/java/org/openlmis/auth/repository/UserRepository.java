@@ -15,9 +15,12 @@
 
 package org.openlmis.auth.repository;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import javax.persistence.LockModeType;
 import org.openlmis.auth.domain.User;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -26,6 +29,11 @@ import org.springframework.data.repository.query.Param;
 public interface UserRepository extends CrudRepository<User, UUID> {
 
   User findOneByUsernameIgnoreCase(@Param("username") String username);
+
+  // Loads a user with a pessimistic write lock, serializing admin unlock vs. authentication.
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT u FROM User u WHERE u.id = :id")
+  Optional<User> findByIdForUpdate(@Param("id") UUID id);
 
   @Modifying
   @Query(value = "DELETE FROM auth.auth_users au "

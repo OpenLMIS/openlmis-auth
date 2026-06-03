@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -56,14 +57,17 @@ import org.mockito.invocation.InvocationOnMock;
 import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.domain.Client;
 import org.openlmis.auth.domain.PasswordResetToken;
+import org.openlmis.auth.domain.UnsuccessfulAuthenticationAttempt;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.PasswordResetRequestDto;
+import org.openlmis.auth.dto.UnlockResponseDto;
 import org.openlmis.auth.dto.UserAuthDetailsResponseDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.dto.referencedata.UserMainDetailsDto;
 import org.openlmis.auth.exception.PermissionMessageException;
 import org.openlmis.auth.i18n.MessageKeys;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
+import org.openlmis.auth.repository.UnsuccessfulAuthenticationAttemptRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.service.PasswordResetRegistryService;
 import org.openlmis.auth.service.PermissionService;
@@ -87,6 +91,8 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private static final String RESOURCE_URL = "/api/users/auth";
   private static final String BATCH_RESOURCE_URL = RESOURCE_URL + "/batch";
+  private static final String UNLOCK_URL = RESOURCE_URL + "/unlock";
+  private static final String LOCKED_OUT_PARAM = "lockedOut";
   private static final String ID_URL = RESOURCE_URL + "/{id}";
   private static final String RESET_PASS_URL = RESOURCE_URL + "/passwordReset";
   private static final String FORGOT_PASS_URL = RESOURCE_URL + "/forgotPassword";
@@ -99,6 +105,9 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private UnsuccessfulAuthenticationAttemptRepository attemptCounterRepository;
 
   @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
@@ -476,6 +485,105 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     assertEquals(1, actual.size());
   }
 
+  @Test
+  public void shouldGetAuthUsersWithActualLockoutState() {
+    User locked = saveLockedUser();
+
+    UserDto[] users = startRequest(USER_TOKEN)
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
+        .when()
+        .get(BATCH_RESOURCE_URL)
+        .then()
+        .statusCode(200)
+        .extract()
+        .as(UserDto[].class);
+
+    UserDto returned = findById(users, locked.getId());
+    assertNotNull(returned);
+    assertTrue(returned.isLockedOut());
+  }
+
+  @Test
+  public void shouldFilterAuthUsersByLockoutState() {
+    User locked = saveLockedUser();
+
+    UserDto[] lockedUsers = startRequest(USER_TOKEN)
+        .queryParam(LOCKED_OUT_PARAM, true)
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
+        .when()
+        .get(BATCH_RESOURCE_URL)
+        .then()
+        .statusCode(200)
+        .extract()
+        .as(UserDto[].class);
+
+    assertNotNull(findById(lockedUsers, locked.getId()));
+    assertTrue(Arrays.stream(lockedUsers).allMatch(UserDto::isLockedOut));
+
+    UserDto[] unlockedUsers = startRequest(USER_TOKEN)
+        .queryParam(LOCKED_OUT_PARAM, false)
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
+        .when()
+        .get(BATCH_RESOURCE_URL)
+        .then()
+        .statusCode(200)
+        .extract()
+        .as(UserDto[].class);
+
+    assertNull(findById(unlockedUsers, locked.getId()));
+  }
+
+  @Test
+  public void shouldUnlockUsersAndResetCounter() {
+    User locked = saveLockedUser();
+    UnsuccessfulAuthenticationAttempt counter = new UnsuccessfulAuthenticationAttempt(locked);
+    counter.incrementCounter();
+    attemptCounterRepository.save(counter);
+
+    UUID missingId = UUID.randomUUID();
+
+    UnlockResponseDto response = startRequest(USER_TOKEN)
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
+        .body(Arrays.asList(locked.getId(), missingId))
+        .given()
+        .post(UNLOCK_URL)
+        .then()
+        .statusCode(200)
+        .extract()
+        .as(UnlockResponseDto.class);
+
+    verify(permissionService).canManageUsers(null);
+    assertTrue(response.getUnlocked().contains(locked.getId()));
+    assertTrue(response.getNotFound().contains(missingId));
+
+    User unlocked = userRepository.findById(locked.getId()).orElse(null);
+    assertNotNull(unlocked);
+    assertFalse(unlocked.isLockedOut());
+
+    UnsuccessfulAuthenticationAttempt resetCounter =
+        attemptCounterRepository.findByUserId(locked.getId()).orElse(null);
+    assertNotNull(resetCounter);
+    assertEquals(Integer.valueOf(0), resetCounter.getAttemptCounter());
+  }
+
+  @Test
+  public void shouldNotUnlockUsersWhenUserHasNoPermission() {
+    PermissionMessageException ex = buildUserManagerPermissionError();
+    doThrow(ex).when(permissionService).canManageUsers(null);
+
+    String message = startRequest(USER_TOKEN)
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
+        .body(Arrays.asList(UUID.randomUUID()))
+        .given()
+        .post(UNLOCK_URL)
+        .then()
+        .statusCode(403)
+        .extract()
+        .path(Fields.MESSAGE);
+
+    assertEquals(getMessage(ex.asMessage()), message);
+  }
+
   private ValidatableResponse passwordReset(String password, String token) {
     return passwordReset(DummyUserMainDetailsDto.USERNAME, password, token);
   }
@@ -559,5 +667,19 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     dto.setId(user.getId());
     dto.setUsername(user.getUsername());
     return dto;
+  }
+
+  private User saveLockedUser() {
+    UserDto dto = new UserDto();
+    dto.setId(UUID.randomUUID());
+    dto.setUsername("lockedUser_" + UUID.randomUUID());
+    dto.setEnabled(true);
+    dto.setLockedOut(true);
+
+    return userRepository.save(User.newInstance(dto));
+  }
+
+  private UserDto findById(UserDto[] users, UUID id) {
+    return Arrays.stream(users).filter(u -> id.equals(u.getId())).findFirst().orElse(null);
   }
 }

@@ -26,8 +26,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 
 public class OlmisAuthenticationProvider extends DaoAuthenticationProvider {
 
@@ -43,10 +45,24 @@ public class OlmisAuthenticationProvider extends DaoAuthenticationProvider {
   @Autowired
   private UnsuccessfulAuthenticationAttemptRepository attemptCounterRepository;
 
+  /**
+   * Wraps the attempt in one transaction so the lock taken below is held across the whole
+   * lockout-state read-modify-write. noRollbackFor is required because a failed login throws an
+   * AuthenticationException after incrementing the counter - without it the counter (and lockout)
+   * would be rolled back. Adds locking only; does not change the lockout logic.
+   */
+  @Override
+  @Transactional(noRollbackFor = AuthenticationException.class)
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    return super.authenticate(authentication);
+  }
+
   @Override
   protected void additionalAuthenticationChecks(UserDetails userDetails,
       UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
     User user = userRepository.findOneByUsernameIgnoreCase(userDetails.getUsername());
+    // pessimistic write lock to serialize with a concurrent administrative unlock of this user
+    user = userRepository.findByIdForUpdate(user.getId()).orElse(user);
     UnsuccessfulAuthenticationAttempt counter = attemptCounterRepository
         .findByUserId(user.getId())
         .orElse(new UnsuccessfulAuthenticationAttempt(user));
