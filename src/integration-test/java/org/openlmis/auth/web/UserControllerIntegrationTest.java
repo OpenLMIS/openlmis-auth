@@ -51,6 +51,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -157,6 +158,17 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
     user.export(userDto);
     userContactDetailsDto.setReferenceDataUserId(user.getId());
+  }
+
+  @After
+  public void removeTestLockedUsers() {
+    for (User user : userRepository.findAll()) {
+      if (user.getUsername() != null && user.getUsername().startsWith("lockedUser_")) {
+        attemptCounterRepository.findByUserId(user.getId())
+            .ifPresent(attemptCounterRepository::delete);
+        userRepository.delete(user);
+      }
+    }
   }
 
   @Test
@@ -508,7 +520,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     User locked = saveLockedUser();
 
     UserDto[] lockedUsers = startRequest(USER_TOKEN)
-        .queryParam(LOCKED_OUT_PARAM, true)
+        .queryParam(LOCKED_OUT_PARAM, "true")
         .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
         .when()
         .get(BATCH_RESOURCE_URL)
@@ -521,7 +533,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
     assertTrue(Arrays.stream(lockedUsers).allMatch(UserDto::isLockedOut));
 
     UserDto[] unlockedUsers = startRequest(USER_TOKEN)
-        .queryParam(LOCKED_OUT_PARAM, false)
+        .queryParam(LOCKED_OUT_PARAM, "false")
         .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
         .when()
         .get(BATCH_RESOURCE_URL)
