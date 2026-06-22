@@ -121,7 +121,6 @@ public class UserService {
    *
    * @return user auth details
    */
-  @Transactional
   public List<User> findAll() {
     return StreamSupport.stream(userRepository.findAll().spliterator(), false)
         .collect(Collectors.toList());

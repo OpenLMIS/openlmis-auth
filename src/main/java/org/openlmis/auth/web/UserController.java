@@ -16,6 +16,7 @@
 
 package org.openlmis.auth.web;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_FIELD_REQUIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
@@ -45,6 +46,7 @@ import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.UserContactDetailsDto;
 import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
+import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -326,6 +328,10 @@ public class UserController {
   @ResponseBody
   public UnlockResponseDto unlockUsers(@RequestBody List<UUID> userIds) {
     permissionService.canManageUsers(null);
+
+    if (userIds == null) {
+      throw new ValidationMessageException(new Message(ERROR_FIELD_REQUIRED, "userIds"));
+    }
 
     String actor = SecurityContextHolder.getContext().getAuthentication().getName();
     return userService.unlockUsers(userIds, actor);
