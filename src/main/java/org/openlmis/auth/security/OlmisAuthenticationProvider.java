@@ -62,10 +62,17 @@ public class OlmisAuthenticationProvider extends DaoAuthenticationProvider {
       counter.resetCounter();
       attemptCounterRepository.save(counter);
       userRepository.save(user);
+    } else if (lockoutExpired && counter.getAttemptCounter() > 0) {
+      counter.resetCounter();
+      attemptCounterRepository.save(counter);
     }
 
     try {
       super.additionalAuthenticationChecks(userDetails, authentication);
+      if (counter.getAttemptCounter() > 0) {
+        counter.resetCounter();
+        attemptCounterRepository.save(counter);
+      }
     } catch (Exception ex) {
       counter.incrementCounter();
 

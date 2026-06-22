@@ -15,6 +15,7 @@
 
 package org.openlmis.auth.security;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -120,6 +121,39 @@ public class OlmisAuthenticationProviderTest {
     assertFalse(user.isLockedOut());
     verify(userRepository).save(user);
     verify(unsuccessfulAuthenticationAttemptRepository).save(attempt);
+  }
+
+  @Test
+  public void shouldResetCounterOnSuccessfulLogin() {
+    // given
+    when(authentication.getCredentials()).thenReturn(Objects.instance());
+    when(userDetails.getPassword()).thenReturn("test-password");
+    when(passwordEncoder.matches(anyString(), anyString())).thenReturn(Boolean.TRUE);
+    attempt.setAttemptCounter(3);
+
+    // when
+    olmisAuthenticationProvider.additionalAuthenticationChecks(userDetails, authentication);
+
+    // then
+    assertEquals(0, (int) attempt.getAttemptCounter());
+    verify(unsuccessfulAuthenticationAttemptRepository).save(attempt);
+  }
+
+  @Test
+  public void shouldResetStaleCounterAndThenIncrementOnFailedLoginAfterWindow() {
+    // given
+    attempt.setAttemptCounter(3);
+    attempt.setLastUnsuccessfulAuthenticationAttemptDate(ZonedDateTime.now().minusSeconds(61));
+    doThrow(new BadCredentialsException("Bad credentials")).when(authentication).getCredentials();
+
+    // when
+    assertThrows(BadCredentialsException.class, () ->
+        olmisAuthenticationProvider.additionalAuthenticationChecks(userDetails, authentication)
+    );
+
+    // then
+    assertEquals(1, (int) attempt.getAttemptCounter());
+    assertFalse(user.isLockedOut());
   }
 
   @Test
