@@ -16,6 +16,7 @@
 
 package org.openlmis.auth.web;
 
+import static org.openlmis.auth.i18n.MessageKeys.ERROR_FIELD_REQUIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_EXPIRED;
 import static org.openlmis.auth.i18n.MessageKeys.ERROR_TOKEN_INVALID;
 import static org.openlmis.auth.i18n.MessageKeys.USERS_LOGOUT_CONFIRMATION;
@@ -27,12 +28,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.PasswordResetRequestDto;
 import org.openlmis.auth.dto.SaveBatchResultDto;
+import org.openlmis.auth.dto.UnlockResponseDto;
 import org.openlmis.auth.dto.UserAuthDetailsResponseDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.exception.ValidationMessageException;
@@ -45,6 +46,7 @@ import org.openlmis.auth.service.PermissionService;
 import org.openlmis.auth.service.UserService;
 import org.openlmis.auth.service.notification.UserContactDetailsDto;
 import org.openlmis.auth.service.notification.UserContactDetailsNotificationService;
+import org.openlmis.auth.util.Message;
 import org.openlmis.auth.util.PasswordChangeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -302,17 +305,36 @@ public class UserController {
   /**
    * Gets all user auth details.
    *
+   * @param lockedOut optional filter; when provided, only users with the matching lockout state
+   *                  are returned. When omitted, no filtering is applied.
    * @return all auth user details dto objects
    */
   @GetMapping(value = "/users/auth/batch")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<UserDto> getAllAuthUsers() {
-    List<User> users = userService.findAll();
+  public List<UserDto> getAllAuthUsers(
+      @RequestParam(value = "lockedOut", required = false) Boolean lockedOut) {
+    return userService.getAuthUsers(lockedOut);
+  }
 
-    return users.stream()
-        .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEnabled()))
-        .collect(Collectors.toList());
+  /**
+   * Bulk-unlocks the given users.
+   *
+   * @param userIds ids of the users to unlock
+   * @return ids grouped into unlocked, notFound and failed buckets
+   */
+  @RequestMapping(value = "/users/auth/unlock", method = RequestMethod.POST)
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UnlockResponseDto unlockUsers(@RequestBody List<UUID> userIds) {
+    permissionService.canManageUsers(null);
+
+    if (userIds == null) {
+      throw new ValidationMessageException(new Message(ERROR_FIELD_REQUIRED, "userIds"));
+    }
+
+    String actor = SecurityContextHolder.getContext().getAuthentication().getName();
+    return userService.unlockUsers(userIds, actor);
   }
 
   /**

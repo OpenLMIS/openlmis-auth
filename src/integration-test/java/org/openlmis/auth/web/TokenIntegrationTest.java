@@ -18,21 +18,33 @@ package org.openlmis.auth.web;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.openlmis.auth.web.TestWebData.Fields;
 import static org.openlmis.auth.web.TestWebData.GrantTypes;
 import static org.openlmis.auth.web.TestWebData.Tokens.DURATION;
 
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openlmis.auth.ApiKeyDataBuilder;
 import org.openlmis.auth.DummyUserMainDetailsDto;
 import org.openlmis.auth.domain.ApiKey;
 import org.openlmis.auth.domain.Client;
+import org.openlmis.auth.domain.UnsuccessfulAuthenticationAttempt;
+import org.openlmis.auth.repository.UnsuccessfulAuthenticationAttemptRepository;
+import org.openlmis.auth.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 public class TokenIntegrationTest extends BaseWebIntegrationTest {
+
+  @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
+  private UnsuccessfulAuthenticationAttemptRepository attemptCounterRepository;
 
   @BeforeClass
   public static void setUpClass() {
@@ -60,6 +72,43 @@ public class TokenIntegrationTest extends BaseWebIntegrationTest {
     assertEquals(OAuth2AccessToken.BEARER_TYPE.toLowerCase(), token.getTokenType());
     // use a delta of five seconds - should be more than enough
     assertEquals(DURATION, token.getExpiresIn(), 5.0);
+  }
+
+  @Test
+  public void shouldPersistFailedLoginAttemptCounter() {
+    // Guards against the failed-attempt counter being rolled back when authenticate() throws
+    // (the whole attempt runs in one transaction, so the increment must commit despite the
+    // thrown AuthenticationException).
+    UUID userId = UUID.fromString(DummyUserMainDetailsDto.REFERENCE_ID);
+    resetLockoutState(userId);
+
+    Client client = mockUserClient();
+    startRequest()
+        .auth()
+        .preemptive()
+        .basic(client.getClientId(), client.getClientSecret())
+        .queryParam(Fields.GRANT_TYPE, GrantTypes.PASSWORD)
+        .queryParam(Fields.USERNAME, DummyUserMainDetailsDto.USERNAME)
+        .queryParam(Fields.PASSWORD, "wrong-password")
+        .when()
+        .post("/api/oauth/token")
+        .then()
+        .statusCode(400);
+
+    Optional<UnsuccessfulAuthenticationAttempt> counter =
+        attemptCounterRepository.findByUserId(userId);
+    assertTrue(counter.isPresent());
+    assertEquals(Integer.valueOf(1), counter.get().getAttemptCounter());
+
+    resetLockoutState(userId);
+  }
+
+  private void resetLockoutState(UUID userId) {
+    attemptCounterRepository.findByUserId(userId).ifPresent(attemptCounterRepository::delete);
+    userRepository.findById(userId).ifPresent(user -> {
+      user.setLockedOut(false);
+      userRepository.save(user);
+    });
   }
 
   @Test

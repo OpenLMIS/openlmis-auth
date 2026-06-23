@@ -26,14 +26,19 @@ import java.util.stream.StreamSupport;
 
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.SaveBatchResultDto;
+import org.openlmis.auth.dto.UnlockResponseDto;
 import org.openlmis.auth.dto.UserAuthDetailsResponseDto;
 import org.openlmis.auth.dto.UserDto;
 import org.openlmis.auth.i18n.MessageKeys;
+import org.openlmis.auth.repository.UnsuccessfulAuthenticationAttemptRepository;
 import org.openlmis.auth.repository.UserRepository;
 import org.openlmis.auth.web.UserDtoValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -41,11 +46,20 @@ import org.springframework.validation.BindingResult;
 @Service
 public class UserService {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+
   @Autowired
   private UserRepository userRepository;
 
   @Autowired
+  private UnsuccessfulAuthenticationAttemptRepository attemptCounterRepository;
+
+  @Autowired
   private UserDtoValidator userDtoValidator;
+
+  // self-reference so per-user unlockUser runs through the proxy and keeps its REQUIRES_NEW tx
+  @Autowired
+  private UserService self;
 
   /**
    * Creates a new user or updates an existing one.
@@ -107,9 +121,25 @@ public class UserService {
    *
    * @return user auth details
    */
-  @Transactional
   public List<User> findAll() {
     return StreamSupport.stream(userRepository.findAll().spliterator(), false)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Returns all auth users as DTOs (without password), optionally filtered by lockout state.
+   *
+   * @param lockedOut when not {@code null}, only users with the matching lockout state are returned
+   * @return matching auth users
+   */
+  public List<UserDto> getAuthUsers(Boolean lockedOut) {
+    return findAll().stream()
+        .filter(user -> lockedOut == null || user.isLockedOut() == lockedOut)
+        .map(user -> {
+          UserDto dto = new UserDto(user.getId(), user.getUsername(), user.getEnabled());
+          dto.setLockedOut(user.isLockedOut());
+          return dto;
+        })
         .collect(Collectors.toList());
   }
 
@@ -121,6 +151,62 @@ public class UserService {
   @Transactional
   public void deleteByUserIds(Set<UUID> userIds) {
     userRepository.deleteByUserIds(userIds);
+  }
+
+  /**
+   * Bulk-unlocks the given users, grouping the result into unlocked, notFound and failed buckets.
+   * Each user is unlocked in its own transaction (so one failure does not affect the others) and an
+   * INFO audit line is logged per unlocked user.
+   *
+   * @param userIds ids of the users to unlock
+   * @param actor   username of the administrator performing the unlock, for the audit log
+   * @return the per-user unlock result
+   */
+  public UnlockResponseDto unlockUsers(List<UUID> userIds, String actor) {
+    UnlockResponseDto response = new UnlockResponseDto();
+
+    for (UUID userId : userIds) {
+      try {
+        String username = self.unlockUser(userId);
+        if (null == username) {
+          response.getNotFound().add(userId);
+        } else {
+          response.getUnlocked().add(userId);
+          LOGGER.info("User '{}' unlocked user '{}' (id: {})", actor, username, userId);
+        }
+      } catch (Exception ex) {
+        LOGGER.warn("Failed to unlock user with id: {}", userId, ex);
+        response.getFailed().add(userId);
+      }
+    }
+
+    return response;
+  }
+
+  /**
+   * Unlocks a single user in its own transaction. Resets the failed-attempt counter, then clears
+   * the lockout flag (order matters for the unlock/login race). Returns the username, or
+   * {@code null} if the user does not exist.
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public String unlockUser(UUID userId) {
+    // pessimistic write lock to serialize with a concurrent authentication attempt for this user
+    Optional<User> optionalUser = userRepository.findByIdForUpdate(userId);
+    if (!optionalUser.isPresent()) {
+      return null;
+    }
+
+    User user = optionalUser.get();
+
+    attemptCounterRepository.findByUserId(userId).ifPresent(counter -> {
+      counter.resetCounter();
+      attemptCounterRepository.save(counter);
+    });
+
+    user.setLockedOut(false);
+    userRepository.save(user);
+
+    return user.getUsername();
   }
 
   private UserDto toDto(User existing) {

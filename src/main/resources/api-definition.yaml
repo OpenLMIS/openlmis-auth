@@ -335,6 +335,32 @@ resourceTypes:
                          headers:
                            X-Content-Type-Options:
                            X-XSS-Protection:
+          /unlock:
+              post:
+                  is: [ secured ]
+                  description: >
+                    Bulk-unlocks the given users. For each user the lockout flag is cleared and the
+                    failed-attempt counter is reset, in its own transaction.
+                  body:
+                    application/json:
+                      example: |
+                        ["00000000-0000-0000-0000-000000000000"]
+                  responses:
+                     200:
+                         description: Unlock operation has been processed.
+                         body:
+                             application/json:
+                                example: |
+                                  {
+                                    "unlocked": ["00000000-0000-0000-0000-000000000000"],
+                                    "notFound": [],
+                                    "failed": []
+                                  }
+                     403:
+                         description: The current logged user has no permission to perform the action.
+                         body:
+                             application/json:
+                                 schema: localizedMessage
       /search/findOneByUsername:
           get:
               is: [ secured ]

@@ -81,6 +81,7 @@ public class OlmisAuthenticationProviderTest {
     attempt = new UnsuccessfulAuthenticationAttempt(user);
 
     when(userRepository.findOneByUsernameIgnoreCase(anyString())).thenReturn(user);
+    when(userRepository.findByIdForUpdate(any(UUID.class))).thenReturn(Optional.of(user));
     when(userDetails.getUsername()).thenReturn(user.getUsername());
     when(unsuccessfulAuthenticationAttemptRepository.findByUserId(any(UUID.class)))
         .thenReturn(Optional.of(attempt));
