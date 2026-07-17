@@ -15,6 +15,7 @@
 
 package org.openlmis.auth.dto;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -36,6 +37,7 @@ public final class UserDto implements User.Importer, User.Exporter {
   private String password;
   private Boolean enabled;
   private boolean lockedOut;
+  private ZonedDateTime lastUnsuccessfulAuthenticationAttemptDate;
 
   /**
    * Creates UserDto object with given params.

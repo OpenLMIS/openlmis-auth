@@ -26,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -164,6 +165,7 @@ public class UserServiceTest {
     User locked = new UserDataBuilder().asLockedOut(true).build();
     User unlocked = new UserDataBuilder().asLockedOut(false).build();
     when(userRepository.findAll()).thenReturn(Arrays.asList(locked, unlocked));
+    when(attemptCounterRepository.findAll()).thenReturn(Collections.emptyList());
 
     List<UserDto> all = userService.getAuthUsers(null);
     assertEquals(2, all.size());
@@ -177,6 +179,20 @@ public class UserServiceTest {
     List<UserDto> unlockedOnly = userService.getAuthUsers(false);
     assertEquals(1, unlockedOnly.size());
     assertEquals(unlocked.getId(), unlockedOnly.get(0).getId());
+  }
+
+  @Test
+  public void shouldPopulateLastUnsuccessfulAuthenticationAttemptDate() {
+    User locked = new UserDataBuilder().asLockedOut(true).build();
+    UnsuccessfulAuthenticationAttempt attempt = new UnsuccessfulAuthenticationAttempt(locked);
+    ZonedDateTime attemptDate = attempt.getLastUnsuccessfulAuthenticationAttemptDate();
+    when(userRepository.findAll()).thenReturn(Collections.singletonList(locked));
+    when(attemptCounterRepository.findAll()).thenReturn(Collections.singletonList(attempt));
+
+    List<UserDto> users = userService.getAuthUsers(true);
+
+    assertEquals(1, users.size());
+    assertEquals(attemptDate, users.get(0).getLastUnsuccessfulAuthenticationAttemptDate());
   }
 
   @Test
