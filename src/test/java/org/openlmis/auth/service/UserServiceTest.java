@@ -185,7 +185,7 @@ public class UserServiceTest {
   public void shouldPopulateLastUnsuccessfulAuthenticationAttemptDate() {
     User locked = new UserDataBuilder().asLockedOut(true).build();
     UnsuccessfulAuthenticationAttempt attempt = new UnsuccessfulAuthenticationAttempt(locked);
-    ZonedDateTime attemptDate = attempt.getLastUnsuccessfulAuthenticationAttemptDate();
+    final ZonedDateTime attemptDate = attempt.getLastUnsuccessfulAuthenticationAttemptDate();
     when(userRepository.findAll()).thenReturn(Collections.singletonList(locked));
     when(attemptCounterRepository.findAll()).thenReturn(Collections.singletonList(attempt));
 
