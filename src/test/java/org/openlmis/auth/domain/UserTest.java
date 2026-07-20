@@ -29,6 +29,7 @@ public class UserTest {
   private static final String PASSWORD_FIELD = "password";
   private static final String ENCODER_FIELD = "ENCODER";
   private static final String UUID_TYPE_FIELD = "UUID_TYPE";
+  private static final String LAST_ATTEMPT_DATE_FIELD = "lastUnsuccessfulAuthenticationAttemptDate";
 
   private UserDto importer;
   private User user = new UserDataBuilder().withPassword("oldPassword").build();
@@ -75,7 +76,8 @@ public class UserTest {
     UserDto exporter = new UserDto();
     user.export(exporter);
 
-    assertThat(exporter).isEqualToIgnoringGivenFields(user, ENCODER_FIELD, UUID_TYPE_FIELD);
+    assertThat(exporter).isEqualToIgnoringGivenFields(
+        user, ENCODER_FIELD, UUID_TYPE_FIELD, LAST_ATTEMPT_DATE_FIELD);
   }
 
   @Test

@@ -15,15 +15,18 @@
 
 package org.openlmis.auth.service;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.openlmis.auth.domain.UnsuccessfulAuthenticationAttempt;
 import org.openlmis.auth.domain.User;
 import org.openlmis.auth.dto.SaveBatchResultDto;
 import org.openlmis.auth.dto.UnlockResponseDto;
@@ -133,11 +136,19 @@ public class UserService {
    * @return matching auth users
    */
   public List<UserDto> getAuthUsers(Boolean lockedOut) {
+    Map<UUID, ZonedDateTime> lastAttemptByUserId = StreamSupport
+        .stream(attemptCounterRepository.findAll().spliterator(), false)
+        .collect(Collectors.toMap(
+            attempt -> attempt.getUser().getId(),
+            UnsuccessfulAuthenticationAttempt::getLastUnsuccessfulAuthenticationAttemptDate));
+
     return findAll().stream()
         .filter(user -> lockedOut == null || user.isLockedOut() == lockedOut)
         .map(user -> {
           UserDto dto = new UserDto(user.getId(), user.getUsername(), user.getEnabled());
           dto.setLockedOut(user.isLockedOut());
+          dto.setLastUnsuccessfulAuthenticationAttemptDate(
+              lastAttemptByUserId.get(user.getId()));
           return dto;
         })
         .collect(Collectors.toList());
