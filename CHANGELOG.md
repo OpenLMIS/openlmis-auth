@@ -3,6 +3,7 @@ Upcoming Version (WIP)
 
 Improvements:
 * Fixed SonarCloud analysis failing on the deprecated Java 17 runtime by running it through the SonarQube scan action (on Java 21) instead of the Gradle plugin, and removed the now-unused Gradle sonar plugin and configuration.
+* Removed the axios dependency from the Consul registration script, replacing it with the native Node `http` client (no more axios security advisories to track).
 * Stabilized consul registration and health checks
 * [MW-1476](https://openlmis.atlassian.net/browse/MW-1476): Add user lockout API and unlock endpoint
 
