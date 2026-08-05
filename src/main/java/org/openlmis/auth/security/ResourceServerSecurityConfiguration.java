@@ -82,7 +82,8 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
             "/api/users/auth/changePassword",
             "/webjars/**",
             "/static/auth/docs/index.html",
-            "/generated/api-definition.json"
+            "/generated/api-definition.json",
+            "/actuator/prometheus"
         ).permitAll()
         .antMatchers("/**").fullyAuthenticated();
   }
