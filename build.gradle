@@ -35,6 +35,7 @@ repositories {
 
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-actuator"
+    compile "io.micrometer:micrometer-registry-prometheus"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-security"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
