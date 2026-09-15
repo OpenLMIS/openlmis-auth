@@ -9,6 +9,8 @@ Improvements:
 * [OLMIS-8280](https://openlmis.atlassian.net/browse/OLMIS-8280) Removed the axios dependency from the Consul registration script, replacing it with the native Node `http` client (no more axios security advisories to track).
 * Stabilized consul registration and health checks
 * [MW-1476](https://openlmis.atlassian.net/browse/MW-1476): Add user lockout API and unlock endpoint
+* [MW-1471](https://openlmis.atlassian.net/browse/MW-1471): Exposed the Prometheus metrics endpoint at `/actuator/prometheus`.
+* [MW-1478](https://openlmis.atlassian.net/browse/MW-1478): The failed login attempt counter is now reset on a successful login and after the lockout expires.
 
 Bug fixes:
 * [OLMIS-8223](https://openlmis.atlassian.net/browse/OLMIS-8223): Fix placeholder bug in messages
