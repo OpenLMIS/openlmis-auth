@@ -45,7 +45,7 @@ public abstract class ExpirationTokenNotifierTest<T extends ExpirationToken> {
   private NotificationService notificationService;
 
   @Mock
-  private ExposedMessageSource messageSource;
+  ExposedMessageSource messageSource;
 
   @Mock
   User user;
