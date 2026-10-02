@@ -116,3 +116,4 @@ Environment variables common to all services are listed here: https://github.com
 
 The auth service also uses the following variables:
 * **TOKEN_DURATION** - The period of inactivity in seconds after which authentication tokens will expire. For example set this to 900 in order to have tokens expire after 15 minutes of inactivity. The default value is 1800 (30 minutes).
+* **PASSWORD_RESET_URL** - The link sent in password reset emails, with the reset token appended to it. The default is `${PUBLIC_URL}/#!/resetPassword/`, the reset page of the reference UI.

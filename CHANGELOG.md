@@ -1,6 +1,9 @@
 Upcoming Version / WIP
 =================
 
+New functionality:
+* [FM-33](https://openlmis.atlassian.net/browse/FM-33): The link in password reset emails can be set with `PASSWORD_RESET_URL`, so it can open another UI's reset page.
+
 4.5.0 / 2026-08-12
 =================
 

@@ -33,13 +33,12 @@ import org.springframework.stereotype.Service;
 public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordResetToken> {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
-  private static final String RESET_PASSWORD_URL = "/#!/resetPassword/";
 
   @Autowired
   private PasswordResetTokenRepository passwordResetTokenRepository;
  
-  @Value("${publicUrl}")
-  private String publicUrl;
+  @Value("${passwordReset.url}")
+  private String resetPasswordUrl;
 
   /**
    * Sends password reset email.
@@ -52,7 +51,7 @@ public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordReset
     try {
       sendEmail(
           user, token, PASSWORD_RESET_EMAIL_SUBJECT,
-          PASSWORD_RESET_EMAIL_BODY, getResetPasswordUrl()
+          PASSWORD_RESET_EMAIL_BODY, resetPasswordUrl
       );
     } catch (ExternalApiException ex) {
       logger.error("An exception occurred in the notification service", ex);
@@ -73,11 +72,6 @@ public class PasswordResetNotifier extends ExpirationTokenNotifier<PasswordReset
 
       return token;
     });
-  }
-
-
-  private String getResetPasswordUrl() {
-    return publicUrl + RESET_PASSWORD_URL;
   }
 
 }

@@ -17,11 +17,13 @@ package org.openlmis.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_BODY;
 import static org.openlmis.auth.i18n.MessageKeys.PASSWORD_RESET_EMAIL_SUBJECT;
 
+import java.util.Locale;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,8 +35,11 @@ import org.openlmis.auth.SaveAnswer;
 import org.openlmis.auth.domain.PasswordResetToken;
 import org.openlmis.auth.repository.ExpirationTokenRepository;
 import org.openlmis.auth.repository.PasswordResetTokenRepository;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class PasswordResetNotifierTest extends ExpirationTokenNotifierTest<PasswordResetToken> {
+
+  private static final String RESET_PASSWORD_URL = "https://example.org/v2/reset-password/";
 
   @Mock
   private PasswordResetTokenRepository passwordResetTokenRepository;
@@ -44,6 +49,9 @@ public class PasswordResetNotifierTest extends ExpirationTokenNotifierTest<Passw
 
   @Captor
   private ArgumentCaptor<PasswordResetToken> tokenCaptor;
+
+  @Captor
+  private ArgumentCaptor<String[]> bodyArgsCaptor;
 
   @Override
   @Before
@@ -84,6 +92,19 @@ public class PasswordResetNotifierTest extends ExpirationTokenNotifierTest<Passw
 
     PasswordResetToken token = tokenCaptor.getValue();
     assertThat(token.getUser()).isEqualTo(user);
+  }
+
+  @Test
+  public void shouldLinkToConfiguredResetPasswordUrl() {
+    ReflectionTestUtils.setField(notifier, "resetPasswordUrl", RESET_PASSWORD_URL);
+
+    notifier.sendNotification(user);
+
+    verify(passwordResetTokenRepository).save(tokenCaptor.capture());
+    verify(messageSource).getMessage(
+        eq(PASSWORD_RESET_EMAIL_BODY), bodyArgsCaptor.capture(), any(Locale.class));
+    assertThat(bodyArgsCaptor.getValue()[2])
+        .isEqualTo(RESET_PASSWORD_URL + tokenCaptor.getValue().getId());
   }
 
 }
