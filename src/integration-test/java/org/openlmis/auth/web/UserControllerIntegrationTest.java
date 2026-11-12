@@ -47,6 +47,7 @@ import guru.nidi.ramltester.junit.RamlMatchers;
 import io.restassured.mapper.TypeRef;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -476,10 +477,37 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
         .body(idsToRemove)
         .given()
-        .delete(BATCH_RESOURCE_URL);
+        .delete(BATCH_RESOURCE_URL)
+        .then()
+        .statusCode(200);
 
+    verify(permissionService).canManageUsers(null);
     User userAfterRemoving = userRepository.findOneByUsernameIgnoreCase("john");
     assertNull(userAfterRemoving);
+  }
+
+  @Test
+  public void shouldNotDeleteAuthDetailsWhenUserHasNoPermission() {
+    User userToCreate = new User();
+    userToCreate.setUsername("jane");
+    User savedUser = userRepository.save(userToCreate);
+
+    PermissionMessageException ex = buildUserManagerPermissionError();
+    doThrow(ex).when(permissionService).canManageUsers(null);
+
+    String message = startRequest(USER_TOKEN)
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
+        .body(Collections.singleton(savedUser.getId()))
+        .given()
+        .delete(BATCH_RESOURCE_URL)
+        .then()
+        .statusCode(403)
+        .extract()
+        .path(Fields.MESSAGE);
+
+    assertEquals(getMessage(ex.asMessage()), message);
+    assertNotNull(userRepository.findOneByUsernameIgnoreCase("jane"));
+    userRepository.delete(savedUser);
   }
 
   @Test
@@ -494,7 +522,25 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .body()
         .as(new TypeRef<List<UserDto>>() {}.getTypeAsClass());
 
+    verify(permissionService).canManageUsers(null);
     assertEquals(1, actual.size());
+  }
+
+  @Test
+  public void shouldNotGetAuthUsersWhenUserHasNoPermission() {
+    PermissionMessageException ex = buildUserManagerPermissionError();
+    doThrow(ex).when(permissionService).canManageUsers(null);
+
+    String message = startRequest(USER_TOKEN)
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON_VALUE)
+        .when()
+        .get(BATCH_RESOURCE_URL)
+        .then()
+        .statusCode(403)
+        .extract()
+        .path(Fields.MESSAGE);
+
+    assertEquals(getMessage(ex.asMessage()), message);
   }
 
   @Test
