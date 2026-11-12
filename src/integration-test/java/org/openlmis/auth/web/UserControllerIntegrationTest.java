@@ -507,6 +507,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
 
     assertEquals(getMessage(ex.asMessage()), message);
     assertNotNull(userRepository.findOneByUsernameIgnoreCase("jane"));
+    userRepository.delete(savedUser);
   }
 
   @Test
