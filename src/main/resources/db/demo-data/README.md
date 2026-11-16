@@ -1,5 +1,9 @@
 # Demo Data for OpenLMIS Authentication Service
 
+This folder holds the `demo-data` layer of this service's test data: logins of the other
+referencedata demo users (users with roles, and users other services' demo data refers to). Setup
+that every layer needs is in `../base-data/`.
+
 See the project README for how to load this data.
 
 The directory `schemas/` holds copies of the Mockaroo schemas used for generating

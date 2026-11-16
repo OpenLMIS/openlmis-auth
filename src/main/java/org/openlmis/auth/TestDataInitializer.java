@@ -16,72 +16,124 @@
 package org.openlmis.auth;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.openlmis.auth.Resource2Db;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * Loads layered test data into an empty database when a data profile is active.
+ *
+ * <p>Each data profile is a layer stored in {@code db/<layer>/}, with one CSV file per table
+ * named {@code <schema>.<table>.csv}. Every data profile implies {@code base-data}, which is
+ * loaded first. A layer only holds files for the tables it adds rows to, and its rows may refer
+ * only to rows of their own layer or of {@code base-data}.
+ */
 @Component
-@Profile("demo-data & !test-run")
+@Profile("(base-data | demo-data | functional-test-data | edge-case-data | performance-data)"
+    + " & !test-run")
 @Order(5)
 public class TestDataInitializer implements CommandLineRunner {
-
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(TestDataInitializer.class);
 
-  private static final String DEMO_DATA_PATH = "classpath:db/demo-data/";
-  private static final String FILE_EXTENSION = ".csv";
+  static final String BASE_DATA = "base-data";
+  static final String DEMO_DATA = "demo-data";
+  static final String FUNCTIONAL_TEST_DATA = "functional-test-data";
+  static final String EDGE_CASE_DATA = "edge-case-data";
+  static final String PERFORMANCE_DATA = "performance-data";
 
-  // table names
-  private static final String API_KEYS = "api_keys";
-  private static final String AUTH_USERS = "auth_users";
-  private static final String OAUTH_CLIENT_DETAILS = "oauth_client_details";
+  /**
+   * All data layers, in load order.
+   */
+  static final List<String> LAYERS = Collections.unmodifiableList(Arrays.asList(
+      BASE_DATA, DEMO_DATA, FUNCTIONAL_TEST_DATA, EDGE_CASE_DATA, PERFORMANCE_DATA));
 
-  // database path
-  private static final String DB_SCHEMA = "auth.";
-  static final String API_KEYS_TABLE = DB_SCHEMA + API_KEYS;
-  static final String AUTH_USERS_TABLE = DB_SCHEMA + AUTH_USERS;
-  static final String OAUTH_CLIENT_DETAILS_TABLE = DB_SCHEMA + OAUTH_CLIENT_DETAILS;
+  /**
+   * All tables a layer may hold, in an order that satisfies the foreign keys between them.
+   */
+  static final List<String> TABLES = Collections.unmodifiableList(Arrays.asList(
+      "auth.auth_users",
+      "auth.oauth_client_details",
+      "auth.api_keys"));
 
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + API_KEYS + FILE_EXTENSION)
-  private Resource apiKeysResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + AUTH_USERS + FILE_EXTENSION)
-  private Resource authUsersResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + OAUTH_CLIENT_DETAILS + FILE_EXTENSION)
-  private Resource oauthClientDetailsResource;
-
-  private Resource2Db loader;
+  private final Resource2Db loader;
+  private final ResourceLoader resourceLoader;
+  private final Environment environment;
 
   @Autowired
-  public TestDataInitializer(JdbcTemplate template) {
-    this(new Resource2Db(template));
+  public TestDataInitializer(JdbcTemplate template, ResourceLoader resourceLoader,
+      Environment environment) {
+    this(new Resource2Db(template), resourceLoader, environment);
   }
 
-  TestDataInitializer(Resource2Db loader) {
+  TestDataInitializer(Resource2Db loader, ResourceLoader resourceLoader,
+      Environment environment) {
     this.loader = loader;
+    this.resourceLoader = resourceLoader;
+    this.environment = environment;
   }
 
   /**
-   * Initializes test data.
-   *
+   * Loads every table file of each active data layer.
    * @param args command line arguments
    */
   public void run(String... args) throws IOException {
     XLOGGER.entry();
 
-    loader.insertToDbFromCsv(AUTH_USERS_TABLE, authUsersResource);
-    loader.insertToDbFromCsv(OAUTH_CLIENT_DETAILS_TABLE, oauthClientDetailsResource);
-    loader.insertToDbFromCsv(API_KEYS_TABLE, apiKeysResource);
+    List<String> layers = resolveLayers(environment.getActiveProfiles());
+    XLOGGER.info("Loading data layers: " + layers);
+
+    for (String layer : layers) {
+      int loaded = 0;
+      for (String table : TABLES) {
+        Resource resource = resourceLoader.getResource(location(layer, table));
+        if (resource.exists()) {
+          loader.insertToDbFromCsv(table, resource);
+          loaded++;
+        }
+      }
+      XLOGGER.info("Data layer " + layer + ": loaded " + loaded + " table file(s)");
+    }
 
     XLOGGER.exit();
   }
 
+  /**
+   * Returns the data layers to load for the given active profiles, in load order. Any data
+   * profile implies {@code base-data}.
+   *
+   * @throws IllegalStateException when both demo-data and functional-test-data are active
+   */
+  static List<String> resolveLayers(String... activeProfiles) {
+    List<String> active = Arrays.asList(activeProfiles);
+
+    if (active.contains(DEMO_DATA) && active.contains(FUNCTIONAL_TEST_DATA)) {
+      throw new IllegalStateException("The " + DEMO_DATA + " and " + FUNCTIONAL_TEST_DATA
+          + " profiles cannot be active together; choose one of them");
+    }
+
+    List<String> layers = new ArrayList<>();
+    for (String layer : LAYERS) {
+      if (BASE_DATA.equals(layer) || active.contains(layer)) {
+        layers.add(layer);
+      }
+    }
+    return layers;
+  }
+
+  static String location(String layer, String table) {
+    return "classpath:db/" + layer + "/" + table + ".csv";
+  }
 }

@@ -1,6 +1,9 @@
 4.5.2-SNAPSHOT (WIP)
 ==================
 
+Improvements:
+* [OLMIS-8456](https://openlmis.atlassian.net/browse/OLMIS-8456): Update demo data of OpenLMIS
+
 4.5.1 / 2026-10-16
 =================
 
