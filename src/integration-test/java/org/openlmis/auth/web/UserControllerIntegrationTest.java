@@ -421,6 +421,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
             .extract()
             .as(UserAuthDetailsResponseDto.class);
 
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     verify(permissionService).canManageUsers(any());
     assertEquals(2, response.getSuccessfulResults().size());
     assertEquals(0, response.getFailedResults().size());
@@ -456,6 +457,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
           .extract()
           .as(UserAuthDetailsResponseDto.class);
 
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     verify(permissionService).canManageUsers(any());
     assertEquals(1, response.getSuccessfulResults().size());
     assertEquals(1, response.getFailedResults().size());
@@ -481,6 +483,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .then()
         .statusCode(200);
 
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     verify(permissionService).canManageUsers(null);
     User userAfterRemoving = userRepository.findOneByUsernameIgnoreCase("john");
     assertNull(userAfterRemoving);
@@ -505,6 +508,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .extract()
         .path(Fields.MESSAGE);
 
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     assertEquals(getMessage(ex.asMessage()), message);
     assertNotNull(userRepository.findOneByUsernameIgnoreCase("jane"));
     userRepository.delete(savedUser);
@@ -522,6 +526,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .body()
         .as(new TypeRef<List<UserDto>>() {}.getTypeAsClass());
 
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     verify(permissionService).canManageUsers(null);
     assertEquals(1, actual.size());
   }
@@ -540,6 +545,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .extract()
         .path(Fields.MESSAGE);
 
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     assertEquals(getMessage(ex.asMessage()), message);
   }
 
@@ -575,6 +581,7 @@ public class UserControllerIntegrationTest extends BaseWebIntegrationTest {
         .extract()
         .as(UserDto[].class);
 
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     assertNotNull(findById(lockedUsers, locked.getId()));
     assertTrue(Arrays.stream(lockedUsers).allMatch(UserDto::isLockedOut));
   }

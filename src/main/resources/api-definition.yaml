@@ -91,6 +91,11 @@ schemas:
 
   - roleAssignment: !include schemas/roleAssignment.json
   - user: !include schemas/user.json
+  - userArray: |
+      {
+          "type": "array",
+          "items": { "type": "object", "$ref": "schemas/user.json" }
+      }
 
   - apiKey: !include schemas/apiKey.json
   - apiKeyPage: !include schemas/apiKeyPage.json
@@ -357,6 +362,98 @@ resourceTypes:
                                     "failed": []
                                   }
                      403:
+                         description: The current logged user has no permission to perform the action.
+                         body:
+                             application/json:
+                                 schema: localizedMessage
+          /batch:
+              get:
+                  is: [ secured ]
+                  description: >
+                    Get auth details of all users. Requires the USERS_MANAGE right or a service
+                    token. WARNING: For security reasons the response does not contain passwords.
+                  queryParameters:
+                      lockedOut:
+                          displayName: lockedOut
+                          description: >
+                            When given, only users with the matching lockout state are returned.
+                          type: boolean
+                          required: false
+                          repeat: false
+                  responses:
+                     200:
+                         headers:
+                             Keep-Alive:
+                         description: Users have been returned.
+                         body:
+                             application/json:
+                                 schema: userArray
+                     403:
+                         headers:
+                             Keep-Alive:
+                         description: The current logged user has no permission to perform the action.
+                         body:
+                             application/json:
+                                 schema: localizedMessage
+              post:
+                  is: [ secured ]
+                  description: >
+                    Create or update auth details of the given users. Requires the USERS_MANAGE
+                    right or a service token.
+                  body:
+                    application/json:
+                      example: |
+                        [
+                          {
+                            "id": "00000000-0000-0000-0000-000000000000",
+                            "username": "administrator",
+                            "password": "password",
+                            "enabled": true
+                          }
+                        ]
+                  responses:
+                     200:
+                         headers:
+                             Keep-Alive:
+                         description: Save operation has been processed.
+                         body:
+                             application/json:
+                                example: |
+                                  {
+                                    "successfulResults": [
+                                      { "referenceDataUserId": "00000000-0000-0000-0000-000000000000" }
+                                    ],
+                                    "failedResults": [
+                                      {
+                                        "referenceDataUserId": "00000000-0000-0000-0000-000000000001",
+                                        "errors": ["username is required."]
+                                      }
+                                    ]
+                                  }
+                     403:
+                         headers:
+                             Keep-Alive:
+                         description: The current logged user has no permission to perform the action.
+                         body:
+                             application/json:
+                                 schema: localizedMessage
+              delete:
+                  is: [ secured ]
+                  description: >
+                    Delete auth details of the given users. Requires the USERS_MANAGE right or a
+                    service token.
+                  body:
+                    application/json:
+                      example: |
+                        ["00000000-0000-0000-0000-000000000000"]
+                  responses:
+                     200:
+                         headers:
+                             Keep-Alive:
+                         description: Auth details of the given users have been deleted.
+                     403:
+                         headers:
+                             Keep-Alive:
                          description: The current logged user has no permission to perform the action.
                          body:
                              application/json:
