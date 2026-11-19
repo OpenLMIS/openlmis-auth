@@ -1,6 +1,9 @@
 4.5.2-SNAPSHOT (WIP)
 ==================
 
+Bug fixes:
+* [OLMIS-8451](https://openlmis.atlassian.net/browse/OLMIS-8451): GET and DELETE /api/users/auth/batch require the USERS_MANAGE right or a service token, as POST /api/users/auth/batch does. API keys are not accepted on either.
+
 4.5.1 / 2026-10-16
 =================
 

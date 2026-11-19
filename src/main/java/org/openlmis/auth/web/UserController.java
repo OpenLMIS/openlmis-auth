@@ -314,6 +314,7 @@ public class UserController {
   @ResponseBody
   public List<UserDto> getAllAuthUsers(
       @RequestParam(value = "lockedOut", required = false) Boolean lockedOut) {
+    permissionService.canManageUsers(null);
     return userService.getAuthUsers(lockedOut);
   }
 
@@ -345,6 +346,7 @@ public class UserController {
   @DeleteMapping(value = "/users/auth/batch")
   @ResponseStatus(HttpStatus.OK)
   public void deleteAuthUsersByIds(@RequestBody Set<UUID> userIds) {
+    permissionService.canManageUsers(null);
     userService.deleteByUserIds(userIds);
   }
 }
